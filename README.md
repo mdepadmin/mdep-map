@@ -1,4 +1,4 @@
-spr-mvc-hib
+MDEP Map
 ===========
 
-Spring MVC + Hibernate + Maven tutorial with all CRUD operations
+Map with Leaflet

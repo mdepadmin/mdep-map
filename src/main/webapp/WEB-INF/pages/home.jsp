@@ -22,9 +22,13 @@
 	<script type="text/javascript" src="<spring:url value="/resources/JS/Scripts.js"/>"></script>
 
 
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
 
 
-
+<%-- 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/jQuery/jquery-ui.min.css"/>"/> 
+	<script type="text/javascript" src="<spring:url value="/resources/jQuery/jquery-ui.min.js"/>"></script> --%>
+	
 	<script src="<spring:url value="/resources/libs/leaflet-src.js"/>"></script>
 	<link rel="stylesheet" href="<spring:url value="/resources/libs/leaflet.css"/>"/>
 
@@ -73,6 +77,7 @@
 		var userId;
 		var idIW;
 		var popUpLayer;
+		var editedLayers;
 		
 		$(document).ready(function() {
 			$('#showForm').click(function(event){
@@ -278,16 +283,10 @@
 					drawnItems.addLayer(lay);
 			});
 		}
-
-		$(function() {
-		    $( "#datepicker" ).datepicker();
-		});
 	</script>
 </head>
 
 <body>
-<p>Date: <input type="text" id="datepicker"/></p>
-
 <input type="button" id="test" value="layers"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
 <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/>
@@ -425,7 +424,8 @@
 		  function saveIdIW() {
 			     var sName = $('#shapeName').val();
 			     var sDesc = $('#shapeDesc').val();
-
+				 var sDate = $('#shapeDate').val();
+				 
 			     //var drawings = drawnItems.getLayers();  //drawnItems is a container for the drawn objects
 			     //var layer = drawings[drawings.length - 1];
 			     
@@ -442,7 +442,7 @@
 					
 			     props.title = sName;
 			     props.desc = sDesc;
-
+				 props.date = sDate; 
 			     
 				 if(props.type=="marker"){
 					 layer.bindPopup(sName);
@@ -474,9 +474,57 @@
 			  if(type=='rectangle' || type == 'polygon' || type=='polyline'){
 				  return popUpLayer.getLatLngs()[0];
 			  }
-			  
 		  }
+		  
+		  function setAreaOrDistance(layer){
 			  
+			  
+			  var fea = layer.feature;
+				var props;
+
+				if(typeof(fea)!="undefined")
+					props = fea.props;
+				else
+					props= layer.props;
+				
+			 var type = props.type;
+			 
+			 if(type=="polygon" || type=="rectangle"){
+				 	var area = L.GeometryUtil.geodesicArea(layer.getLatLngs());
+				 	console.log("area "+area);
+				 	props.measure = area;
+				 }
+				 else if (type === 'circle') {
+				     var area = 0;
+				     var radius = layer.getRadius();
+				     area = (Math.PI) * (radius * radius);
+				     props.measure = ((area / 1000000).toFixed(2) + ' km<sup>2</sup>');
+				}
+				 else if (type=="polyline"){					 
+					var tempLatLng = null;
+				    var totalDistance = 0.00000;
+				    $.each(layer._latlngs, function(i, latlng){
+				        if(tempLatLng == null){
+				            tempLatLng = latlng;
+				            return;
+				        }
+				        totalDistance += tempLatLng.distanceTo(latlng);
+				        tempLatLng = latlng;
+				    });
+				    console.log("line dist "+(totalDistance).toFixed(2));
+				    props.measure = (totalDistance).toFixed(2) + ' meters';
+				 }
+		  }
+		  
+			  
+		  map.on('draw:edited', function(event) {
+			  editedLayers = event.layers;
+			  editedLayers.eachLayer(function(layer){
+				  setAreaOrDistance(layer);
+			  });
+		  });
+		  
+		  
 		 map.on('draw:created', function(event) {
 		     
 			 var  type = event.layerType, layer = event.layer;
@@ -484,13 +532,13 @@
 
 			 layer.props = [];
 			 layer.props.type = type;
-			 layer.props.color = getColor(type);
-			 layer.props.opacity = 0.3;
+			 //layer.props.color = getColor(type);
+			 layer.props.opacity = 0.7;
 			 popUpLayer = layer;
 
 			 
 			 idIW = L.popup();
-		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="3"></textarea><br/><br/><span><b>Shape Date<b/></span><br/><input type="text" id="shapeDate"/><br/><br/> <span><b><div id="sizeMeasure"> </div> <div id="sizeValue"> </div> <b/></span> <br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
 		     idIW.setContent(content);
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
@@ -499,7 +547,26 @@
 			        var radius = layer.getRadius();
 			        layer.props.radius = radius;
 			 }
-
+			 
+			 setAreaOrDistance(layer);
+			 
+		     var measure = layer.props.measure;
+			 if(typeof(measure)!="undefined"){
+			     if(type=="circle" || type=="rectangle" || type == "polygon")	 
+				 {
+				 	$( '#sizeMeasure').text('Area: ');
+				 	$( '#sizeValue').text(measure);
+				 }
+				 else if(type=="polyline"){
+					 $( '#sizeMeasure').text('Distance: ');
+					 $( '#sizeValue').text(measure);
+				 }
+			 }
+			 
+			$(function() {
+			    $( "#shapeDate" ).datepicker();
+			});
+				
 			 console.log(layer);
 			 drawnItems.addLayer(layer);
 
@@ -517,15 +584,36 @@
 			else
 				props= layer.props;
 			
+			var type = props.type;
+			
 			 idIW = L.popup();
-		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><span><b>Shape Date<b/></span><br/><input type="text" id="shapeDate"/><br/><br/> <span><b><div id="sizeMeasure"> </div> <div id="sizeValue"> </div> <b/></span><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
 		     idIW.setContent(content);
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
 		     
+		     
+		     var measure = props.measure;
+			 if(typeof(measure)!="undefined"){
+			     if(type=="circle" || type=="rectangle" || type == "polygon")	 
+				 {
+				 	$( '#sizeMeasure').text('Area: ');
+				 	$( '#sizeValue').text(measure);
+				 }
+				 else if(type=="polyline"){
+					 $( '#sizeMeasure').text('Distance: ');
+					 $( '#sizeValue').text(measure);
+				 }
+			 }
+				 
+			$(function() {
+			    $( "#shapeDate" ).datepicker();
+			});
+			
+			
 		     $('#shapeName').val(props.title);
 		     $('#shapeDesc').val(props.desc);
-
+		     $('#shapeDate').val(props.date);
 		     
 		}
 		
