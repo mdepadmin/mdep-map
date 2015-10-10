@@ -71,6 +71,8 @@
 		var drawingId=0, curSelection = 0;
 		var updatedDraw;
 		var userId;
+		var idIW;
+		var popUpLayer;
 		
 		$(document).ready(function() {
 			$('#showForm').click(function(event){
@@ -172,8 +174,11 @@
 				}
 				$('#userDrawingsListDiv').html(sel);
 			}
-			var shapes= loadedDrawings[0];
-			showDrawings(shapes);
+			
+			if(loadedDrawings.length>0){
+				var shapes= loadedDrawings[0];
+				showDrawings(shapes);
+			}
 		}
 		
 		$(document).on('change','#dropDown',function(){
@@ -202,12 +207,17 @@
 			
 			geoData = JSON.parse(shapes.jsonData);
 			drawingId = shapes.drawingId;
-	
+		
+			var zoom = shapes.zoomLevel;
 			var cen = shapes.jsonCenter;
-			
+
 			if(typeof(cen)!="undefined")
 				if(cen!=null)
 					map.panTo(JSON.parse(cen));
+			
+			if(typeof(zoom)!="undefined")
+				if(zoom!=null)
+					map.setZoom(zoom);
 			
 /*			geoData.features.forEach(function(layer){
 				if(layer.props.type == 'circle')
@@ -231,12 +241,20 @@
 			});		*/
 			
 			var savedLayers = L.geoJson(geoData);
+			
 			savedLayers.eachLayer(function(lay){
-				var type = lay.feature.props.type;
+			
+				var props = lay.feature.props;
 				
-				lay.options.color = getColor(type);
-				console.log(lay);
+				var type = props.type;
+				
+				//lay.options.color = getColor(type);
+
+				lay.options.color = props.color;
+				lay.options.opacity = props.opacity;
+				
 				console.log(type);
+				
 				
 				if(type=='circle'){
 					
@@ -261,10 +279,14 @@
 			});
 		}
 
+		$(function() {
+		    $( "#datepicker" ).datepicker();
+		});
 	</script>
 </head>
 
 <body>
+<p>Date: <input type="text" id="datepicker"/></p>
 
 <input type="button" id="test" value="layers"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
@@ -315,11 +337,60 @@
 		
 		// L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);
 		
-//		var marker = L.marker([39.505, -77.09]);
-//		marker.addTo(map);
-		
  		var	drawnItems = L.featureGroup().addTo(map);
-		
+ 		drawnItems.on('click', function(e) { layerClicked(e.layer); });
+/*  		var editableLayers = new L.FeatureGroup();
+ 		map.addLayer(editableLayers);
+ 		
+ 		var MyCustomMarker = L.Icon.extend({
+ 		    options: {
+ 		        shadowUrl: null,
+ 		        iconAnchor: new L.Point(12, 12),
+ 		        iconSize: new L.Point(24, 24),
+ 		        iconUrl: 'link/to/image.png'
+ 		    }
+ 		});
+ 		
+ 		
+ 		var options = {
+ 			    position: 'topright',
+ 			    draw: {
+ 			        polyline: {
+ 			            shapeOptions: {
+ 			                color: '#f357a1',
+ 			                weight: 10
+ 			            }
+ 			        },
+ 			        polygon: {
+ 			            allowIntersection: false, // Restricts shapes to simple polygons
+ 			            drawError: {
+ 			                color: '#e1e100', // Color the shape will turn when intersects
+ 			                message: '<strong>Oh snap!<strong> you can\'t draw that!' // Message that will show when intersect
+ 			            },
+ 			            shapeOptions: {
+ 			                color: '#bada55'
+ 			            }
+ 			        },
+ 			        circle: false, // Turns off this drawing tool
+ 			        rectangle: {
+ 			            shapeOptions: {
+ 			                clickable: false
+ 			            }
+ 			        },
+ 			        marker: {
+ 			            icon: new MyCustomMarker()
+ 			        }
+ 			    },
+ 			    edit: {
+ 			        featureGroup: editableLayers, //REQUIRED!!
+ 			        remove: false
+ 			    }
+ 			};
+
+ 			var drawControl = new L.Control.Draw(options);
+ 			map.addControl(drawControl); */
+ 			
+ 		
 		var drawControl = new L.Control.Draw({
 			   draw: {
 			    polygon: {
@@ -350,26 +421,113 @@
 			  map.addControl(drawControl);
 			  
 			  
+		  
+		  function saveIdIW() {
+			     var sName = $('#shapeName').val();
+			     var sDesc = $('#shapeDesc').val();
+
+			     //var drawings = drawnItems.getLayers();  //drawnItems is a container for the drawn objects
+			     //var layer = drawings[drawings.length - 1];
+			     
+			     var layer = popUpLayer;
+			     
+				var fea = layer.feature;
+				var props;
+
+				if(typeof(fea)!="undefined")
+					props = fea.props;
+				else
+					props= layer.props;
+					
+					
+			     props.title = sName;
+			     props.desc = sDesc;
+
+			     
+				 if(props.type=="marker"){
+					 layer.bindPopup(sName);
+					 layer.openPopup();
+				 }
+			     
+			     if (idIW) {
+			        map.closePopup();
+			     }
+			     
+			     popUpLayer = null;
+			}
+		  
+		  function getpopUpCenter(){
 			  
+  			  var fea = popUpLayer.feature;
+			  var props;
+
+			  if(typeof(fea)!="undefined")
+				 props = fea.props;
+			  else
+				 props= popUpLayer.props;
+				
+			  var type = props.type;
+			  
+			  if(type=='marker' || type=='circle'){
+				  return popUpLayer.getLatLng(); 
+			  }
+			  if(type=='rectangle' || type == 'polygon' || type=='polyline'){
+				  return popUpLayer.getLatLngs()[0];
+			  }
+			  
+		  }
 			  
 		 map.on('draw:created', function(event) {
+		     
 			 var  type = event.layerType, layer = event.layer;
-			 var geoJSON = layer.toGeoJSON();
+			 //var geoJSON = layer.toGeoJSON();
 
 			 layer.props = [];
 			 layer.props.type = type;
+			 layer.props.color = getColor(type);
+			 layer.props.opacity = 0.3;
+			 popUpLayer = layer;
+
 			 
+			 idIW = L.popup();
+		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     idIW.setContent(content);
+		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
+		     idIW.openOn(map);
+		     
 			 if (type === "circle") {
 			        var radius = layer.getRadius();
-			        //radius = layer._radius;
-			        geoJSON.properties.radius = radius;
 			        layer.props.radius = radius;
 			 }
-			 geoJSON.properties.type = type;
 
 			 console.log(layer);
-			drawnItems.addLayer(layer);
+			 drawnItems.addLayer(layer);
+
 		});  
+		
+		function layerClicked(layer){
+			
+			popUpLayer = layer;
+
+			var fea = layer.feature;
+			var props;
+
+			if(typeof(fea)!="undefined")
+				props = fea.props;
+			else
+				props= layer.props;
+			
+			 idIW = L.popup();
+		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     idIW.setContent(content);
+		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
+		     idIW.openOn(map);
+		     
+		     $('#shapeName').val(props.title);
+		     $('#shapeDesc').val(props.desc);
+
+		     
+		}
 		
 		$(document).ready(function() {
 			$('#test').click(function(event){				

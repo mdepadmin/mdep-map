@@ -14,9 +14,17 @@
 		<postgresql.version>9.4-1200-jdbc41</postgresql.version>
 		<leaflet.version> 0.7.1.bv0 </leaflet.version>
 		<jquery.version> 1.11.3 </jquery.version>
+		<jqueryui.version> 1.11.3 </jqueryui.version>
 	</properties>
 
 	<dependencies>
+	    
+	    <dependency>
+			<groupId>org.webjars</groupId>
+			<artifactId>jquery-ui</artifactId>
+			<version>${jqueryui.version}</version>
+		</dependency>
+	    
 	    
 	    <dependency>
 			<groupId>org.st-js.bridge</groupId>

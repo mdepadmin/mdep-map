@@ -81,13 +81,18 @@ function saveDrawings(inUrl, map, drawnItems){
 	
 	for(var i=0; i<len;i++){
 		var curLayer = drawnItems.getLayers()[i];
-		var type = curLayer.props.type;
+		var props = curLayer.props;
+		var options = curLayer.options;
 		
 		var layerGeo = curLayer.toGeoJSON();
 		layerGeo.props = {};
-		layerGeo.props.type = type;
-
-		if(type == 'circle'){
+		layerGeo.props.type = props.type;
+		layerGeo.props.desc = props.desc;
+		layerGeo.props.title = props.title;
+		layerGeo.props.color = options.color;
+		layerGeo.props.opacity = options.opacity;
+		
+		if(props.type == 'circle'){
 //			console.log(curLayer.props.radius);
 			layerGeo.props.radius = curLayer.props.radius;
 		}
@@ -102,7 +107,7 @@ function saveDrawings(inUrl, map, drawnItems){
 	console.log(geo);
 
 	
-	var json = {"userId":'', "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter())};
+	var json = {"userId":'', "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter()), "zoomLevel":map.getZoom()};
 	var jsonData = JSON.stringify(json);
 
 	console.log(jsonData);
@@ -137,21 +142,32 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 	for(var i=0; i<len;i++){
 		var curLayer = drawnItems.getLayers()[i];
 		var type;
+		var title, desc;
+		var props;
+		var options = curLayer.options;
 		console.log(curLayer);
 		
 		//has feature - old shape
 		var fea = curLayer.feature;
 		
 		if(typeof(fea)!="undefined")
-			type = fea.props.type;
+			props = fea.props;
 		else
-			type = curLayer.props.type;
+			props= curLayer.props;
 			
+		type = props.type;
+		title = props.title;
+		desc = props.desc;
+		
 		
 		var layerGeo = curLayer.toGeoJSON();
 		layerGeo.props = {};
 		layerGeo.props.type = type;
-
+		layerGeo.props.desc = desc;
+		layerGeo.props.title = title;
+		layerGeo.props.color = options.color;
+		layerGeo.props.opacity = options.opacity;
+		
 		if(type == 'circle'){
 //			console.log(curLayer.props.radius);
 			layerGeo.props.radius = curLayer.props.radius;
@@ -161,12 +177,12 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 		
 		geo.features.push(layerGeo);
 	}
-	
+
 	var url = inUrl+"/team/updateDrawings";
 	
 	console.log(geo);
 	
-	var json = {"drawingId":drawingId,"userId":'', "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter())};
+	var json = {"drawingId":drawingId,"userId":'', "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter()), "zoomLevel":map.getZoom()};
 	var jsonData = JSON.stringify(json);
 //	console.log("-----------"+json);
 //	console.log("***********"+jsonData);
