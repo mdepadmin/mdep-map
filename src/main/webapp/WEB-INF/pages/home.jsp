@@ -284,15 +284,70 @@
 			});
 		}
 	</script>
+    
+    <script type="text/javascript">
+    var files = [], result;
+    $(document)
+            .on(
+                    "change",
+                    "#fileLoader",
+                    function(event) {
+                     files=event.target.files;
+                    });
+
+    $(document)
+            .on(
+                    "click",
+                    "#fileSubmit",
+                    function() {
+                    processUpload();
+                    });
+
+    function processUpload()
+              {
+		    	var url = "${pageContext.request.contextPath}";
+                  var oMyForm = new FormData();
+                  oMyForm.append("file", files[0]);
+                 $
+                    .ajax({dataType : 'text',
+                        url : "/spr-mvc-hib/team/savefiles.html",
+                        data : oMyForm,
+                        type : "POST",
+                        enctype: 'multipart/form-data',
+                        processData: false, 
+                        contentType:false,
+                        success : function(msg) {
+                        	result = msg;
+                            console.log("Success: "+result);
+                            files = [];
+                            var url = "${pageContext.request.contextPath}";
+                            $('#imgHolder').attr('src',url+'/'+result);
+                            
+                        },
+                        error : function(msg){
+                        	result = msg;
+                        	console.log("Error: "+result);
+                        }
+                    });
+              }
+    </script>
+    
+    
 </head>
 
 <body>
+        
+        <input type="file" name="file" id="fileLoader" /> 
+		<input type="button" id="fileSubmit" value="Upload"/>
+
+
 <input type="button" id="test" value="layers"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
 <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/>
 <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/>
 <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/>
 <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/>
+<img id="imgHolder" src="" />
 <br/>
 <div id="userDrawingsListDiv"></div>
 <p id="message">Please login</p>

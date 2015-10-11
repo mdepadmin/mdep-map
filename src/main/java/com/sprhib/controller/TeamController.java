@@ -1,7 +1,10 @@
 package com.sprhib.controller;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
@@ -13,7 +16,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sprhib.model.Team;
@@ -77,6 +82,7 @@ public class TeamController {
 		boolean message = false;
 		
 		HttpSession session = request.getSession();
+		
 		System.out.println("before login user "+session.getAttribute("userId"));
 		
 		UserLogin regUser =	loginService.getUser(user.getUserId());
@@ -152,6 +158,35 @@ public class TeamController {
 		shapes =	drawShapeService.getUserDrawings(userId);
 		return shapes;
 	}
+	
+	
+	
+	@RequestMapping(value = "/savefiles", method = RequestMethod.POST)
+	@ResponseBody
+    public String uploadFile(@RequestParam("file") MultipartFile multipartFile, HttpServletRequest request) throws IllegalStateException, IOException {
+
+        String fileName = multipartFile.getOriginalFilename();
+        int lastDot = fileName.lastIndexOf(".");
+        String extension = fileName.substring(lastDot);
+
+		HttpSession session = request.getSession();
+		String serverDir = session.getServletContext().getRealPath("/");
+        String imagesDir = "resources/images/";
+        
+        String newFileName = imagesDir+ System.currentTimeMillis()+extension;
+        
+        if (!"".equalsIgnoreCase(fileName))
+            multipartFile.transferTo(new File(serverDir+newFileName));
+ 
+        return newFileName;
+    }
+	
+	
+	
+	
+	
+	
+	
 	
 	@RequestMapping(value="/list")
 	public ModelAndView listOfTeams() {
