@@ -25,10 +25,6 @@
 	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
 
-
-<%-- 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/jQuery/jquery-ui.min.css"/>"/> 
-	<script type="text/javascript" src="<spring:url value="/resources/jQuery/jquery-ui.min.js"/>"></script> --%>
-	
 	<script src="<spring:url value="/resources/libs/leaflet-src.js"/>"></script>
 	<link rel="stylesheet" href="<spring:url value="/resources/libs/leaflet.css"/>"/>
 
@@ -67,6 +63,7 @@
 	<script src="<spring:url value="/resources/src/edit/handler/Edit.Rectangle.js"/>"></script>
 	<script src="<spring:url value="/resources/src/edit/handler/Edit.Marker.js"/>"></script>
 
+	<link rel="stylesheet" href="<spring:url value="/resources/CSS/lightbox.css"/>"/>
 
 
 	
@@ -310,7 +307,8 @@
                   oMyForm.append("file", files[0]);
                  $
                     .ajax({dataType : 'text',
-                        url : "/spr-mvc-hib/team/savefiles.html",
+//                        url : "/spr-mvc-hib/team/savefiles.html",
+                        url : url+"/team/savefiles.html",
                         data : oMyForm,
                         type : "POST",
                         enctype: 'multipart/form-data',
@@ -320,9 +318,24 @@
                         	result = msg;
                             console.log("Success: "+result);
                             files = [];
-                            var url = "${pageContext.request.contextPath}";
-                            $('#imgHolder').attr('src',url+'/'+result);
                             
+                            
+                            var layer = popUpLayer;
+           			     
+            				var fea = layer.feature;
+            				var props;
+
+            				if(typeof(fea)!="undefined")
+            					props = fea.props;
+            				else
+            					props= layer.props;
+            				
+                            props.image = result;
+                            
+            				var url = "${pageContext.request.contextPath}";
+            				var imagePath = url+'/'+props.image;
+            			    $('#imageHolder').attr('src',imagePath).height(60).width(60);
+            			    $('#imageAnchor').attr('href',imagePath);
                         },
                         error : function(msg){
                         	result = msg;
@@ -332,14 +345,9 @@
               }
     </script>
     
-    
 </head>
 
 <body>
-        
-        <input type="file" name="file" id="fileLoader" /> 
-		<input type="button" id="fileSubmit" value="Upload"/>
-
 
 <input type="button" id="test" value="layers"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
@@ -347,7 +355,7 @@
 <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/>
 <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/>
 <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/>
-<img id="imgHolder" src="" />
+
 <br/>
 <div id="userDrawingsListDiv"></div>
 <p id="message">Please login</p>
@@ -378,9 +386,16 @@
  --%>
 
 	<div id="map"></div>
-	
+	<script src="<spring:url value="/resources/JS/lightbox.js"/>"></script>
+	<script>
+    lightbox.option({
+      'resizeDuration': 400,
+      'wrapAround': true
+    });
+	</script>
 	<script type="text/javascript">
 
+	
 		var map = L.map('map', {editable: true}).setView([39.505, -77.09], 6);
 		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 			    attribution: 'Title Here',
@@ -570,8 +585,30 @@
 				    props.measure = (totalDistance).toFixed(2) + ' meters';
 				 }
 		  }
-		  
-			  
+	     
+	     function getPopupMarkup(){
+	    	 return    '<span><b>Name: </b></span>'
+					  +'<input id="shapeName" type="text"/><br/><br/>'
+					  
+		 			  +'<span><b>Desc: <b/></span>'
+		 			  +'<textarea id="shapeDesc" cols="20" rows="3"></textarea><br/><br/>'
+		 			  
+		 			  +'<span><b>Date: <b/></span>'
+		 			  +'<input type="text" id="shapeDate"/><br/><br/>'
+		 			  
+		 			  +'<label id="sizeMeasure"></label>'
+		 			  +'<label id="sizeValue" style="font-weight: normal !important;"></label> <br/><br/>'
+		 			  
+		 			  +'<input type="file" name="file" id="fileLoader" /><br/>'
+		 			  +'<input type="button" id="fileSubmit" value="Upload"/><br/><br/>'
+		 			  
+		 			  +'<a id="imageAnchor" class="example-image-link" href="" data-lightbox="Image"> <img id="imageHolder" src="" alt="Deleted"/></a> <br/><br/>'
+		 			  
+		 			  +'<input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+	    	 
+	     }
+	     
+	     
 		  map.on('draw:edited', function(event) {
 			  editedLayers = event.layers;
 			  editedLayers.eachLayer(function(layer){
@@ -593,7 +630,8 @@
 
 			 
 			 idIW = L.popup();
-		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="3"></textarea><br/><br/><span><b>Shape Date<b/></span><br/><input type="text" id="shapeDate"/><br/><br/> <span><b><div id="sizeMeasure"> </div> <div id="sizeValue"> </div> <b/></span> <br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     var content = getPopupMarkup(); 
+		     				
 		     idIW.setContent(content);
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
@@ -613,10 +651,16 @@
 				 	$( '#sizeValue').text(measure);
 				 }
 				 else if(type=="polyline"){
-					 $( '#sizeMeasure').text('Distance: ');
+					 $( '#sizeMeasure').text('Dist: ');
 					 $( '#sizeValue').text(measure);
 				 }
 			 }
+			 
+			 if(type=="marker"){
+				 $( '#sizeMeasure').text('Lat: '+layer.getLatLng().lat);
+			 	 $( '#sizeValue').text('Lng: '+layer.getLatLng().lng);
+			 }
+
 			 
 			$(function() {
 			    $( "#shapeDate" ).datepicker();
@@ -640,9 +684,10 @@
 				props= layer.props;
 			
 			var type = props.type;
+			var image = props.image;
 			
 			 idIW = L.popup();
-		     var content = '<span><b>Shape Name</b></span><br/><input id="shapeName" type="text"/><br/><br/><span><b>Shape Description<b/></span><br/><textarea id="shapeDesc" cols="25" rows="5"></textarea><br/><br/><span><b>Shape Date<b/></span><br/><input type="text" id="shapeDate"/><br/><br/> <span><b><div id="sizeMeasure"> </div> <div id="sizeValue"> </div> <b/></span><br/><br/><input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
+		     var content = getPopupMarkup();
 		     idIW.setContent(content);
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
@@ -660,16 +705,26 @@
 					 $( '#sizeValue').text(measure);
 				 }
 			 }
-				 
+			 
+			if(type=="marker"){
+				$( '#sizeMeasure').text('Lat: '+layer.getLatLng().lat);
+			 	$( '#sizeValue').text('Lng: '+layer.getLatLng().lng);
+			}
+			
 			$(function() {
 			    $( "#shapeDate" ).datepicker();
 			});
 			
-			
 		     $('#shapeName').val(props.title);
 		     $('#shapeDesc').val(props.desc);
 		     $('#shapeDate').val(props.date);
-		     
+		    
+		     if(typeof(image)!= "undefined"){
+				var url = "${pageContext.request.contextPath}";
+				var imagePath = url+'/'+image;
+			    $('#imageHolder').attr('src',imagePath).height(60).width(60);
+			    $('#imageAnchor').attr('href',imagePath);
+		     }
 		}
 		
 		$(document).ready(function() {

@@ -91,7 +91,7 @@ function saveDrawings(inUrl, map, drawnItems){
 		layerGeo.props.title = props.title;
 		layerGeo.props.date = props.date;
 		layerGeo.props.measure = props.measure;
-		
+		layerGeo.props.image = props.image;
 		layerGeo.props.color = options.color;
 		layerGeo.props.opacity = options.opacity;
 		
@@ -170,7 +170,7 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 		layerGeo.props.title = title;
 		layerGeo.props.date = props.date;
 		layerGeo.props.measure = props.measure;
-		
+		layerGeo.props.image = props.image;
 		layerGeo.props.color = options.color;
 		layerGeo.props.opacity = options.opacity;
 		
