@@ -3,9 +3,14 @@
 #map { height: 480px; }
 
 
+ .leaflet-google-layer{
+    z-index: 0 !important;
+}
+/*.leaflet-map-pane{
+    z-index: 100;
+} */
 
-
-.slideout-menu {
+.slideout-menu, .slideout-search {
 	visibility:hidden;
 	position: fixed;
 	top: 0;
@@ -15,14 +20,14 @@
 	background: #fff;
 	z-index: 100;
 }
-.slideout-menu h3 {
+.slideout-menu h3, .slideout-search h3 {
 	position: relative;
 	padding: 12px 10px;
 	font-size: 1.2em;
 	font-weight: 400;
 	border-bottom: 4px solid #222;
 }
-.slideout-menu .slideout-menu-toggle {
+.slideout-menu .slideout-menu-toggle, .slideout-search .slideout-search-toggle {
 	position: absolute;
 	top: 12px;
 	right: 10px;
@@ -36,33 +41,42 @@
 	text-decoration: none;
 	vertical-align: top;
 }
-.slideout-menu .slideout-menu-toggle:hover {
+.slideout-menu .slideout-menu-toggle:hover, .slideout-search .slideout-search-toggle:hover  {
 	color: #fff;
 }
-.slideout-menu ul {
+.slideout-menu ul , .slideout-search ul {
 	list-style: none;
 	font-weight: 300;
 	border-top: 1px solid #151515;
 	border-bottom: 1px solid #454545;
 }
-.slideout-menu ul li {
+.slideout-menu ul li, .slideout-search ul li  {
 	border-top: 1px solid #454545;
 	border-bottom: 1px solid #151515;
 }
-.slideout-menu ul li a {
+.slideout-menu ul li a, .slideout-search ul li a  {
 	position: relative;
 	display: block;
 	padding: 10px;
 	color: #999;
 	text-decoration: none;
 }
-.slideout-menu ul li a:hover {
+.slideout-menu ul li a:hover, .slideout-search ul li a:hover {
 	background: #000;
 	color: #fff;
 }
-.slideout-menu ul li a i {
+.slideout-menu ul li a i, .slideout-search ul li a i {
 	position: absolute;
 	top: 15px;
 	right: 10px;
 	opacity: .5;
+}
+
+
+.searchResults{
+	float:left;
+	width:1000px;
+	overflow-y: auto;
+	height: 400px;
+	width: 250px;
 }

@@ -28,8 +28,21 @@
 	<script src="<spring:url value="/resources/libs/leaflet-src.js"/>"></script>
 	<link rel="stylesheet" href="<spring:url value="/resources/libs/leaflet.css"/>"/>
 
+	<script src="<spring:url value="/resources/opacity/Control.Opacity.js"/>"></script>
+	<link rel="stylesheet" href="<spring:url value="/resources/opacity/Control.Opacity.css"/>" />
+
+	<script src="<spring:url value="resources/MarkerLabel/Label.js"/>"></script>
+	<script src="<spring:url value="resources/MarkerLabel/BaseMarkerMethods.js"/>"></script>
+	<script src="<spring:url value="resources/MarkerLabel/Marker.Label.js"/>"></script>
+	<script src="<spring:url value="resources/MarkerLabel/FeatureGroup.Label.js"/>"></script>
+	<script src="<spring:url value="resources/MarkerLabel/Map.Label.js"/>"></script>
+	<link rel="stylesheet" href="<spring:url value="/resources/MarkerLabel/leaflet.label.css"/>"/>
+
 	<script src="<spring:url value="/resources/src/Leaflet.draw.js"/>"></script>
 	<link rel="stylesheet" href="<spring:url value="/resources/dist/leaflet.draw.css"/>" />
+
+	<script src="<spring:url value="/resources/ControlGroup/leaflet.groupedlayercontrol.min.js"/>"></script>
+	<link rel="stylesheet" href="<spring:url value="/resources/ControlGroup/leaflet.groupedlayercontrol.min.css"/>" />
 	
 	<script src="<spring:url value="/resources/src/Toolbar.js"/>"></script>
 	<script src="<spring:url value="/resources/src/Tooltip.js"/>"></script>
@@ -65,6 +78,8 @@
 
 	<link rel="stylesheet" href="<spring:url value="/resources/CSS/lightbox.css"/>"/>
 
+	<script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
+	<script src="http://matchingnotes.com/javascripts/leaflet-google.js"></script>
 
 	
 	<script type="text/javascript">
@@ -76,7 +91,39 @@
 		var popUpLayer;
 		var editedLayers;
 		
+		var tempvalue;
+		var chk;
+		var hehe;
 		$(document).ready(function() {
+			
+			$('#searchButton').click(function(event){
+				var searchText = $('#searchBox').val();
+				if(searchText.length > 0){
+					var searchTextEncoded = encodeURIComponent(searchText);
+					var query = 'http://voyager1.mojavedata.gov:8080/solr/v0/select?q='+searchTextEncoded+'&wt=json&rows=50';
+					console.log(query);
+					getSearchResults(query, getResultsCallback);
+				}
+			});
+			
+			function getResultsCallback(res){
+				var response = res.response;
+				if(response.numFound > 0){
+					var docs = response.docs;
+					var count = docs.length;
+					for(var i = 0; i < count; i++){
+						var doc = docs[i];
+						
+						var $ctrl = $('<label />').html(doc.name)
+                        .prepend($('<input/>').attr({ type: 'checkbox', name: 'result'+i, value: 'result'+i, id: 'result'+i, checked:false}));
+						 $("#searchResultsDiv").append($ctrl);
+						 $ctrl = $('<br/>');
+						 $("#searchResultsDiv").append($ctrl);
+					}
+				}
+				
+			}
+			
 			$('#showForm').click(function(event){
 				showForm();	
 			});
@@ -89,8 +136,16 @@
  			
 			$('.slideout-menu-toggle').on('click', function(event){
 		    	event.preventDefault();
-		    	toggleMenuSlide();
+		    	var menuSlide = $('.slideout-menu');
+		    	toggleSlide(menuSlide);
 		    });
+			
+			$('.slideout-search-toggle').on('click', function(event){
+				event.preventDefault();
+		    	var searchSlide = $('.slideout-search');
+		    	toggleSlide(searchSlide);
+		    });
+			
 			$('#logoutButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				logoutUser(url,logoutCallback);
@@ -100,40 +155,138 @@
 			$('#saveDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				if(drawingId==0)
-					saveDrawings(url, map, drawnItems);
+					saveDrawings(url, map, drawnItems, saveDrawingsCallback);
 				else
 					updateDrawings(url, map, drawingId, drawnItems, updateCallback);
 			});
 			
-			$('#getDrawingsButtonId').click(function(event){
+ 			$('#getDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				 getDrawings(url,getDrawingsCallback);
 				
+			}); 
+			
+			$('#test').click(function(event){
+				var url = "${pageContext.request.contextPath}";
+				getBaseLayers(url,getBaseLayersCallback);
 			});
 			
+			
 			$('#clearDrawingsButtonId').click(function(event){
-/* 				var drawnLayers = drawnItems.getLayers();
-				drawnLayers.forEach(function(layer){
-					map.removeLayer(layer);
-				}); */
-				
-/* 				var lay = [];
-				var i=0;
-				map.eachLayer(function (layer) {
-//				    console.log(layer);
-				    lay.push(layer);
-				    if(i>0)
-				    	map.removeLayer(layer);
-				    i++;
-				});		*/
-				
-				
-				
+				clearDrawings();
+			});
+			
+			$('#newDrawingButtonId').click(function(event){
+
 				clearDrawings();
 				
+				if(loadedDrawings.length>1)
+				{
+					var sel = document.createElement("select");
+					sel.id='dropDownMultiSelect';
+					sel.multiple="multiple";
+					sel.size = "3";
+					
+					for(var i=0; i<loadedDrawings.length;i++){
+						var op = new Option();
+						op.value = i;
+						op.text = "Drawing-"+i;
+						sel.options.add(op);  
+					}
+					$('#includeDrawingsListDiv').html(sel);
+					addNewButton("button","Add", sel);
+				}
 			});
 			
 		});
+		
+		function getBaseLayers(){
+			var url = "${pageContext.request.contextPath}";
+			getBaseLayersFromService(url,getBaseLayersCallback);
+		}
+		
+		function getBaseLayersCallback(returnBaseLayers){
+			var layers = {};
+			for(var i=0; i < returnBaseLayers.length; i++){
+				var baseLayer = returnBaseLayers[i];
+				var layerGroup;
+				var layer;
+				
+				if(baseLayer.provider == "Google"){
+					if(baseLayer.url == 'TERRAIN')
+						layer = new L.Google('TERRAIN');
+					if(baseLayer.url == 'SATELLITE')
+						layer = new L.Google('SATELLITE');
+					if(baseLayer.url == 'ROADMAP')
+						layer = new L.Google('ROADMAP');
+					
+					/* layer = new L.Google("'"+baseLayer.url+"'");*/
+					console.log("'"+baseLayer.url+"'");
+					layerGroup = L.layerGroup([layer]);
+					hehe = layer;
+				}else{
+					layer = L.tileLayer(baseLayer.url);  
+					
+					if(baseLayer.options != null){
+						var options = JSON.parse(baseLayer.options);
+						if(options.hasOwnProperty("maxZoom")){
+							layer.options.maxZoom = options.maxZoom;
+						}
+						if(options.hasOwnProperty("minZoom")){
+							layer.options.minZoom = options.minZoom;
+						}
+						if(options.hasOwnProperty("id")){
+							layer.options.id = options.id;
+						}
+						if(options.hasOwnProperty("accessToken")){
+							layer.options.accessToken = options.accessToken;
+						}
+					}
+					layerGroup = L.layerGroup([layer]);
+				}
+				layers[baseLayer.displayName] = layerGroup;
+			}
+			var controls = L.control.layers(layers);		
+			controls.addTo(map);
+		}
+		
+		function addNewButton(type,name, sel){
+			    var element = document.createElement("input"); 
+			    element.type = type;
+			    element.value = name; 
+			    element.name = name;
+			    
+			    var parent = document.getElementById("includeDrawingsListDiv"); //replace with jquery
+			    parent.appendChild(element);
+			    
+			    element.onclick = function() {
+			        buttonClickCallback(sel, includeDrawings);
+			    };
+		}
+		
+		function buttonClickCallback(sel, callback){
+			var opts = [], opt;
+			
+		    for (var i=0, len=sel.options.length; i<len; i++) {
+		        opt = sel.options[i];
+		        if ( opt.selected ) {
+		        	tempvalue = opt;    	
+		            var curSelection = opt.value;
+				    var shapes = loadedDrawings[curSelection];
+				    opts.push(shapes);
+		        }
+		    }
+		    
+		    if (callback) {
+		    	callback(opts);
+            }
+		}
+		
+		function includeDrawings(inclDraws){
+			for(var i=0; i<inclDraws.length; i++)
+				showDrawings(false, inclDraws[i]);
+			drawingId = 0;
+		}
 		
 		function clearDrawings(){
 			drawingId = 0;
@@ -143,12 +296,14 @@
 				drawnItems.removeLayer(layer);
 			}
 		}
+		
 		function loginCallback(){
 			$('#loginButtonId').css("visibility","hidden");
 			$('#logoutButtonId').css("visibility","visible");
 			$('#message').text("Hello "+userId+"..!");
-			console.log("${userId}");
-			closeSlide();
+			console.log("${userId} **");
+			var menuSlide = $('.slideout-menu');
+			closeSlide(menuSlide);
 		}
 		
 		function logoutCallback(){
@@ -156,130 +311,228 @@
 			$('#loginButtonId').css("visibility","visible");
 			$('#message').text("Please login");
 		}
-		function updateCallback(updatedDrawing){
-			msg = updatedDrawing;
-			loadedDrawings[curSelection] = updatedDrawing;
-		}
-		function getDrawingsCallback(drawings){
-			loadedDrawings = drawings;
+		
+		function saveDrawingsCallback(returnDrawingId){
 			
-			if(loadedDrawings.length>1)
-			{
+		}
+
+		function updateCallback(updatedDrawing) {
+			loadedDrawings[curSelection] = updatedDrawing;
+			clearDrawings();
+			showDrawings(true, updatedDrawing);
+			
+		}
+		function getDrawingsCallback(drawings) {
+			loadedDrawings = drawings;
+
+			if (loadedDrawings.length > 1) {
 				var sel = document.createElement("select");
-				sel.id='dropDown';
-				
-				for(var i=0; i<drawings.length;i++){
+				sel.id = 'dropDown';
+
+				for (var i = 0; i < drawings.length; i++) {
 					var op = new Option();
 					op.value = i;
-					op.text = "Drawing-"+i;
-					sel.options.add(op);  
+					op.text = "Drawing-" + i;
+					sel.options.add(op);
 				}
 				$('#userDrawingsListDiv').html(sel);
 			}
-			
-			if(loadedDrawings.length>0){
-				var shapes= loadedDrawings[0];
-				showDrawings(shapes);
+
+			if (loadedDrawings.length > 0) {
+				var shapes = loadedDrawings[0];
+				showDrawings(true, shapes);
 			}
 		}
+
 		
-		$(document).on('change','#dropDown',function(){
+		$(document).on('change', '#dropDown', function() {
 			console.log('option changed');
 			var optionSelected = $("option:selected", this);
-			
-		    //console.log(optionSelected.text()+"*******"+optionSelected.val());
-		    curSelection = optionSelected.val();
-		    var shapes = loadedDrawings[curSelection];
-		    showDrawings(shapes);
+
+			//console.log(optionSelected.text()+"*******"+optionSelected.val());
+			curSelection = parseInt(optionSelected.val());
+			var shapes = loadedDrawings[curSelection];
+			console.log("Option changed: "+shapes);
+			showDrawings(true, shapes);
 		});
-		
-		function getColor(type){
-			switch(type){
-			case 'polygon': return 'purple';
-			case 'polyline': return 'red';
-			case 'rectangle': return 'green';
-			case 'circle': return 'steelblue';
-			default: return 'black';
+
+		function getColor(type) {
+			switch (type) {
+			case 'polygon':
+				return 'purple';
+			case 'polyline':
+				return 'red';
+			case 'rectangle':
+				return 'green';
+			case 'circle':
+				return 'steelblue';
+			default:
+				return 'black';
 			}
 		}
-		
-		function showDrawings(shapes){
-			
-			clearDrawings();
-			
+
+		function showDrawings(clear, shapes) {
+
+			if (clear)
+				clearDrawings();
+
 			geoData = JSON.parse(shapes.jsonData);
 			drawingId = shapes.drawingId;
-		
+
 			var zoom = shapes.zoomLevel;
 			var cen = shapes.jsonCenter;
 
-			if(typeof(cen)!="undefined")
-				if(cen!=null)
+			if (typeof (cen) != "undefined")
+				if (cen != null)
 					map.panTo(JSON.parse(cen));
-			
-			if(typeof(zoom)!="undefined")
-				if(zoom!=null)
+
+			if (typeof (zoom) != "undefined")
+				if (zoom != null)
 					map.setZoom(zoom);
-			
-/*			geoData.features.forEach(function(layer){
-				if(layer.props.type == 'circle')
-				{
-					cir = L.circle([layer.geometry.coordinates[0],layer.geometry.coordinates[1]], layer.props.radius * 10);
-//					console.log(layer.geometry.coordinates[0]);
-//					console.log(layer.geometry.coordinates[1]);
 
-//					cir.editing.enable();
-//					cir.addTo(map);
-//					var cirGeo = cir.toGeoJSON();
-//					drawnItems.addLayer(cirGeo);
-//					drawnItems.addLayer(L.geoJson(cir));
-				}
-				else{
-					drawnItems.addLayer(L.geoJson(layer));
+			/*			geoData.features.forEach(function(layer){
+			 if(layer.props.type == 'circle')
+			 {
+			 cir = L.circle([layer.geometry.coordinates[0],layer.geometry.coordinates[1]], layer.props.radius * 10);
+			 //					console.log(layer.geometry.coordinates[0]);
+			 //					console.log(layer.geometry.coordinates[1]);
 
-//					drawnItems.addLayer(lay);
-					console.log(layer.props.type+" yet to add");
-				}
-			});		*/
-			
+			 //					cir.editing.enable();
+			 //					cir.addTo(map);
+			 //					var cirGeo = cir.toGeoJSON();
+			 //					drawnItems.addLayer(cirGeo);
+			 //					drawnItems.addLayer(L.geoJson(cir));
+			 }
+			 else{
+			 drawnItems.addLayer(L.geoJson(layer));
+
+			 //					drawnItems.addLayer(lay);
+			 console.log(layer.props.type+" yet to add");
+			 }
+			 });		*/
+//jjjjj
 			var savedLayers = L.geoJson(geoData);
-			
-			savedLayers.eachLayer(function(lay){
-			
+			savedLayers.eachLayer(function(lay) {
+				console.log(lay);
 				var props = lay.feature.props;
-				
 				var type = props.type;
-				
 				//lay.options.color = getColor(type);
-
 				lay.options.color = props.color;
 				lay.options.opacity = props.opacity;
-				
 				console.log(type);
-				
-				
-				if(type=='circle'){
-					
-//					console.log(lay.feature.props.radius);
-//					cir = L.circle([lay.feature.geometry.coordinates[0], lay.feature.geometry.coordinates[1]], lay.feature.props.radius);
-//					console.log(cir.toGeoJSON());
-					
-/*					var circLayer =L.geoJson(lay.feature, {
-					    pointToLayer: function (feature, latlng) {
-					    	var circ = L.circle(latlng, lay.feature.props.radius);
-					    	circ.editing.enable();
-					    	var cirGeo = L.geoJson(cir);
-					    	console.log("circle here: "+cirGeo);
-					        return circ; 
-					    }
-					});
-					circLayer.addTo(map);*/
-//					drawnItems.addLayer(circLayer);
+				//if (type == 'circle') {} else{}
+				drawnItems.addLayer(lay);
+				if(type=="marker"){
+					var title = props.title;
+					if(typeof(title)!="undefined" && title.length > 0)
+						lay.bindLabel(title);
+						//lay.setLabelNoHide(true);
 				}
-				else
-					drawnItems.addLayer(lay);
+			});
+			
+			if(geoData.hasOwnProperty('includeDrawings'))
+			{
+				var checkboxDiv = $('#dispDrawingsCheckBoxDiv');
+				var includeIds = geoData.includeDrawings;
+				for(var j=0; j<includeIds.length; j++){
+					var includedId = includeIds[j];
+
+					for(var i=0; i<loadedDrawings.length; i++){
+						var drawings = loadedDrawings[i];
+						if(drawings.hasOwnProperty('drawingId')){
+							var drwId = drawings.drawingId;
+							
+							if(includedId == drwId){
+
+								geoData = JSON.parse(drawings.jsonData);
+								savedLayers = L.geoJson(geoData);
+								
+								savedLayers.eachLayer(function(lay) {
+									var props = lay.feature.props;
+									var type = props.type;
+									//lay.options.color = getColor(type);
+									lay.options.color = props.color;
+									lay.options.opacity = props.opacity;
+									console.log(type);
+									//if (type == 'circle') {} else{}
+									if(type=="marker"){
+										var title = props.title;
+										if(typeof(title)!="undefined" && title.length > 0)
+											lay.bindLabel(title);
+											//lay.setLabelNoHide(true);
+											//ddddd
+									}
+									drawnItems.addLayer(lay);
+								});
+								 var $ctrl = $('<label />').html('Drawing '+i)
+		                          .prepend($('<input/>').attr({ type: 'checkbox', name: includedId, value: includedId, id: 'drawing'+i, checked:true}));
+								 checkboxDiv.append($ctrl);
+							}
+						}
+					}
+				}
+				if(includeIds.length == 0){
+					$('#dispDrawingsCheckBoxDiv').empty();
+				}
+			}
+		}
+		
+		$(document).on('change', '[type=checkbox]', function() {
+			chk = $(this);
+			var id = chk.attr('id');
+			var drawId = parseInt(chk.attr('value'));
+			if (id.match("^drawing")){
+				if(chk.is(":checked")){
+					addIncludeDrawing(drawId);
+				}else{
+					removeIncludeDrawing(drawId);
+				}
+			}
+			else if (id.match("^result")){
+				if(chk.is(":checked")){
+					console.log('result checked');
+					//
+				}else{
+					console.log('result unchecked');
+					//
+				}
+			}
+		});
+		
+		function addIncludeDrawing(includedId){
+			for(var i=0; i<loadedDrawings.length; i++){
+				var drawings = loadedDrawings[i];
+				var drwId = drawings.drawingId;
+				if(includedId == drwId){
+
+					geoData = JSON.parse(drawings.jsonData);
+					savedLayers = L.geoJson(geoData);
+					
+					savedLayers.eachLayer(function(lay) {
+						var props = lay.feature.props;
+						var type = props.type;
+						//lay.options.color = getColor(type);
+						lay.options.color = props.color;
+						lay.options.opacity = props.opacity;
+						console.log(type);
+						//if (type == 'circle') {} else{}
+						drawnItems.addLayer(lay);
+					});
+					break;
+				}
+			}
+		}
+		
+		function removeIncludeDrawing(drawId){
+			drawnItems.eachLayer(function(layer){
+				if(layer.feature.props.drawingId == drawId)
+					drawnItems.removeLayer(layer);
 			});
 		}
+		
+		
+
+
 	</script>
     
     <script type="text/javascript">
@@ -348,36 +601,51 @@
 </head>
 
 <body>
-
+<input type="button" id="searchButtonId" class="button slideout-search-toggle" style="visibility:visible" value="Search"/>
 <input type="button" id="test" value="layers"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
 <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/>
 <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/>
 <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/>
 <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/>
-
-<br/>
+<input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/>
+<div id="includeDrawingsListDiv"></div>
+<div id="dispDrawingsCheckBoxDiv"></div>
 <div id="userDrawingsListDiv"></div>
 <p id="message">Please login</p>
-<div class="slideout-menu">
-	<h3>Login <a href="#" class="slideout-menu-toggle">×</a></h3>
-		<table>		<tbody>
-			<tr>
-				<td>User Id:</td>
-				<td><input type="text" id="userId" value="a" /></td>
-			</tr>
-			<tr>
-				<td>Password:</td>
-				<td><input type="password" id="password" value="a" /></td>
-			</tr>
-			<tr>
-				<td><input type="button" id="buttonLogin" value="Login" /></td>
-				<td></td>
-			</tr>
-		</tbody>
-		</table>
 
+<div class="slideout-menu open">
+	<h3>Login <a href="#" class="slideout-menu-toggle">×</a></h3>
+		<table>		
+			<tbody>
+				<tr>
+					<td>User Id:</td>
+					<td><input type="text" id="userId" value="e" /></td>
+				</tr>
+				<tr>
+					<td>Password:</td>
+					<td><input type="password" id="password" value="e" /></td>
+				</tr>
+				<tr>
+					<td><input type="button" id="buttonLogin" value="Login" /></td>
+					<td></td>
+				</tr>
+			</tbody>
+		</table>
 </div>
+
+
+<div class="slideout-search open">
+	<h3>Search <a href="#" class="slideout-search-toggle">×</a></h3>
+	<input type="text" id="searchBox" value="new york"/>
+	<input type="button" id="searchButton" class="button" value="Search"/>
+	
+	<div id="searchResultsDiv" class="searchResults">
+		Search Results<br/>
+	</div>
+	
+</div>
+
 
 <%-- 	<p>	${message}<br/>
 	<a href="${pageContext.request.contextPath}/team/add.html">Add new team</a><br/>
@@ -394,20 +662,137 @@
     });
 	</script>
 	<script type="text/javascript">
-
 	
 		var map = L.map('map', {editable: true}).setView([39.505, -77.09], 6);
-		L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
-			    attribution: 'Title Here',
+		
+		var mapBoxLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 			    maxZoom: 18,
 			    id: 'sudheerpitchika.ciep2uaqn0ituskkmmyu1j6ps',
 			    accessToken: 'pk.eyJ1Ijoic3VkaGVlcnBpdGNoaWthIiwiYSI6ImNpZXAydWJlcTBpeWNzMm0ycW10OTVpbmEifQ.z2zCTc_8_5R9JBxM1eFpmg'
-				}).addTo(map);
+				});
+		var mapquestLayer = new L.TileLayer('http://{s}.mqcdn.com/tiles/1.0.0/osm/{z}/{x}/{y}.png', {maxZoom: 18, subdomains: ['otile1','otile2','otile3','otile4']});
 		
-		// L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png?{foo}', {foo: 'bar'}).addTo(map);
+		var osmLayer = L.tileLayer('http://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 18 });	//styleId: 997,
+		var g_roadmap = new L.Google('ROADMAP');
+		var g_satellite = new L.Google('SATELLITE');
+		var g_terrain = new L.Google('TERRAIN');
+
 		
+		var Esri_WorldStreetMapLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}');
+
+		var Esri_DeLormeLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Specialty/DeLorme_World_Base_Map/MapServer/tile/{z}/{y}/{x}', {
+			minZoom: 1,
+			maxZoom: 11
+		});
+
+		var Esri_WorldTopoMapLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}');
+
+		var Esri_WorldImageryLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}');
+
+		var Esri_WorldTerrainLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Terrain_Base/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 13
+		});
+
+		var Esri_WorldShadedReliefLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 13
+		});
+
+		var Esri_WorldPhysicalLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/World_Physical_Map/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 8
+		});
+
+		var Esri_OceanBasemapLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Ocean_Basemap/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 13
+		});
+
+
+		var Esri_NatGeoWorldMapLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 16
+		});
+
+
+		var Esri_WorldGrayCanvasLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+			maxZoom: 16
+		});
+
+
+		
+/* 		var HERE_normalDayTransitLayer = L.tileLayer('http://{s}.{base}.maps.cit.api.here.com/maptile/2.1/{type}/{mapID}/normal.day.transit/{z}/{x}/{y}/{size}/{format}?app_id={app_id}&app_code={app_code}&lg={language}', {
+			attribution: 'Map &copy; 1987-2014 <a href="http://developer.here.com">HERE</a>',
+			base: 'base',
+			type: 'maptile'
+		}); */
+		
+//		map.addLayer(g_satellite);
+		map.addLayer(mapquestLayer);
+		
+		//g_roadmap.setOpacity(0.6);
+		//g_satellite.setOpacity(0.6);
+		//g_terrain.setOpacity(0.6);
+		
+		
+		var roadmap =L.layerGroup([g_roadmap]);
+		var satellite = L.layerGroup([g_satellite]);
+		var terrain =L.layerGroup([g_terrain]);
+		var mapBox = L.layerGroup([mapBoxLayer]);
+		var mapquest = L.layerGroup([mapquestLayer]);
+		var osm = L.layerGroup([osmLayer]);
+		var Esri_WorldStreetMap = L.layerGroup([Esri_WorldStreetMapLayer]);
+		var Esri_DeLorme = L.layerGroup([Esri_DeLormeLayer]);
+		var Esri_WorldTopoMap = L.layerGroup([Esri_WorldTopoMapLayer]);
+		var Esri_WorldImagery = L.layerGroup([Esri_WorldImageryLayer]);
+		var Esri_WorldTerrain = L.layerGroup([Esri_WorldTerrainLayer]);
+		var Esri_WorldShadedRelief = L.layerGroup([Esri_WorldShadedReliefLayer]);
+		var Esri_WorldPhysical = L.layerGroup([Esri_WorldPhysicalLayer]);
+		var Esri_OceanBasemap = L.layerGroup([Esri_OceanBasemapLayer]);
+		var Esri_NatGeoWorldMap = L.layerGroup([Esri_NatGeoWorldMapLayer]);
+		var Esri_WorldGrayCanvas = L.layerGroup([Esri_WorldGrayCanvasLayer]);
+
+/* 		var HERE_normalDayTransit = L.layerGroup([HERE_normalDayTransitLayer]); */
+		
+		var layers = {
+			"Roadmap" : roadmap,
+			"Satellite" : satellite,
+			"Terrain" : terrain,
+			"MapBox" : mapBox,
+			"MapQuest": mapquestLayer,
+			"OSM" : osm,
+			
+			"WorldStreetMap" : Esri_WorldStreetMap,
+			"DeLorme" : Esri_DeLorme,
+			"WorldTopoMap" : Esri_WorldTopoMap,
+			"WorldImagery" : Esri_WorldImagery,
+			"WorldTerrain" : Esri_WorldTerrain,
+			"WorldShadedRelief" : Esri_WorldShadedRelief,
+			"WorldPhysical" : Esri_WorldPhysical,
+			"OceanBasemap" : Esri_OceanBasemap,
+			"NatGeoWorldMap" : Esri_NatGeoWorldMap,
+			"WorldGrayCanvas" : Esri_WorldGrayCanvas,
+			
+/* 			"normalDayTransit" : HERE_normalDayTransit, */
+		};
+
+		//add layer control
+/* 		var controls = L.control.layers(layers);		
+		controls.addTo(map);
+ */		
+
+ 		getBaseLayers();
+ 
  		var	drawnItems = L.featureGroup().addTo(map);
  		drawnItems.on('click', function(e) { layerClicked(e.layer); });
+// 		drawnItems.on('mouseover', function(e) { layerMouseover(e.layer); });
+// 		drawnItems.on('mouseout', function(e) { layerMouseout(e.layer); });
+
+ 		
+/*  		var higherOpacity = new L.Control.higherOpacity();
+ 		map.addControl(higherOpacity);
+ 		var lowerOpacity = new L.Control.lowerOpacity();
+ 		map.addControl(lowerOpacity);
+ 		var opacitySlider = new L.Control.opacitySlider();
+ 		map.addControl(opacitySlider);
+ */ 		
+ 		
 /*  		var editableLayers = new L.FeatureGroup();
  		map.addLayer(editableLayers);
  		
@@ -509,21 +894,29 @@
 				else
 					props= layer.props;
 					
-					
 			     props.title = sName;
 			     props.desc = sDesc;
-				 props.date = sDate; 
+				 props.date = sDate;
+			     props.opacity = parseFloat($('#slidernumber').html());
+			     layer.options.opacity = parseFloat($('#slidernumber').html());
+			     layer.options.fillOpacity = parseFloat($('#slidernumber').html());
 			     
-				 if(props.type=="marker"){
-					 layer.bindPopup(sName);
-					 layer.openPopup();
+				 if(props.type=="marker" && sName.length > 0){
+					 layer.unbindLabel();
+					 layer.bindLabel(sName);
+					 layer.setLabelNoHide(true);
 				 }
 			     
 			     if (idIW) {
 			        map.closePopup();
 			     }
 			     
+			     //remove layer, and add it back (with updated opacity)
+			     drawnItems.removeLayer(layer);
+			     drawnItems.addLayer(layer);
+			     console.log(layer);
 			     popUpLayer = null;
+			     //iiiii
 			}
 		  
 		  function getpopUpCenter(){
@@ -598,7 +991,8 @@
 		 			  
 		 			  +'<label id="sizeMeasure"></label>'
 		 			  +'<label id="sizeValue" style="font-weight: normal !important;"></label> <br/><br/>'
-		 			  
+		 			  +'<input id="opacitySlider" type ="range" min ="0" max="1.0" step ="0.1"/>'
+		 			  +'<span id="slidernumber">1</span>'
 		 			  +'<input type="file" name="file" id="fileLoader" /><br/>'
 		 			  +'<input type="button" id="fileSubmit" value="Upload"/><br/><br/>'
 		 			  
@@ -615,6 +1009,22 @@
 				  setAreaOrDistance(layer);
 			  });
 		  });
+
+		  map.on('draw:editing', function() {
+			  drawnItems.eachLayer(function(layer){
+					var fea = layer.feature;
+					var props;
+					
+					if(typeof(fea)!="undefined")
+						props = fea.props;
+					else
+						props= layer.props;
+					
+					if(drawingId != props.drawingId){
+						layer.editing.disable();
+					}				
+				});
+		  });
 		  
 		  
 		 map.on('draw:created', function(event) {
@@ -622,8 +1032,10 @@
 			 var  type = event.layerType, layer = event.layer;
 			 //var geoJSON = layer.toGeoJSON();
 
-			 layer.props = [];
+			 layer.props = {};
 			 layer.props.type = type;
+			 layer.props.drawingId = drawingId;
+			 
 			 //layer.props.color = getColor(type);
 			 layer.props.opacity = 0.7;
 			 popUpLayer = layer;
@@ -635,6 +1047,13 @@
 		     idIW.setContent(content);
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
+
+		     $('#opacitySlider').on("change mousemove", function() {
+		    	    $('#slidernumber').html($(this).val());
+		    });
+		     
+		     $("input[type=range]").val(0.7);
+		     $("#slidernumber").text("0.7");
 		     
 			 if (type === "circle") {
 			        var radius = layer.getRadius();
@@ -658,7 +1077,7 @@
 			 
 			 if(type=="marker"){
 				 $( '#sizeMeasure').text('Lat: '+layer.getLatLng().lat);
-			 	 $( '#sizeValue').text('Lng: '+layer.getLatLng().lng);
+			 	 $( '#sizeValue').html('<br /><b>Lng: '+layer.getLatLng().lng+'</b>');
 			 }
 
 			 
@@ -670,6 +1089,41 @@
 			 drawnItems.addLayer(layer);
 
 		});  
+		
+		function layerMouseover(layer){
+
+			var fea = layer.feature;
+			var props;
+
+			if(typeof(fea)!="undefined")
+				props = fea.props;
+			else
+				props= layer.props;
+			
+			var type = props.type;
+			if(type == "marker"){
+				if(typeof(props.title)!="undefined"){
+					layer.bindPopup(props.title);
+					layer.openPopup();
+				}
+			}
+		}
+
+		function layerMouseout(layer){
+
+			var fea = layer.feature;
+			var props;
+
+			if(typeof(fea)!="undefined")
+				props = fea.props;
+			else
+				props= layer.props;
+			
+			var type = props.type;
+			if(type == "marker"){
+				layer.closePopup();
+			}
+		}
 		
 		function layerClicked(layer){
 			
@@ -692,6 +1146,14 @@
 		     idIW.setLatLng(getpopUpCenter()); //calculated based on the e.layertype
 		     idIW.openOn(map);
 		     
+		     $('#opacitySlider').on("change mousemove", function() {
+		    	    $('#slidernumber').html($(this).val());
+		    	    //layer.options.opacity = parseFloat($(this).val());
+		    });
+		     
+		     $("input[type=range]").val(props.opacity);
+		     $("#slidernumber").text(props.opacity);
+
 		     
 		     var measure = props.measure;
 			 if(typeof(measure)!="undefined"){
@@ -708,7 +1170,7 @@
 			 
 			if(type=="marker"){
 				$( '#sizeMeasure').text('Lat: '+layer.getLatLng().lat);
-			 	$( '#sizeValue').text('Lng: '+layer.getLatLng().lng);
+			 	$( '#sizeValue').html('<br /><b>Lng: '+layer.getLatLng().lng+'</b>');
 			}
 			
 			$(function() {
@@ -727,23 +1189,6 @@
 		     }
 		}
 		
-		$(document).ready(function() {
-			$('#test').click(function(event){				
-				for(var i = 0; i< drawnItems.getLayers().length; i++){
-					var h = drawnItems.getLayers()[i];
-					var j = h.toGeoJSON();
-					 }
-				
-				var bounds = [[39.505, -77.09], [38.505, -71.09]];
-				var rect = L.rectangle(bounds, {color: "#ff7800", weight: 4});
-				rect.editing.enable();
-				rect.addTo(map);
-				drawnItems.addLayer(rect);
-//				map.addLayer(rect);
-			});
-			
-			
-		});
 	</script>
 
 </body>

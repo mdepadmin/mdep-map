@@ -3,6 +3,7 @@
  (c) 2010-2013, Vladimir Agafonkin
  (c) 2010-2011, CloudMade
 */
+var selectedLayerNumber;
 (function (window, document, undefined) {
 var oldL = window.L,
     L = {};
@@ -1537,7 +1538,6 @@ L.CRS.EPSG4326 = L.extend({}, L.CRS, {
 /*
  * L.Map is the central class of the API - it is used to create a map.
  */
-
 L.Map = L.Class.extend({
 
 	includes: L.Mixin.Events,
@@ -1583,7 +1583,6 @@ L.Map = L.Class.extend({
 		this._tileLayersNum = 0;
 
 		this.callInitHooks();
-
 		this._addLayers(options.layers);
 	},
 
@@ -2069,6 +2068,7 @@ L.Map = L.Class.extend({
 		layers = layers ? (L.Util.isArray(layers) ? layers : [layers]) : [];
 
 		for (var i = 0, len = layers.length; i < len; i++) {
+		
 			this.addLayer(layers[i]);
 		}
 	},
@@ -2509,6 +2509,7 @@ L.TileLayer = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -3218,6 +3219,7 @@ L.ImageOverlay = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -3508,6 +3510,7 @@ L.Marker = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -3900,6 +3903,7 @@ L.Popup = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -4157,6 +4161,7 @@ L.Map.include({
 		popup._isOpen = true;
 
 		this._popup = popup;
+	
 		return this.addLayer(popup);
 	},
 
@@ -4278,6 +4283,7 @@ L.LayerGroup = L.Class.extend({
 
 		if (layers) {
 			for (i = 0, len = layers.length; i < len; i++) {
+			
 				this.addLayer(layers[i]);
 			}
 		}
@@ -4285,10 +4291,11 @@ L.LayerGroup = L.Class.extend({
 
 	addLayer: function (layer) {
 		var id = this.getLayerId(layer);
-
+	
 		this._layers[id] = layer;
 
 		if (this._map) {
+		
 			this._map.addLayer(layer);
 		}
 
@@ -4335,6 +4342,7 @@ L.LayerGroup = L.Class.extend({
 
 	onAdd: function (map) {
 		this._map = map;
+	
 		this.eachLayer(map.addLayer, map);
 	},
 
@@ -4344,6 +4352,7 @@ L.LayerGroup = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -4395,6 +4404,7 @@ L.FeatureGroup = L.LayerGroup.extend({
 	},
 
 	addLayer: function (layer) {
+
 		if (this.hasLayer(layer)) {
 			return this;
 		}
@@ -4402,7 +4412,7 @@ L.FeatureGroup = L.LayerGroup.extend({
 		if ('on' in layer) {
 			layer.on(L.FeatureGroup.EVENTS, this._propagateEvent, this);
 		}
-
+	
 		L.LayerGroup.prototype.addLayer.call(this, layer);
 
 		if (this._popupContent && layer.bindPopup) {
@@ -4413,6 +4423,7 @@ L.FeatureGroup = L.LayerGroup.extend({
 	},
 
 	removeLayer: function (layer) {
+
 		if (!this.hasLayer(layer)) {
 			return this;
 		}
@@ -4544,6 +4555,7 @@ L.Path = L.Class.extend({
 	},
 
 	addTo: function (map) {
+	
 		map.addLayer(this);
 		return this;
 	},
@@ -5787,6 +5799,7 @@ L.polygon = function (latlngs, options) {
 				}, this);
 
 				while (i < len) {
+				
 					this.addLayer(new Klass(latlngs[i++], this._options));
 				}
 
@@ -6140,7 +6153,7 @@ L.GeoJSON = L.FeatureGroup.extend({
 		if (options.onEachFeature) {
 			options.onEachFeature(geojson, layer);
 		}
-
+	
 		return this.addLayer(layer);
 	},
 
@@ -8355,10 +8368,12 @@ L.Control.Layers = L.Control.extend({
 		this._handlingClick = false;
 
 		for (var i in baseLayers) {
+		
 			this._addLayer(baseLayers[i], i);
 		}
 
 		for (i in overlays) {
+		
 			this._addLayer(overlays[i], i, true);
 		}
 	},
@@ -8381,12 +8396,14 @@ L.Control.Layers = L.Control.extend({
 	},
 
 	addBaseLayer: function (layer, name) {
+	
 		this._addLayer(layer, name);
 		this._update();
 		return this;
 	},
 
 	addOverlay: function (layer, name) {
+	
 		this._addLayer(layer, name, true);
 		this._update();
 		return this;
@@ -8454,7 +8471,7 @@ L.Control.Layers = L.Control.extend({
 
 	_addLayer: function (layer, name, overlay) {
 		var id = L.stamp(layer);
-
+	
 		this._layers[id] = {
 			layer: layer,
 			name: name,
@@ -8564,6 +8581,9 @@ L.Control.Layers = L.Control.extend({
 			obj = this._layers[input.layerId];
 
 			if (input.checked && !this._map.hasLayer(obj.layer)) {
+				// added to get the selected layed - sudheer
+				selectedLayerNumber = i;
+				
 				this._map.addLayer(obj.layer);
 
 			} else if (!input.checked && this._map.hasLayer(obj.layer)) {

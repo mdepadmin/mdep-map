@@ -8,6 +8,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -21,9 +22,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.sprhib.model.BaseLayer;
 import com.sprhib.model.Team;
 import com.sprhib.model.UserDrawShapes;
 import com.sprhib.model.UserLogin;
+import com.sprhib.service.BaseLayersService;
 import com.sprhib.service.TeamService;
 import com.sprhib.service.UserDrawShapesService;
 import com.sprhib.service.UserLoginService;
@@ -50,6 +53,8 @@ public class TeamController {
 	private UserLoginService loginService;
 	@Autowired
 	private UserDrawShapesService drawShapeService;
+	@Autowired
+	private BaseLayersService baseLayersService;
 
 	private static String globalUser = "b";
 	
@@ -111,9 +116,9 @@ public class TeamController {
 	@RequestMapping(value="/saveDrawings", method=RequestMethod.POST, 
 			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public boolean saveDrawings(@RequestBody UserDrawShapes drawing, HttpServletRequest request) {
+	public int saveDrawings(@RequestBody UserDrawShapes drawing, HttpServletRequest request) throws JSONException {
 		
-		boolean result = false;
+		int returnId = 0;
 		System.out.println("Saving drawings..!");
 		HttpSession session = request.getSession();
 		String userId = (String)session.getAttribute("userId");
@@ -121,8 +126,22 @@ public class TeamController {
 		//drawing.setUserId(globalUser);
 		drawing.setDrawingId(null);
 		
-		result =	drawShapeService.saveUserDrawings(drawing);
-		return result;
+		returnId =	drawShapeService.saveUserDrawings(drawing);
+		return returnId;
+	}
+	
+	
+	@RequestMapping(value="/getBaseLayers", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<BaseLayer> getBaseLayers(HttpServletRequest request) {
+
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		
+		List<BaseLayer> baseLayers = null;
+		baseLayers = baseLayersService.getBaseLayers(userId);
+		return baseLayers;
 	}
 	
 	@RequestMapping(value="/updateDrawings", method=RequestMethod.POST, 
@@ -227,4 +246,5 @@ public class TeamController {
 		modelAndView.addObject("message", message);
 		return modelAndView;
 	}
+	
 }

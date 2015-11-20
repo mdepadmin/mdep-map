@@ -1,10 +1,34 @@
 /**
  * 
  */
-
+var tt;
 
 function showForm(){
 	$('#loginForm').toggle(1000);
+}
+
+function getSearchResults(url, callback){
+	$.ajax({
+/*	    headers: {
+	        'Access-Control-Allow-Origin':'*',
+	        'Content-Type':'application/json; charset=UTF-8'
+	    },*/
+	    beforeSend: function (request)
+        {
+            request.setRequestHeader("Access-Control-Allow-Origin", "*");
+        },
+        url: url,
+	    type: 'GET',
+	    success: function(data){
+	    	tt= data;
+	      console.log('succes');
+	      callback(data);
+	    },
+	    error:function(message){
+	    	tt= message;
+	    	console.log('failure: '+message);
+	    }
+	  });
 }
 
 function checkCredentials(inUrl,callback){
@@ -71,42 +95,67 @@ function logoutUser(inUrl,callback){
 }
 
 
-function saveDrawings(inUrl, map, drawnItems){
+function saveDrawings(inUrl, map, drawnItems, callback){
 	
 	var len = drawnItems.getLayers().length;
 	var geo = drawnItems.toGeoJSON();
 	
 	var featuresLen = geo.features.length;
 	geo.features.splice(0,featuresLen);
+
+	
+	var includes = [];
 	
 	for(var i=0; i<len;i++){
 		var curLayer = drawnItems.getLayers()[i];
-		var props = curLayer.props;
+		
+		
+		var fea = curLayer.feature;
+		var props;
+		
+		if(typeof(fea)!="undefined")
+			props = fea.props;
+		else
+			props= curLayer.props;
+
+		
 		var options = curLayer.options;
 		
-		var layerGeo = curLayer.toGeoJSON();
-		layerGeo.props = {};
-		layerGeo.props.type = props.type;
-		layerGeo.props.desc = props.desc;
-		layerGeo.props.title = props.title;
-		layerGeo.props.date = props.date;
-		layerGeo.props.measure = props.measure;
-		layerGeo.props.image = props.image;
-		layerGeo.props.color = options.color;
-		layerGeo.props.opacity = options.opacity;
+		console.log("drawing id: "+props.drawingId);
 		
-		if(props.type == 'circle'){
-//			console.log(curLayer.props.radius);
-			layerGeo.props.radius = curLayer.props.radius;
+		if(props.drawingId == 0 || props.drawingId == drawingId){
+			console.log(props.drawingId + " "+props.type);	
+			var layerGeo = curLayer.toGeoJSON();
+			layerGeo.props = {};
+			layerGeo.props.drawingId = "";
+			layerGeo.props.type = props.type;
+			layerGeo.props.desc = props.desc;
+			layerGeo.props.title = props.title;
+			layerGeo.props.date = props.date;
+			layerGeo.props.measure = props.measure;
+			layerGeo.props.image = props.image;
+			layerGeo.props.color = options.color;
+			layerGeo.props.opacity = options.opacity;
+			
+			if(props.type == 'circle'){
+	//			console.log(curLayer.props.radius);
+				layerGeo.props.radius = curLayer.props.radius;
+			}
+	//		console.log(layerGeo);
+	//		drawnItems.removeLayer(curLayer);
+			
+			geo.features.push(layerGeo);
 		}
-//		console.log(layerGeo);
-//		drawnItems.removeLayer(curLayer);
-		
-		geo.features.push(layerGeo);
+		else{
+			includes.push(props.drawingId); 
+		}
 	}
 	
 	var url = inUrl+"/team/saveDrawings";
-
+	
+	var uniqueIncludes = includes.filter( onlyUnique );
+	geo.includeDrawings = uniqueIncludes;
+	
 	console.log(geo);
 
 	
@@ -126,6 +175,21 @@ function saveDrawings(inUrl, map, drawnItems){
 	    
 		success:function(message){
 			console.log("Success: "+message);
+			for(var i=0; i<len;i++){
+				var curLayer = drawnItems.getLayers()[i];
+				var fea = curLayer.feature;
+				var props;
+				
+				if(typeof(fea)!="undefined")
+					props = fea.props;
+				else
+					props= curLayer.props;
+				
+				if(props.drawingId==0)
+					props.drawingId = message;
+			}
+			if(callback)
+				callback(message);
 		},
 	    failure:function(message){
 	    	console.log("Failure: "+message);
@@ -133,6 +197,9 @@ function saveDrawings(inUrl, map, drawnItems){
 	});
 }
 
+function onlyUnique(value, index, self) { 
+    return self.indexOf(value) === index;
+}
 
 function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 	
@@ -141,6 +208,7 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 	
 	var featuresLen = geo.features.length;
 	geo.features.splice(0,featuresLen);
+	var includes = [];
 	
 	for(var i=0; i<len;i++){
 		var curLayer = drawnItems.getLayers()[i];
@@ -148,7 +216,7 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 		var title, desc;
 		var props;
 		var options = curLayer.options;
-		console.log(curLayer);
+		//console.log(curLayer);
 		
 		//has feature - old shape
 		var fea = curLayer.feature;
@@ -158,32 +226,41 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 		else
 			props= curLayer.props;
 			
-		type = props.type;
-		title = props.title;
-		desc = props.desc;
-		
-		
-		var layerGeo = curLayer.toGeoJSON();
-		layerGeo.props = {};
-		layerGeo.props.type = type;
-		layerGeo.props.desc = desc;
-		layerGeo.props.title = title;
-		layerGeo.props.date = props.date;
-		layerGeo.props.measure = props.measure;
-		layerGeo.props.image = props.image;
-		layerGeo.props.color = options.color;
-		layerGeo.props.opacity = options.opacity;
-		
-		if(type == 'circle'){
-//			console.log(curLayer.props.radius);
-			layerGeo.props.radius = curLayer.props.radius;
+		if(props.drawingId == 0 || props.drawingId == drawingId){
+			
+			
+			type = props.type;
+			title = props.title;
+			desc = props.desc;
+			
+			var layerGeo = curLayer.toGeoJSON();
+			
+			layerGeo.props = {};
+			layerGeo.props.drawingId = drawingId;
+			layerGeo.props.type = type;
+			layerGeo.props.desc = desc;
+			layerGeo.props.title = title;
+			layerGeo.props.date = props.date;
+			layerGeo.props.measure = props.measure;
+			layerGeo.props.image = props.image;
+			layerGeo.props.color = options.color;
+			layerGeo.props.opacity = options.opacity;
+			
+			if(type == 'circle'){
+	//			console.log(curLayer.props.radius);
+				layerGeo.props.radius = curLayer.props.radius;
+			}
+	//		console.log(layerGeo);
+	//		drawnItems.removeLayer(curLayer);
+			
+			geo.features.push(layerGeo);
 		}
-//		console.log(layerGeo);
-//		drawnItems.removeLayer(curLayer);
-		
-		geo.features.push(layerGeo);
+		else{
+			includes.push(props.drawingId);
+		}
 	}
-
+	var uniqueIncludes = includes.filter( onlyUnique );
+	geo.includeDrawings = uniqueIncludes;
 	var url = inUrl+"/team/updateDrawings";
 	
 	console.log(geo);
@@ -205,6 +282,21 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 	    
 		success:function(message){
 			console.log("Success: "+message);
+			
+			for(var i=0; i<len;i++){
+				var curLayer = drawnItems.getLayers()[i];
+				var fea = curLayer.feature;
+				var props;
+				
+				if(typeof(fea)!="undefined")
+					props = fea.props;
+				else
+					props= curLayer.props;
+				
+				if(props.drawingId==0)
+					props.drawingId = drawingId;
+			}
+			
 			callback(message);
 		},
 	    failure:function(message){
@@ -213,43 +305,47 @@ function updateDrawings(inUrl, map, drawingId, drawnItems, callback){
 	});
 }
 
-function toggleMenuSlide(){
+
+
+
+function toggleSlide(slide){
 	// create menu variables
-	var slideoutMenu = $('.slideout-menu');	
+//	var slideoutMenu = $('.slideout-menu');	
 	var screenSize = $(window).width();
 	var leftPx = screenSize+"px";
 	
-	$('.slideout-menu').css("left",leftPx);
+//	$('.slideout-menu').css("left",leftPx);
+	slide.css("left",leftPx);
 	
 	// slide menu
-	if (slideoutMenu.hasClass("open")) {
-		openSlide();
+	if (slide.hasClass("open")) {
+		openSlide(slide);
 	} else {
-		closeSlide();
+		closeSlide(slide);
 	}
 }
 
-function closeSlide(){
-	var slideoutMenu = $('.slideout-menu');
+function closeSlide(slide){
+	var slideoutMenu = slide;
 	var screenSize = $(window).width();
 	slideoutMenu.toggleClass("open");
 	
-	$('.slideout-menu').css("visibility","hidden");
+	slide.css("visibility","hidden");
 	slideoutMenu.animate({
     	left: screenSize
 	}, 200);
 }
 
-function openSlide(){
-	var slideoutMenu = $('.slideout-menu');
-	var slideoutMenuWidth = $('.slideout-menu').width();
+function openSlide(slide){
+	var slideoutMenu = slide;
+	var slideoutMenuWidth = slide.width();
 	
 	var screenSize = $(window).width();	
 	var leftStart = screenSize - slideoutMenuWidth;
 	leftStart = leftStart + "px";
 	
 	slideoutMenu.toggleClass("open");
-	$('.slideout-menu').css("visibility","visible");
+	slide.css("visibility","visible");
 	slideoutMenu.animate({
     	left: leftStart
 	}, 200);
@@ -277,4 +373,29 @@ function getDrawings(inUrl, callback){
 		    	console.log("Failure: "+message);
 		    }
 		});
+}
+
+
+function getBaseLayersFromService(inUrl, callback){
+
+	var url = inUrl+"/team/getBaseLayers";
+	console.log('*****   '+url);
+	url = "/spr-mvc-hib/team/getBaseLayers";
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
 }

@@ -2,6 +2,7 @@ package com.sprhib.service;
 
 import java.util.List;
 
+import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -19,12 +20,12 @@ public class UserDrawShapesServiceImpl implements UserDrawShapesService {
 	private UserDrawShapesDAO shapesDAO;
 
 	@Override
-	public boolean saveUserDrawings(UserDrawShapes shapes) {
+	public int saveUserDrawings(UserDrawShapes shapes) throws JSONException {
 		try {
 			return shapesDAO.saveUserDrawings(shapes);
 		} catch (PSQLException e) {
 			e.printStackTrace();
-			return false;
+			return 0;
 		}
 	}
 	
@@ -46,6 +47,21 @@ public class UserDrawShapesServiceImpl implements UserDrawShapesService {
 			e.printStackTrace();
 			return null;
 		}
+	}
+
+	@Override
+	public UserDrawShapes getDrawing(String drawingId) {
+		try {
+			return shapesDAO.getDrawing(drawingId);
+		} catch (PSQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
+		
 	}
 
 	

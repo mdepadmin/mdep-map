@@ -54,9 +54,10 @@ L.EditToolbar.Edit = L.Handler.extend({
 
 		if (map) {
 			map.getContainer().focus();
-
+			
 			this._featureGroup.eachLayer(this._enableLayerEdit, this);
-
+			this._map.fire('draw:editing');
+			
 			this._tooltip = new L.Tooltip(this._map);
 			this._tooltip.updateContent({
 				text: L.drawLocal.edit.handlers.edit.tooltip.text,

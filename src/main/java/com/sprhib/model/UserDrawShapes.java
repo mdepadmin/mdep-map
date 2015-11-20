@@ -1,5 +1,7 @@
 package com.sprhib.model;
 
+import java.sql.Timestamp;
+
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -15,6 +17,7 @@ public class UserDrawShapes {
 	private String jsonData;
 	private String jsonCenter;
 	private Integer zoomLevel;
+	private Timestamp insertedTime;
 	
 	public Integer getDrawingId() {
 		return drawingId;
@@ -45,5 +48,11 @@ public class UserDrawShapes {
 	}
 	public void setZoomLevel(Integer zoomLevel) {
 		this.zoomLevel = zoomLevel;
+	}
+	public Timestamp getInsertedTime() {
+		return insertedTime;
+	}
+	public void setInsertedTime(Timestamp insertedTime) {
+		this.insertedTime = insertedTime;
 	}
 }
