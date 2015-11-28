@@ -10,6 +10,7 @@ public class UserLogin {
 	@Id
 	private String userId;
 	private String password;
+	private String userType; 
 	
 	public String getUserId() {
 		return userId;
@@ -23,5 +24,10 @@ public class UserLogin {
 	public void setPassword(String password) {
 		this.password = password;
 	}
-	
+	public String getUserType() {
+		return userType;
+	}
+	public void setUserType(String userType) {
+		this.userType = userType;
+	}
 }

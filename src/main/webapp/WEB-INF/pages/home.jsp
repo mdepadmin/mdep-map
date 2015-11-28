@@ -83,17 +83,23 @@
 
 	
 	<script type="text/javascript">
-		var geoData, loadedDrawings, cir;
+		var geoData, loadedDrawings, cir, sharedDrawings;
 		var drawingId=0, curSelection = 0;
 		var updatedDraw;
 		var userId;
+		var userType;
 		var idIW;
 		var popUpLayer;
 		var editedLayers;
+		var newGroupSlideOpen = false;
+		var shareSlideOpen = false;
+		var shareWithGroups = [];
+		var shareWithMembers = [];
 		
 		var tempvalue;
 		var chk;
 		var hehe;
+		
 		$(document).ready(function() {
 			
 			$('#searchButton').click(function(event){
@@ -134,6 +140,7 @@
 				checkCredentials(url,loginCallback);
 			});
  			
+ 			
 			$('.slideout-menu-toggle').on('click', function(event){
 		    	event.preventDefault();
 		    	var menuSlide = $('.slideout-menu');
@@ -146,12 +153,124 @@
 		    	toggleSlide(searchSlide);
 		    });
 			
+			$('.slideout-creategroup-toggle').on('click', function(event){
+				event.preventDefault();
+				
+				newGroupSlideOpen = !newGroupSlideOpen;
+				if(newGroupSlideOpen)
+				{
+					var url = "${pageContext.request.contextPath}";
+					getUsersList(url,getUsersListCallback);
+				}
+		    	var newGroupSlide = $('.slideout-creategroup');
+		    	toggleSlide(newGroupSlide);
+		    });
+			
+			$('.slideout-share-toggle').on('click', function(event){
+				event.preventDefault();
+				shareSlideOpen = !shareSlideOpen;
+				if(shareSlideOpen){
+					addDrawingsAndGroupsListToDropdown();
+				}
+		    	var shareSlide = $('.slideout-share');
+		    	toggleSlide(shareSlide);		    	
+		    });
+			
+			function addDrawingsAndGroupsListToDropdown(){
+	
+				$('#drawingShareDropdown').empty();
+				var sel = document.getElementById('drawingShareDropdown');
+				for(var i=0; i<loadedDrawings.length;i++){
+					var op = new Option();
+					op.value = i;
+					op.text = "Drawing-"+i;
+					sel.options.add(op);  
+				}
+				
+				$('#userGroupsDiv').empty();
+				for(var i=0; i<userGroupsDetails.length;i++){		
+					var group = userGroupsDetails[i];
+					var members = group.groupMembers;
+					
+					$("#userGroupsDiv").append("<div>  <input type='checkbox' id='groupList-"+i+"'>  "+group.groupName+"</div>");
+					$('#userGroupsDiv').append("<ul id='groupListUl"+i+"'></ul>");
+				    for (var j = 0; j < members.length; j++) {
+				          $("#groupListUl"+i).append("<li> <input type='checkbox' id='groupMember-"+i+"-"+j+"'> "+members[j]+"</li>");
+				    }
+				}
+			}
+			
+			$('#submitSharingButton').click(function(event){
+				
+				shareWithMembers = [];
+				shareWithGroups = [];
+				
+				var dropSelectedNum = parseInt($('#drawingShareDropdown').val());
+				var shareDrawingId = loadedDrawings[dropSelectedNum].drawingId;
+				
+				var groupNamesList = $('input')
+			    .filter(function() {
+			        return this.id.match('groupList-*');
+			    });
+				
+				$.each( groupNamesList, function( index, groupBox ){
+					var groupOrderNum = parseInt(groupBox.id.split("-")[1]);
+					
+					if(groupBox.checked)
+						shareWithGroups.push(userGroupsDetails[groupOrderNum].groupId);
+					else{
+						var filtered = $('input')
+					    .filter(function() {
+					        return this.id.match('groupMember-'+groupOrderNum+'-*');
+					    });
+						$.each( filtered, function( index, memberBox ){
+							if(memberBox.checked){
+								var members = userGroupsDetails[groupOrderNum].groupMembers;
+								shareWithMembers.push(members[parseInt(memberBox.id.split('-')[2])]);
+							}
+						});
+					}
+				});
+				
+				var shareWithMembersUnique = [];
+				$.each(shareWithMembers, function(i, el){
+				    if($.inArray(el, shareWithMembersUnique) === -1) shareWithMembersUnique.push(el);
+				});
+				
+				var url = "${pageContext.request.contextPath}";
+				submitSharingRequest(url, shareDrawingId, shareWithGroups, shareWithMembersUnique, submitSharingRequestCallback);
+				
+			});
+
+			function submitSharingRequestCallback(msg){
+				
+			}
+			
 			$('#logoutButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				logoutUser(url,logoutCallback);
 			});
 			
+			 $('#createNewGroupButtonId').click(function(event){
+				 var groupName = $('#groupNameTextBox').val();
+				 if(groupName.length > 0){
+					 var selectedUsers = [];
+					 $('input[type=checkbox][name=listUsers]').each(function () {
+						 if(this.checked){
+							 selectedUsers.push(this.value);
+						 }
+					 });
+					 console.log (selectedUsers);
+					 var url = "${pageContext.request.contextPath}";
+					 createNewGroup(url, groupName, selectedUsers, createNewGroupCallback);
+				 }
+			 });
 			
+			 function createNewGroupCallback(message){
+				 var groupSlide = $('.slideout-creategroup');
+		    	 toggleSlide(groupSlide);
+			 }
+			 
 			$('#saveDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				if(drawingId==0)
@@ -168,9 +287,75 @@
 			
 			$('#test').click(function(event){
 				var url = "${pageContext.request.contextPath}";
-				getBaseLayers(url,getBaseLayersCallback);
+				getUserGroupsAndShareDrawings(url,getUserGroupsAndShareDrawingsCallback);
+			});
+
+			function getUserGroupsAndShareDrawingsCallback(msg){
+				
+			}
+			
+			
+			$('#test1').click(function(event){
+				var url = "${pageContext.request.contextPath}";
+				
+				var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
+				var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
+				var sharedIds=[];
+				
+				if(groupShared.length>0){
+					for(var i=0; i< groupShared.length; i++){
+						var shared = groupShared[i];
+						sharedIds.push(shared.sharedDrawingId);
+					}
+				}
+				
+				if(memberShared.length>0){
+					for(var i=0; i< memberShared.length; i++){
+						var shared = memberShared[i];
+						sharedIds.push(shared.sharedDrawingId);
+					}
+				}
+				
+				var sharedIdsUnique = [];
+				$.each(sharedIds, function(i, el){
+				    if($.inArray(el, sharedIdsUnique) === -1) sharedIdsUnique.push(el);
+				});
+				
+				getSharedDrawings(url,sharedIdsUnique,getSharedDrawingsCallback);
+				
 			});
 			
+			function getSharedDrawingsCallback(drawings){
+				sharedDrawings = drawings;
+
+				if (sharedDrawings.length > 1) {
+					var sel = document.createElement("select");
+					sel.id = 'sharedDrawingsDropDown';
+
+					for (var i = 0; i < sharedDrawings.length; i++) {
+						var op = new Option();
+						op.value = i;
+						op.text = "Shared Drawing-" + i;
+						sel.options.add(op);
+					}
+					$('#sharedDrawingsListDiv').html(sel);
+				}
+
+				/* if (loadedDrawings.length > 0) {
+					var shapes = loadedDrawings[0];
+					showDrawings(true, shapes);
+				} */
+			}
+			
+			$(document).on('change', '#sharedDrawingsDropDown', function() {
+				console.log('shared option changed');
+				var optionSelected = $("option:selected", this);
+
+				curSelection = parseInt(optionSelected.val());
+				var shapes = sharedDrawings[curSelection];
+				console.log("Option changed: "+shapes);
+				showDrawings(true, shapes);
+			});
 			
 			$('#clearDrawingsButtonId').click(function(event){
 				clearDrawings();
@@ -199,7 +384,27 @@
 			});
 			
 		});
+
+	
 		
+		function getUsersListCallback(userList){
+	 		$("#userListDiv").empty();
+			if(userList.length > 0){
+				var count = userList.length;
+				for(var i = 0; i < count; i++){
+					var user = userList[i];
+					
+					var $ctrl = $('<label />').html(user.userId)
+                    .prepend($('<input/>').attr({ type: 'checkbox', name: 'listUsers', value: user.userId, id: 'listUser'+i, checked:false}));
+					 $("#userListDiv").append($ctrl);
+					 $ctrl = $('<br/>');
+					 $("#userListDiv").append($ctrl);
+				}
+			}
+			
+		}
+		
+ 
 		function getBaseLayers(){
 			var url = "${pageContext.request.contextPath}";
 			getBaseLayersFromService(url,getBaseLayersCallback);
@@ -297,11 +502,18 @@
 			}
 		}
 		
-		function loginCallback(){
+		function loginCallback(user){
 			$('#loginButtonId').css("visibility","hidden");
 			$('#logoutButtonId').css("visibility","visible");
-			$('#message').text("Hello "+userId+"..!");
-			console.log("${userId} **");
+			$('#message').text("Hello "+user.userId+"..!");
+			userId = user.userId;
+			userType = user.userType;
+			if(userType=="A"){
+				console.log("admin");
+				$('#createGroupButtonId').css("visibility","visible");
+			}
+			else
+				console.log("user");
 			var menuSlide = $('.slideout-menu');
 			closeSlide(menuSlide);
 		}
@@ -310,6 +522,7 @@
 			$('#logoutButtonId').css("visibility","hidden");
 			$('#loginButtonId').css("visibility","visible");
 			$('#message').text("Please login");
+			$('#createGroupButtonId').css("visibility","hidden");
 		}
 		
 		function saveDrawingsCallback(returnDrawingId){
@@ -322,10 +535,11 @@
 			showDrawings(true, updatedDrawing);
 			
 		}
+		
 		function getDrawingsCallback(drawings) {
 			loadedDrawings = drawings;
 
-			if (loadedDrawings.length > 1) {
+			if (loadedDrawings.length > 0) {
 				var sel = document.createElement("select");
 				sel.id = 'dropDown';
 
@@ -497,7 +711,51 @@
 					//
 				}
 			}
+ 			else if (id.match("^groupList-")){
+				if(chk.is(":checked")){
+					checkedGroup(id);
+				}else{
+					unCheckedGroup(id);
+				}
+			}
+ 			else if (id.match("^groupMember-")){
+				if(chk.is(":checked")){
+					
+				}else{
+					unCheckedGroupMember(id);
+				}
+			}
 		});
+
+		function checkedGroup(id){
+			var splits = id.split("-");
+			var groupNum = parseInt(splits[1]);
+			var filtered = $('input')
+		    .filter(function() {
+		        return this.id.match('groupMember-'+groupNum+'-*');
+		    });
+			
+			$.each( filtered, function( index, memberBox ){
+				memberBox.checked = true;
+			});
+		}
+		
+		function unCheckedGroup(id){
+			var splits = id.split("-");
+			var groupNum = parseInt(splits[1]);
+			var filtered = $('input')
+		    .filter(function() {
+		        return this.id.match('groupMember-'+groupNum+'-*');
+		    });
+			$.each( filtered, function( index, memberBox ){
+				memberBox.checked = false;
+			});
+		}
+		
+		function unCheckedGroupMember(id){
+			var groupOrderNum = parseInt(id.split('-')[1]);
+			$('#groupList-'+groupOrderNum).attr('checked', false);
+		}
 		
 		function addIncludeDrawing(includedId){
 			for(var i=0; i<loadedDrawings.length; i++){
@@ -602,16 +860,21 @@
 
 <body>
 <input type="button" id="searchButtonId" class="button slideout-search-toggle" style="visibility:visible" value="Search"/>
-<input type="button" id="test" value="layers"/>
+<input type="button" id="test" value="layers"/> <input type="button" id="test1" value="layers-1"/>
 <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
 <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/>
 <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/>
 <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/>
 <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/>
 <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/>
+<input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" style="visibility:hidden"/>
+<input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/>
+<input type="button" id="shareFeedButtonId" class="button slideout-shareFeed-toggle" style="visibility:visible" value="Share Feed"/>
 <div id="includeDrawingsListDiv"></div>
 <div id="dispDrawingsCheckBoxDiv"></div>
 <div id="userDrawingsListDiv"></div>
+<div id="sharedDrawingsListDiv"></div>
+
 <p id="message">Please login</p>
 
 <div class="slideout-menu open">
@@ -644,6 +907,29 @@
 		Search Results<br/>
 	</div>
 	
+</div>
+
+
+<div class="slideout-creategroup open">
+	<h3>Search <a href="#" class="slideout-creategroup-toggle">×</a></h3>
+	<input type="text" id="groupNameTextBox" value=""/>
+	<input type="button" id="createNewGroupButtonId" class="button" value="Create"/>
+	
+	<div id="userListDiv" class="searchResults">
+		Users<br/>
+	</div>	
+</div>
+
+<div class="slideout-share open">
+	<h3>Share <a href="#" class="slideout-share-toggle">×</a></h3>
+	<input type="button" id="submitSharingButton" class="button" value="Share"/>
+	<br/><br/>
+	<select id ="drawingShareDropdown">
+	</select>
+	<br/><br/>
+	<div id="userGroupsDiv" class="searchResults">
+		Groups <br/>
+	</div>
 </div>
 
 
@@ -916,7 +1202,6 @@
 			     drawnItems.addLayer(layer);
 			     console.log(layer);
 			     popUpLayer = null;
-			     //iiiii
 			}
 		  
 		  function getpopUpCenter(){

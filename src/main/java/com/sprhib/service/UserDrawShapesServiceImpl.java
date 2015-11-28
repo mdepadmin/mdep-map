@@ -1,5 +1,6 @@
 package com.sprhib.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -62,6 +63,14 @@ public class UserDrawShapesServiceImpl implements UserDrawShapesService {
 		}
 		return null;
 		
+	}
+
+	@Override
+	public ArrayList<UserDrawShapes> getDrawingList(
+			ArrayList<Integer> drawingIdList) throws PSQLException,
+			JSONException {
+
+		return shapesDAO.getDrawingList(drawingIdList);
 	}
 
 	

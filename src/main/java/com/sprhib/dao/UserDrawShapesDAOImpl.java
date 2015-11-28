@@ -1,9 +1,11 @@
 package com.sprhib.dao;
 
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Restrictions;
@@ -11,6 +13,7 @@ import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
 
 import org.json.JSONArray;
@@ -64,6 +67,21 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		Criteria criteria = getCurrentSession().createCriteria(UserDrawShapes.class);
 		UserDrawShapes shapes = (UserDrawShapes) criteria.add(Restrictions.eq("drawingid", drawingId));
 		return shapes;
+	}
+
+	@Override
+	public ArrayList<UserDrawShapes> getDrawingList(ArrayList<Integer> drawingIdList)
+			throws PSQLException, JSONException {
+		
+		int[] array = new int[drawingIdList.size()];
+		for(int i=0;i<drawingIdList.size();i++)
+			array[i] = drawingIdList.get(i);
+		String queryString = "from UserDrawShapes as shapes where shapes.drawingId IN :idList";
+		Query query = getCurrentSession().createQuery(queryString);
+		query.setParameterList("idList", drawingIdList);
+		ArrayList<UserDrawShapes> drawingsList =  (ArrayList<UserDrawShapes>) query.list();
+
+		return drawingsList;
 	}
 
 }

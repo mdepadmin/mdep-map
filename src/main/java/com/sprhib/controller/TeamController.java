@@ -2,13 +2,14 @@ package com.sprhib.controller;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.json.JSONException;
+import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Controller;
@@ -23,10 +24,14 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
 
 import com.sprhib.model.BaseLayer;
+import com.sprhib.model.Groups;
+import com.sprhib.model.GroupsAndSharedDrawings;
+import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.Team;
 import com.sprhib.model.UserDrawShapes;
 import com.sprhib.model.UserLogin;
 import com.sprhib.service.BaseLayersService;
+import com.sprhib.service.GroupsService;
 import com.sprhib.service.TeamService;
 import com.sprhib.service.UserDrawShapesService;
 import com.sprhib.service.UserLoginService;
@@ -56,7 +61,8 @@ public class TeamController {
 	@Autowired
 	private BaseLayersService baseLayersService;
 
-	private static String globalUser = "b";
+	@Autowired
+	private GroupsService groupsService;
 	
 	@RequestMapping(value="/add", method=RequestMethod.GET)
 	public ModelAndView addTeamPage() {
@@ -82,7 +88,7 @@ public class TeamController {
 	@RequestMapping(value="/login", method=RequestMethod.POST, 
 			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
-	public boolean userLogin(@RequestBody UserLogin user, HttpServletRequest request) {
+	public UserLogin userLogin(@RequestBody UserLogin user, HttpServletRequest request) {
 		
 		boolean message = false;
 		
@@ -100,7 +106,12 @@ public class TeamController {
 				System.out.println("user logged in "+session.getAttribute("userId"));
 			}
 		}
-		return message;
+		if(message){
+			regUser.setPassword(null);
+			return regUser;
+		}else{
+			return null;
+		}
 	}
 	
 	
@@ -123,12 +134,88 @@ public class TeamController {
 		HttpSession session = request.getSession();
 		String userId = (String)session.getAttribute("userId");
 		drawing.setUserId(userId);
-		//drawing.setUserId(globalUser);
 		drawing.setDrawingId(null);
 		
 		returnId =	drawShapeService.saveUserDrawings(drawing);
 		return returnId;
 	}
+	
+	
+	@RequestMapping(value="/createNewGroup", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public int createNewGroup(@RequestBody Groups group, HttpServletRequest request) throws JSONException, PSQLException {
+		
+		int returnId = 0;
+		System.out.println("Create new group..! "+group.getGroupMembersJSON());
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		group.setAdminId(userId);
+		
+		groupsService.saveGroup(group);
+		return returnId;
+	}
+	
+	
+	@RequestMapping(value="/shareDrawing", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public int shareDrawing(@RequestBody SharedDrawing sharedDrawing, HttpServletRequest request) throws JSONException, PSQLException {
+		
+		int returnId = 0;
+		System.out.println("Share Drawing..! "+sharedDrawing.getsharedDrawingId());
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		sharedDrawing.setSharedByUser(userId);
+		
+		groupsService.shareDrawing(sharedDrawing);
+		return returnId;
+	}
+	
+	
+	@RequestMapping(value="/getUserGroupsAndShareDrawings", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public GroupsAndSharedDrawings getUserGroupsAndShareDrawings(HttpServletRequest request) throws JSONException, PSQLException {
+		
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		
+		ArrayList<Groups> groups = groupsService.getUserGroups(userId);
+		System.out.println("Groups Size "+groups.size());
+		
+		ArrayList<SharedDrawing> memberSharedDrawings = groupsService.getMemberSharedDrawings(userId);
+		ArrayList<SharedDrawing> groupSharedDrawings = groupsService.getGroupSharedDrawings(groups);
+
+		GroupsAndSharedDrawings groupAndDrawings = new GroupsAndSharedDrawings();
+		groupAndDrawings.setUserId(userId);
+		groupAndDrawings.setUserGroups(groups);
+		groupAndDrawings.setGroupSharedDrawingsInfo(groupSharedDrawings);
+		groupAndDrawings.setMemberSharedDrawingsInfo(memberSharedDrawings);
+		return groupAndDrawings;
+	}
+	
+	// getDrawingsList
+	
+	@RequestMapping(value="/getDrawingsList", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public ArrayList<UserDrawShapes> getDrawingsList(@RequestBody ArrayList<Integer> uniqueIds, HttpServletRequest request) throws JSONException, PSQLException {
+		
+		int returnId = 0;
+		System.out.println("Share Drawings List ..! "+uniqueIds);
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		
+		return	drawShapeService.getDrawingList(uniqueIds);
+
+	}
+
+	
+	
+	
+	
+	
 	
 	
 	@RequestMapping(value="/getBaseLayers", method=RequestMethod.POST, 
@@ -176,6 +263,18 @@ public class TeamController {
 		List<UserDrawShapes> shapes = null;
 		shapes =	drawShapeService.getUserDrawings(userId);
 		return shapes;
+	}
+	
+	
+	@RequestMapping(value="/getUsersList", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<UserLogin> getUsersList(HttpServletRequest request) throws PSQLException {
+		
+		System.out.println("In Team Controller - getUsersList");
+		List<UserLogin> userList = null;
+		userList =	loginService.getUserList();
+		return userList;
 	}
 	
 	

@@ -1,6 +1,8 @@
 /**
  * 
  */
+var userGroupsAndSharedDrawings;
+var userGroupsDetails;
 var tt;
 
 function showForm(){
@@ -49,18 +51,12 @@ function checkCredentials(inUrl,callback){
 	        'Content-Type': 'application/json; charset=utf-8' 
 	    },
 	    
-		success:function(message){
-			console.log(message);
-			
-			if(message == true)
-				$('#message').text("Yayy. :)");
-				
-			else if(message == false)
-				$('#message').text("Pchh. :(");
-			
-			callback();
+		success:function(user){
+			console.log(user);
+			if(user!="")
+				callback(user);
 		},
-	    failure:function(message){
+	    failure:function(user){
 	    }
 	});
 }
@@ -376,11 +372,11 @@ function getDrawings(inUrl, callback){
 }
 
 
-function getBaseLayersFromService(inUrl, callback){
 
-	var url = inUrl+"/team/getBaseLayers";
-	console.log('*****   '+url);
-	url = "/spr-mvc-hib/team/getBaseLayers";
+function getUsersList(inUrl, callback){
+
+	var url = inUrl+"/team/getUsersList";
+	console.log(url);
 	$.ajax({
 		url: url,
 		type:"POST",
@@ -390,7 +386,139 @@ function getBaseLayersFromService(inUrl, callback){
 	    },
 	    
 		success:function(message){
-			console.log("Success: "+message);
+			console.log("Success: UserList");
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
+function getBaseLayersFromService(inUrl, callback){
+
+	var url = inUrl+"/team/getBaseLayers";
+//	url = "/spr-mvc-hib/team/getBaseLayers";
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: Fetched layers ");
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
+
+function createNewGroup(inUrl, groupName, selectedUsers, callback){
+	
+	var url = inUrl+"/team/createNewGroup";
+
+	var json = {"groupId":"","groupName": groupName, "groupMembersJSON":JSON.stringify(selectedUsers), "adminId":"", "groupMembers":selectedUsers};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: group created "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
+
+function getUserGroupsAndShareDrawings(inUrl, callback){
+
+	var url = inUrl+"/team/getUserGroupsAndShareDrawings";
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: User Groups");
+			userGroupsAndSharedDrawings=message;
+			userGroupsDetails = message.userGroups;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
+function submitSharingRequest(inUrl, shareDrawingId, shareWithGroups, shareWithMembers, callback){
+	
+	var url = inUrl+"/team/shareDrawing";
+	
+	var json = {"sharingId":"","sharedByUser":"","sharedDrawingId":shareDrawingId,"sharedWithGroups": shareWithGroups, "sharedWithMembers":shareWithMembers};	// ,"sharedTime":""
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: Shared "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
+
+function getSharedDrawings(inUrl,sharedIdsUnique,callback){
+	
+	console.log(sharedIdsUnique);
+	var url = inUrl+"/team/getDrawingsList";
+	
+	var json = sharedIdsUnique;
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: SharedDrawingsList "+message);
 			tt=message;
 			callback(message);
 		},

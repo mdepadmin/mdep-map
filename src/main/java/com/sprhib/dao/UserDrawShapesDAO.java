@@ -1,5 +1,6 @@
 package com.sprhib.dao;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.json.JSONException;
@@ -12,4 +13,5 @@ public interface UserDrawShapesDAO {
 	public boolean updateUserDrawings(UserDrawShapes shapes) throws PSQLException;
 	public List<UserDrawShapes> getUserDrawings(String userId) throws PSQLException;
 	public UserDrawShapes getDrawing(String drawingId) throws PSQLException, JSONException;
+	public ArrayList<UserDrawShapes> getDrawingList(ArrayList<Integer> drawingIdList) throws PSQLException, JSONException;
 }
