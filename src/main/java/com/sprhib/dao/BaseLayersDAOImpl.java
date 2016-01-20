@@ -21,6 +21,7 @@ public class BaseLayersDAOImpl implements BaseLayersDAO{
 		return sessionFactory.getCurrentSession();
 	}
 	
+	// get the list of base layers available in BaseLayer table
 	@Override
 	public List<BaseLayer> getBaseLayers(String userId) throws PSQLException {
 		List<BaseLayer> shapes = getCurrentSession().createCriteria(BaseLayer.class).list();

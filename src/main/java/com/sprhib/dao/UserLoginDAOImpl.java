@@ -24,11 +24,13 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 		return sessionFactory.getCurrentSession();
 	}
 	
+	// get the user details based on userId and return it
 	public UserLogin getUser(String userId) throws PSQLException{
 		UserLogin user = (UserLogin) getCurrentSession().get(UserLogin.class, userId);
 		return user;
 	}
 
+	// get the list of users (added by admin)
 	@Override
 	public List<UserLogin> getUserList() throws PSQLException {
 		

@@ -93,6 +93,7 @@
 		var editedLayers;
 		var newGroupSlideOpen = false;
 		var shareSlideOpen = false;
+		var shareFeedSlideOpen = false;
 		var shareWithGroups = [];
 		var shareWithMembers = [];
 		
@@ -166,6 +167,53 @@
 		    	toggleSlide(newGroupSlide);
 		    });
 			
+			$('.slideout-sharingFeed-toggle').on('click', function(event){
+				event.preventDefault();
+				shareFeedSlideOpen = !shareFeedSlideOpen;
+				if(shareFeedSlideOpen){
+					addSharingFeed();
+				}
+		    	var sharingFeedSlide = $('.slideout-sharingFeed');
+		    	toggleSlide(sharingFeedSlide);		    	
+		    });
+
+			
+			function addSharingFeed(){
+				
+				
+				var userGroupIds = [];
+				for(var i=0; i < userGroupsDetails.length; i++){
+					var group = userGroupsDetails[i];
+					userGroupIds.push(group.groupId);
+				}
+				
+				var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
+				var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
+				
+				$('#sharingFeedDiv').empty();
+				for(var i=0; i < groupShared.length; i++){		
+					var shared = groupShared[i];
+					var common =  $(shared.sharedWithGroups).filter(userGroupIds);
+					
+					var commonGroupsString = "";
+					for(var i=0; i< common.length; i++)
+						commonGroupsString = commonGroupsString+"  "+common[i];
+					
+					$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+					$("#sharingFeedDiv").append("<div> Shared With Group(s): "+commonGroupsString+"</div> <br/>");
+					$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
+				    
+				}
+				$("#sharingFeedDiv").append("<br/><hr/><br/>");
+				for(var i=0; i < memberShared.length; i++){		
+					var shared = memberShared[i];
+					
+					$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+					$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
+				    
+				}
+			}
+
 			$('.slideout-share-toggle').on('click', function(event){
 				event.preventDefault();
 				shareSlideOpen = !shareSlideOpen;
@@ -819,7 +867,7 @@
                  $
                     .ajax({dataType : 'text',
 //                        url : "/spr-mvc-hib/team/savefiles.html",
-                        url : url+"/team/savefiles.html",
+                        url : url+"/drawshapescontroller/savefiles.html",
                         data : oMyForm,
                         type : "POST",
                         enctype: 'multipart/form-data',
@@ -869,7 +917,8 @@
 <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/>
 <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" style="visibility:hidden"/>
 <input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/>
-<input type="button" id="shareFeedButtonId" class="button slideout-shareFeed-toggle" style="visibility:visible" value="Share Feed"/>
+<input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/>
+
 <div id="includeDrawingsListDiv"></div>
 <div id="dispDrawingsCheckBoxDiv"></div>
 <div id="userDrawingsListDiv"></div>
@@ -932,6 +981,13 @@
 	</div>
 </div>
 
+<div class="slideout-sharingFeed open">
+	<h3>Share Feed<a href="#" class="slideout-sharingFeed-toggle">×</a></h3>
+	<br/><br/>
+	<div id="sharingFeedDiv" class="searchResults">
+		Groups <br/>
+	</div>
+</div>
 
 <%-- 	<p>	${message}<br/>
 	<a href="${pageContext.request.contextPath}/team/add.html">Add new team</a><br/>

@@ -9,5 +9,6 @@ import com.sprhib.model.BaseLayer;
 import com.sprhib.model.UserDrawShapes;
 
 public interface BaseLayersDAO {
+	// Base layers related methods
 	public List<BaseLayer> getBaseLayers(String userId) throws PSQLException;
 }

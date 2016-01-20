@@ -60,7 +60,6 @@ public class TeamController {
 	private UserDrawShapesService drawShapeService;
 	@Autowired
 	private BaseLayersService baseLayersService;
-
 	@Autowired
 	private GroupsService groupsService;
 	

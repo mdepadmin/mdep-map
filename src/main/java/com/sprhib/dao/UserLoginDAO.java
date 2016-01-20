@@ -7,7 +7,7 @@ import org.postgresql.util.PSQLException;
 import com.sprhib.model.UserLogin;
 
 public interface UserLoginDAO {
-
+	// user login related methods
 	public UserLogin getUser(String userId) throws PSQLException;
 	public List<UserLogin> getUserList() throws PSQLException;
 }

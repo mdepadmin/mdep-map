@@ -32,22 +32,26 @@ public class GroupsDAOImpl implements GroupsDAO{
 		return sessionFactory.getCurrentSession();
 	}
 
-	
+	// save the group
 	@Override
 	public int saveGroup(Groups group) throws PSQLException, JSONException {
 		getCurrentSession().save(group);
 		return 0;
 	}
 
+	// update group based on groupId
 	@Override
 	public boolean updateGroup(Groups group) throws PSQLException {
 		// TODO Auto-generated method stub
 		return false;
 	}
 
+	// get the list of groups user belongs to (based on userId)
 	@Override
 	public ArrayList<Groups> getUserGroups(String userId) throws PSQLException {
 
+		// get the user groups from groups table
+		
 		System.out.println("get user groups");
 		String queryString = "from Groups as groups where '"+ userId +"' in elements(groups.groupMembers)";
 		Query query = getCurrentSession().createQuery(queryString);
@@ -56,6 +60,7 @@ public class GroupsDAOImpl implements GroupsDAO{
 			System.out.println("id: "+ g.getGroupId());
 		}
 
+		// return the list of groups
 		return groups;
 	}
 
@@ -67,6 +72,7 @@ public class GroupsDAOImpl implements GroupsDAO{
 	}
 
 
+	// save shared drawing to SharedDrawing table (it has mets info of sharing a drawing)
 	@Override
 	public int shareDrawing(SharedDrawing sharedDrawing) throws PSQLException,
 			JSONException {
@@ -74,6 +80,7 @@ public class GroupsDAOImpl implements GroupsDAO{
 		return 0;
 	}
 	
+	// get the list of drawings shared directly to the user
 	@Override
 	public ArrayList<SharedDrawing> getMemberSharedDrawings(String userId) throws PSQLException{
 		System.out.println("get user shared drawings");
@@ -90,21 +97,25 @@ public class GroupsDAOImpl implements GroupsDAO{
 	}
 	
 	
+	// get the list of drawings shared to the groups (groups list is the list of groups user is part of)
 	@Override
 	public ArrayList<SharedDrawing> getGroupSharedDrawings(ArrayList<Groups> groups) throws PSQLException{
 		System.out.println("get user shared drawings");
 		
 		ArrayList<SharedDrawing> sharedGroupDrawings = null;
-		
+
+		// get the shared drawings for each group and add it to a list to return
 		for(Groups g: groups){
 			String queryString = "from SharedDrawing as shared where "+ g.getGroupId()+" in elements(shared.sharedWithGroups)";
 			Query query = getCurrentSession().createQuery(queryString);
-			sharedGroupDrawings =  (ArrayList<SharedDrawing>) query.list();
+			// sharedGroupDrawings =  (ArrayList<SharedDrawing>) query.list();
+			sharedGroupDrawings.addAll((ArrayList<SharedDrawing>) query.list());
 		}
 
 		for(SharedDrawing draw: sharedGroupDrawings)
 			System.out.println(draw.getsharedDrawingId()+" GROUPS  "+draw.getSharedWithGroups());
 
+		// return all the drawings shared to given groups
 		return sharedGroupDrawings;
 	}
 	

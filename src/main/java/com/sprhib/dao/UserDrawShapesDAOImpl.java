@@ -31,12 +31,17 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		return sessionFactory.getCurrentSession();
 	}
 	
+	// save drawing (includes shapes, zoom level, center etc) to UserDrawShapes table 
 	@Override
 	public int saveUserDrawings(UserDrawShapes shapes) throws PSQLException, JSONException {
+		// save the drawing
 		Serializable sz = getCurrentSession().save(shapes);
+		
+		// get the id of this drawing which is saved just now
 		String returnId = sz.toString();
 		JSONObject jsonObj = new JSONObject(shapes.getJsonData());
 		JSONArray features = jsonObj.getJSONArray("features");
+		// add this id to props
 		for(int i=0; i<features.length();i++){
 			JSONObject drawing = (JSONObject) features.get(i);
 			JSONObject props = drawing.getJSONObject("props");
@@ -44,16 +49,19 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		}
 		shapes.setDrawingId(Integer.parseInt(returnId));
 		shapes.setJsonData(jsonObj.toString());
+		// update it with the id
 		updateUserDrawings(shapes);
 		return Integer.parseInt(returnId);
 	}
 
+	// update the drawing (shapes object)
 	@Override
 	public boolean updateUserDrawings(UserDrawShapes shapes) throws PSQLException {
 		getCurrentSession().update(shapes);
 		return true;
 	}
 	
+	// get the list of drawings saved by the user from UserDrawShapes table 
 	@Override
 	public List<UserDrawShapes> getUserDrawings(String userId) throws PSQLException {
 		Criteria criteria = getCurrentSession().createCriteria(UserDrawShapes.class);
@@ -61,6 +69,7 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		return shapes;
 	}
 
+	// get drawing based for a given drawingId
 	@Override
 	public UserDrawShapes getDrawing(String drawingId) throws PSQLException,
 			JSONException {
@@ -69,13 +78,16 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		return shapes;
 	}
 
+	// get the drawings based on ids
 	@Override
 	public ArrayList<UserDrawShapes> getDrawingList(ArrayList<Integer> drawingIdList)
 			throws PSQLException, JSONException {
 		
-		int[] array = new int[drawingIdList.size()];
-		for(int i=0;i<drawingIdList.size();i++)
-			array[i] = drawingIdList.get(i);
+//		int[] array = new int[drawingIdList.size()];
+//		for(int i=0;i<drawingIdList.size();i++)
+//			array[i] = drawingIdList.get(i);
+		
+		// idList is a dummy parameter which should contain the list of drawing Ids 
 		String queryString = "from UserDrawShapes as shapes where shapes.drawingId IN :idList";
 		Query query = getCurrentSession().createQuery(queryString);
 		query.setParameterList("idList", drawingIdList);

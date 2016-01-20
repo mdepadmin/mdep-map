@@ -10,6 +10,7 @@ import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
 
 public interface GroupsService {
+	// groups and sharing related methods
 	public int saveGroup(Groups group) throws PSQLException, JSONException;
 	public boolean updateGroup(Groups group) throws PSQLException;
 	public ArrayList<Groups> getUserGroups(String userId) throws PSQLException;
