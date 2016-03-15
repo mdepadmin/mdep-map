@@ -39,7 +39,7 @@ function getSearchResults(url, callback){
 }
 
 // get the userId, password fields and pass them to the service to check  
-function checkCredentials(inUrl,callback){
+function checkCredentials(inUrl,callback_success, callback_failure){
 	var userId = $('#userId').val();
 	var password = $('#password').val();
 	
@@ -62,9 +62,10 @@ function checkCredentials(inUrl,callback){
 			console.log(user);
 			// callback on successful login
 			if(user!="")
-				callback(user);
+				callback_success(user);
 		},
 	    failure:function(user){
+	    	callback_failure(user);
 	    }
 	});
 }
@@ -413,7 +414,8 @@ function getDrawings(inUrl, callback){
 		success:function(message){
 			// call back upon successful service call
 			console.log("Success: "+message);
-			callback(message);
+			if(message.length>0)
+				callback(message);
 		},
 	    failure:function(message){
 	    	console.log("Failure: "+message);

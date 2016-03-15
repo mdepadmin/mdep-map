@@ -1,8 +1,3 @@
-<!--
-This is a starter template page. Use this page to start your new project from
-scratch. This page gets rid of all links and provides the needed markup only.
--->
-
 <?xml version="1.0" encoding="ISO-8859-1" ?>
 <%@ taglib uri="http://www.springframework.org/tags" prefix="spring"%>
 <%@taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
@@ -13,48 +8,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml">
 
-  <head>
-    <meta charset="utf-8">
-    <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
-    <!-- <meta http-equiv="X-UA-Compatible" content="IE=edge"> -->
-    <title>UI Home page</title>
-    <!-- Tell the browser to be responsive to screen width -->
-    <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
-    
-    <!-- Bootstrap 3.3.5 -->    
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/bootstrap/css/bootstrap.min.css"/>"/>
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
-    <!-- Ionicons -->
-    <link rel="stylesheet" href="https://code.ionicframework.com/ionicons/2.0.1/css/ionicons.min.css">
-    <!-- Theme style -->
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/AdminLTE.css"/>">
-    <!-- AdminLTE Skins. We have chosen the skin-blue for this starter
-          page. However, you can choose any other skin. Make sure you
-          apply the skin class to the body tag so the changes take effect.
-    -->
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-blue.min.css"/>">
-    <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-        <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
-        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    <script type="text/javascript" src="<spring:url value="/resources/JS/jquery-1.11.3.min.js"/>"></script>	
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1" />
+	<title>Home page</title>
+
+<!-- 	<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script> -->
+	
+	<script type="text/javascript" src="<spring:url value="/resources/JS/jquery-1.11.3.min.js"/>"></script>	
 	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
 	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
 	
 	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-	<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+	<script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script>
 	
 	
 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/CSS/Styles.css"/>"/> 
@@ -120,10 +85,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<script src="http://maps.google.com/maps/api/js?v=3.2&sensor=false"></script>
 	<script src="http://matchingnotes.com/javascripts/leaflet-google.js"></script>
 
-	<!-- http://www.bootstraptoggle.com/ -->
-	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
-	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
-		
+	
 	<script type="text/javascript">
 
 		// temporary variables for intermediate data
@@ -138,15 +100,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var newGroupSlideOpen = false;
 		var shareSlideOpen = false;
 		var shareFeedSlideOpen = false;
-
-		var drawingsLoaded = false;
-		var includeInNewListCreated = false; 
-		
 		var shareWithGroups = [];
 		var shareWithMembers = [];
-		
-		var baseLayers = [];
-		var curBaseLayerIndex = -1;
 		
 		var tempvalue;
 		var chk;
@@ -166,27 +121,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			});
 			
 			// display the search results in the slide after successful service call
-			
-		function getResultsCallback(res){
-			var response = res.response;
-			if(response.numFound > 0){
-				var docs = response.docs;
-				var count = docs.length;
-				for(var i = 0; i < count; i++){
-					var doc = docs[i];
-					
-					var $ctrl = $('<label />').html(doc.name)
-                       .prepend($('<input/>').attr({ type: 'checkbox', name: 'result'+i, value: 'result'+i, id: 'result'+i, checked:false}));
-					 $("#searchResultsDiv").append($ctrl);
-					 $ctrl = $('<br/>');
-					 $("#searchResultsDiv").append($ctrl);
+			function getResultsCallback(res){
+				var response = res.response;
+				if(response.numFound > 0){
+					var docs = response.docs;
+					var count = docs.length;
+					for(var i = 0; i < count; i++){
+						var doc = docs[i];
+						
+						var $ctrl = $('<label />').html(doc.name)
+                        .prepend($('<input/>').attr({ type: 'checkbox', name: 'result'+i, value: 'result'+i, id: 'result'+i, checked:false}));
+						 $("#searchResultsDiv").append($ctrl);
+						 $ctrl = $('<br/>');
+						 $("#searchResultsDiv").append($ctrl);
+					}
 				}
+				
 			}
-		}
 			
-		$('#showForm').click(function(event){
-			showForm();	
-		});
+			$('#showForm').click(function(event){
+				showForm();	
+			});
 
 			// check user credentials upon 'login' button click
  			$('#buttonLogin').click(function(event){
@@ -216,7 +171,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
  			function loginCallback_failure(user){
  				console.log('login failed');
  			}
- 			
  			// check user credentials upon 'login' button click
  			$(document).on('click', '#buttonLogin_1', function(){ 
  				var url = "${pageContext.request.contextPath}";
@@ -247,6 +201,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	 		
  			function loginCallback_failure_1(user){
 				console.log('login failed');
+
  			}	
 
  			// logout button click action, call service
@@ -306,7 +261,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		    	toggleSlide(sharingFeedSlide);		    	
 		    });
 
-			
 			
 			// add sharing feed details to the slide upon successful service call
 			function addSharingFeed(){
@@ -464,9 +418,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			 }
 			 
 			 // upon clicking save drawing button
-			$('#saveDrawingsAnchorId').click(function(event){
-				event.preventDefault();
-				
+			$('#saveDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 
 				if(drawingId==0){
@@ -478,36 +430,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					updateDrawings(url, map, drawingId, drawnItems, updateCallback);
 				}
 			});
-			 
-			 // upon clicking saveas new drawing button
-			$('#saveAsNewDrawingsAnchorId').click(function(event){
-				event.preventDefault();
-				
-				var url = "${pageContext.request.contextPath}";
-				saveDrawings(url, map, drawnItems, saveDrawingsCallback);
-			});			
-			
-			
 			
 			// get saved drawings from the database
  			$('#getDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
 				 getDrawings(url,getDrawingsCallback);				
 			}); 
- 			
- 			$('#getDrawingsAnchorId').click(function(event){
- 				event.preventDefault();
- 				
- 				
- 				//if(drawingsLoaded || typeof(loadedDrawings)=="undefined")
- 				if(drawingsLoaded)	
- 					return;
- 					
-				var url = "${pageContext.request.contextPath}";
-				getDrawings(url,getDrawingsCallback);
- 				
-			}); 
- 			
+			
 			$('#test').click(function(event){
 //				var url = "${pageContext.request.contextPath}";
 //				getUserGroupsAndShareDrawings(url,getUserGroupsAndShareDrawingsCallback);
@@ -592,11 +521,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			$('#clearDrawingsButtonId').click(function(event){
 				clearDrawings();
 			});
-			$('#clearDrawingsAnchorId').click(function(event){
-				event.preventDefault();
-				clearDrawings();
-			});
-			
 			
 			// 'new drawing' button click
 			$('#newDrawingButtonId').click(function(event){
@@ -628,45 +552,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 			});
 			
-			$('#newDrawingAnchorId').click(function(event){
-				event.preventDefault();
-				
-				// clear the drawings currently being displayed
-				
-				if(includeInNewListCreated || typeof(loadedDrawings)=="undefined")
-					return;
-				
-				clearDrawings();
-				includeInNewListCreated = true;
-				
-				$('#includeDrawingsUL').empty();
-				var ul = document.getElementById("includeDrawingsUL");
-
-				// add user drawings to multi select
-				// user can include the existing drawins in the new drawing by selecting items from this list
-				if(loadedDrawings.length>1)
-				{
-
-					for(var i=0; i<loadedDrawings.length;i++){
-						// change to drawing name here
-						
-						// add checkbox to add/remove
-						 var $ctrl = $('<label />').html('Drawing '+i)
-                         .prepend($('<input/>').attr({ type: 'checkbox', name: 'includeInNewDrawingCheckbox', value: i, id: 'incDrawing'+i, checked:false}));
-						
-						var li = document.createElement("li");
-						$ctrl.appendTo(li);
-						ul.appendChild(li);
-					}
-					
-					// add a dynamic button
-					// click this button to include the selected drawings in the current drawing 
-					addNewButton("button","Add", ul);
-				}
-			});
-			
-			
-			
 		});
 	
 		// add the list of users to the slide
@@ -696,18 +581,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		// add the base layers and properties such as min, max zoom etc., from db to the list
 		// user can select any base layer from this list
 		function getBaseLayersCallback(returnBaseLayers){
-			
-			
-			var sel = document.createElement("select");
-			sel.id = 'baseLayersDropDown';
-			sel.multiple="multiple";
-			sel.size="4";
-							
-			
-			
-
-			
-			
+			var layers = {};
 			for(var i=0; i < returnBaseLayers.length; i++){
 				var baseLayer = returnBaseLayers[i];
 				var layerGroup;
@@ -724,7 +598,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					/* layer = new L.Google("'"+baseLayer.url+"'");*/
 					console.log("'"+baseLayer.url+"'");
 					layerGroup = L.layerGroup([layer]);
-					hehe = baseLayer;
+					hehe = layer;
 				}else{
 					layer = L.tileLayer(baseLayer.url);  
 					
@@ -745,76 +619,32 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					}
 					layerGroup = L.layerGroup([layer]);
 				}
-				
-				var op = new Option();
-				op.value = baseLayer.id;
-				op.text = baseLayer.displayName;
-				sel.options.add(op);
-				
-				
-				layer.options.name = baseLayer.displayName;
-				layer.options.id = baseLayer.id;
-				
-				baseLayers[i] = layer;
-				// baseLayers[baseLayer.displayName] = layerGroup;
+				layers[baseLayer.displayName] = layerGroup;
 			}
-			var controls = L.control.layers(baseLayers);
-		//	controls.addTo(map);
-			map.addLayer(baseLayers[0]);
-			curBaseLayerIndex = 0;
-			
-			$('#baseLayersDiv').html(sel);
+			var controls = L.control.layers(layers);		
+			controls.addTo(map);
 		}
 		
-		// drop down change action
-		$(document).on('change', '#baseLayersDropDown', function() {
-			console.log('option changed');
-			var optionSelected = $("option:selected", this);
-			hehe = optionSelected;
-			
-			//console.log(optionSelected.text()+"*******"+optionSelected.val());
-			curSelection = parseInt(optionSelected.index());
-			
-			var curBaseLayer = baseLayers[curBaseLayerIndex];
-			map.removeLayer(curBaseLayer);
-			curBaseLayer = baseLayers[curSelection];
-			map.addLayer(curBaseLayer);
-			curBaseLayerIndex = curSelection;
-		});
-		
-		
-		// add a button dynamically to ul
-		function addNewButton(type, name, ul){
+		// add a button dynamically after multiselect list
+		function addNewButton(type,name, sel){
 			    var element = document.createElement("input"); 
 			    element.type = type;
 			    element.value = name; 
 			    element.name = name;
 			    
-			    var ulist = document.getElementById("includeDrawingsUL"); //replace with jquery
-			    var li = document.createElement("li");
-			    li.appendChild(element);
-				ulist.appendChild(li);
-				
+			    var parent = document.getElementById("includeDrawingsListDiv"); //replace with jquery
+			    parent.appendChild(element);
 			    
 			    element.onclick = function() {
-			        buttonClickCallback(includeInNewDrawing);
+			        buttonClickCallback(sel, includeDrawings);
 			    };
 		}
 		
 		// add the selected drawings to the included drawings list upon clicking the button 
-		function buttonClickCallback(callback){
+		function buttonClickCallback(sel, callback){
 			var opts = [], opt;
 			
-
-			$('input[type=checkbox][name=includeInNewDrawingCheckbox]').each(function () {
-				 if(this.checked){
-					 var shapes = loadedDrawings[this.value];
-					 opts.push(shapes);
-				 }
-			 });
-			
-			
-		    /* for (var i=0, len=sel.options.length; i<len; i++) {
+		    for (var i=0, len=sel.options.length; i<len; i++) {
 		        opt = sel.options[i];
 		        if ( opt.selected ) {
 		        	tempvalue = opt;    	
@@ -822,7 +652,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				    var shapes = loadedDrawings[curSelection];
 				    opts.push(shapes);
 		        }
-		    } */
+		    }
 		    
 		    if (callback) {
 		    	callback(opts);
@@ -830,7 +660,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		}
 		
 		// second callback for add button click
-		function includeInNewDrawing(inclDraws){
+		function includeDrawings(inclDraws){
 			for(var i=0; i<inclDraws.length; i++)
 				showDrawings(false, inclDraws[i]);
 			drawingId = 0;
@@ -859,7 +689,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		}
 		
 		function saveDrawingsCallback(returnDrawingId){
-			drawingId = returnDrawingId;
+			
 		}
 
 		// upon successful update of drawing
@@ -875,17 +705,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		// add fetched drawings (saved previously by the user) to the dropdown list
 		function getDrawingsCallback(drawings) {
 			loadedDrawings = drawings;
-			drawingsLoaded = true;
-			
+
 			if (loadedDrawings.length > 0) {
 				var sel = document.createElement("select");
 				sel.id = 'dropDown';
-				sel.multiple="multiple";
-				if(loadedDrawings.length > 4 )
-					sel.size="4";
-				else
-					sel.size = loadedDrawings.length;				
-				
+
 				for (var i = 0; i < drawings.length; i++) {
 					var op = new Option();
 					op.value = i;
@@ -894,12 +718,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 				$('#userDrawingsListDiv').html(sel);
 			}
-			
 
-			/* if (loadedDrawings.length > 0) {
+			if (loadedDrawings.length > 0) {
 				var shapes = loadedDrawings[0];
 				showDrawings(true, shapes);
-			} */
+			}
 		}
 
 		
@@ -998,11 +821,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			// if there are any included drawings in the drawing
 			if(geoData.hasOwnProperty('includeDrawings'))
 			{
-
+				var checkboxDiv = $('#dispDrawingsCheckBoxDiv');
 				var includeIds = geoData.includeDrawings;
-				var ul = document.getElementById("includedDrawingsCheckBoxesUL");
-				
-				
+
 				// for every included drawing, get shapes and show
 				for(var j=0; j<includeIds.length; j++){
 					var includedId = includeIds[j];
@@ -1031,6 +852,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 										if(typeof(title)!="undefined" && title.length > 0)
 											lay.bindLabel(title);
 											//lay.setLabelNoHide(true);
+											//ddddd
 									}
 
 									// drawnItems are the layers currently being displayed on baselayer
@@ -1041,18 +863,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 								// add checkbox to add/remove
 								 var $ctrl = $('<label />').html('Drawing '+i)
 		                          .prepend($('<input/>').attr({ type: 'checkbox', name: includedId, value: includedId, id: 'drawing'+i, checked:true}));
-								
-								var li = document.createElement("li");
-								$ctrl.appendTo(li);
-								ul.appendChild(li); 
-
+								 checkboxDiv.append($ctrl);
 							}
 						}
 					}
 				}
 
 				if(includeIds.length == 0){
-					$('#includedDrawingsCheckBoxesUL').empty();
+					$('#dispDrawingsCheckBoxDiv').empty();
 				}
 			}
 		}
@@ -1096,13 +914,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					
 				}else{
 					unCheckedGroupMember(id);
-				}
-			}
- 			else if (id.match("^drawControlCheckboxId")){
-				if(chk.is(":checked")){
-					map.addControl(drawControl);
-				}else{
-					map.removeControl(drawControl);
 				}
 			}
 		});
@@ -1180,6 +991,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			});
 		}
 		
+		
+
+
 	</script>
     
     <script type="text/javascript">
@@ -1250,330 +1064,170 @@ scratch. This page gets rid of all links and provides the needed markup only.
                     });
               }
     </script>
+</head>
+
+<body>
+
+
+<%-- <a href="<spring:url value="/WEB-INF/pages/homeUI.jsp"/>">Move</a> --%>
+
+
+
+<!-- 
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+    Brand and toggle get grouped for better mobile display
+
+    <div class="navbar-header">
+      <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+        <span class="sr-only">Toggle navigation</span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+        <span class="icon-bar"></span>
+      </button>
+      <a class="navbar-brand" href="#">Mojavedata</a>
+    </div>
+
+    Collect the nav links, forms, and other content for toggling
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+
+      <ul class="nav navbar-nav">
+        <li class="active"><a href="#">Link <span class="sr-only">(current)</span></a></li>
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Dropdown <span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">One more separated link</a></li>
+          </ul>
+        </li>
+      </ul>
+
+      <form class="navbar-form navbar-left" role="search">
+        <div class="form-group">
+          <input type="text" class="form-control" placeholder="Type a location..">
+        </div>
+        <button type="submit" class="btn btn-default">Search</button>
+      </form>
+
+
+      <ul class="nav navbar-nav navbar-right">
+        <li><a href="#">Link</a></li>
+        <li class="dropdown">
+          <a id="anchor_dropdown" href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false"> Hello Guest<span class="caret"></span></a>
+          <ul class="dropdown-menu">
+            <li><a href="#">Action</a></li>
+            <li><a href="#">Another action</a></li>
+            <li><a href="#">Something else here</a></li>
+            <li role="separator" class="divider"></li>
+            <li><a href="#">Separated link</a></li>
+          </ul>
+          
+          <ul class="dropdown-menu">
+          <li><div id="dropdown-menu_content_div"> lets do something over here</div></li>
+          </ul>
+
+        </li>
+      </ul>
+
+    </div>/.navbar-collapse
+  </div>/.container-fluid
+</nav>
+
+ -->
+
+
+
+<div id="map"></div>
+<!-- <div class="container">
+    <div class="row">
+        <div class="col-md-2">
+            <div class="sidebar-nav-fixed affix">
+                <div class="well">
+                    <ul class="nav ">
+                        <li class="nav-header">Sidebar</li>
+                        <li class="active"><a href="#">Link</a>
+                        </li>
+                        <li><a href="#">Link</a>
+                        </li>
+                        <li><a href="#">Link</a>
+                        </li>
+                        <li><a href="#">Link</a>
+                        </li>
+                        <li class="nav-header">Sidebar</li>
+                        <li><a href="#">Link</a>
+                        </li>
+                        <li><a href="#">Link</a>
+                        </li>
+                        <li><a href="#">Link</a>
+                        </li>
+                    </ul>
+                </div>
+                /.well
+            </div>
+            /sidebar-nav-fixed
+        </div>
+
+     	display map here
+	<div id="map"></div>
     	
-	
-  </head>
-  <!--
-  BODY TAG OPTIONS:
-  =================
-  Apply one or more of the following classes to get the
-  desired effect
-  |---------------------------------------------------------|
-  | SKINS         | skin-blue                               |
-  |               | skin-black                              |
-  |               | skin-purple                             |
-  |               | skin-yellow                             |
-  |               | skin-red                                |
-  |               | skin-green                              |
-  |---------------------------------------------------------|
-  |LAYOUT OPTIONS | fixed                                   |
-  |               | layout-boxed                            |
-  |               | layout-top-nav                          |
-  |               | sidebar-collapse                        |
-  |               | sidebar-mini                            |
-  |---------------------------------------------------------|
-  -->
-  <body class="hold-transition skin-blue sidebar-mini">
-    <div class="wrapper">
+    	-->    
+    	
+    	<!-- login slide -->
+		<div class="slideout-menu open">
+			<h3>Login <a href="#" class="slideout-menu-toggle">×</a></h3>
+				<table>		
+					<tbody>
+						<tr>
+							<td>User Id:</td>
+							<td><input type="text" id="userId" value="e" /></td>
+						</tr>
+						<tr>
+							<td>Password:</td>
+							<td><input type="password" id="password" value="e" /></td>
+						</tr>
+						<tr>
+							<td><input type="button" id="buttonLogin" value="Login" /></td>
+							<td></td>
+						</tr>
+					</tbody>
+				</table>
+		</div>
+ 
+	    </div>
+    </div>
 
-      <!-- Main Header -->
-      <header class="main-header">
 
-        <!-- Logo -->
-        <a href="#" class="logo">
-          <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini">ALT</span>
-          <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><b>Mojavedata</b>***</span>
-        </a>
-        
 
-        <!-- Header Navbar -->
-        <nav class="navbar navbar-static-top" role="navigation">
-          <!-- Sidebar toggle button-->
-          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
-          </a>
+<input type="button" id="searchButtonId" class="button slideout-search-toggle" style="visibility:visible" value="Search"/>
+<input type="button" id="test" value="layers"/> <input type="button" id="test1" value="layers-1"/>
+<input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/>
+<input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/>
+<input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/>
+<input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/>
+<input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/>
+<input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/>
+<input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" style="visibility:hidden"/>
+<input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/>
+<input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/>
 
-          
+<div id="includeDrawingsListDiv"></div>
+<div id="dispDrawingsCheckBoxDiv"></div>
+<div id="userDrawingsListDiv"></div>
+<div id="sharedDrawingsListDiv"></div>
 
-<!--           <form class="navbar-form navbar-left" role="search">
-  <div class="form-group">
-    <input type="text" class="form-control" placeholder="Type a location..">
-  </div>
-  <button type="submit" class="btn btn-default">Search</button>
-</form> -->
-          
-          <!-- Navbar Right Menu -->
-          <div class="navbar-custom-menu">
-            <ul class="nav navbar-nav">
-              <!-- Messages: style can be found in dropdown.less-->
-              <li class="dropdown messages-menu">
-                <!-- Menu toggle button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-envelope-o"></i>
-                  <span class="label label-success">4</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 4 messages</li>
-                  <li>
-                    <!-- inner menu: contains the messages -->
-                    <ul class="menu">
-                      <li><!-- start message -->
-                        <a href="#">
-                          <div class="pull-left">
-                            <!-- User Image -->
-                            <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="img-circle" alt="User Image">
-                          </div>
-                          <!-- Message title and timestamp -->
-                          <h4>
-                            Support Team
-                            <small><i class="fa fa-clock-o"></i> 5 mins</small>
-                          </h4>
-                          <!-- The message -->
-                          <p>Why not buy a new awesome theme?</p>
-                        </a>
-                      </li><!-- end message -->
-                    </ul><!-- /.menu -->
-                  </li>
-                  <li class="footer"><a href="#">See All Messages</a></li>
-                </ul>
-              </li><!-- /.messages-menu -->
 
-              <!-- Notifications Menu -->
-              <li class="dropdown notifications-menu">
-                <!-- Menu toggle button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-bell-o"></i>
-                  <span class="label label-warning">10</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 10 notifications</li>
-                  <li>
-                    <!-- Inner Menu: contains the notifications -->
-                    <ul class="menu">
-                      <li><!-- start notification -->
-                        <a href="#">
-                          <i class="fa fa-users text-aqua"></i> 5 new members joined today
-                        </a>
-                      </li><!-- end notification -->
-                    </ul>
-                  </li>
-                  <li class="footer"><a href="#">View all</a></li>
-                </ul>
-              </li>
-              <!-- Tasks Menu -->
-              <li class="dropdown tasks-menu">
-                <!-- Menu Toggle Button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <i class="fa fa-flag-o"></i>
-                  <span class="label label-danger">9</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <li class="header">You have 9 tasks</li>
-                  <li>
-                    <!-- Inner menu: contains the tasks -->
-                    <ul class="menu">
-                      <li><!-- Task item -->
-                        <a href="#">
-                          <!-- Task title and progress text -->
-                          <h3>
-                            Design some buttons
-                            <small class="pull-right">20%</small>
-                          </h3>
-                          <!-- The progress bar -->
-                          <div class="progress xs">
-                            <!-- Change the css width attribute to simulate progress -->
-                            <div class="progress-bar progress-bar-aqua" style="width: 20%" role="progressbar" aria-valuenow="20" aria-valuemin="0" aria-valuemax="100">
-                              <span class="sr-only">20% Complete</span>
-                            </div>
-                          </div>
-                        </a>
-                      </li><!-- end task item -->
-                    </ul>
-                  </li>
-                  <li class="footer">
-                    <a href="#">View all tasks</a>
-                  </li>
-                </ul>
-              </li>
-              <!-- User Account Menu -->
-              <li class="dropdown user user-menu">
-                <!-- Menu Toggle Button -->
-                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
-                  <!-- The user image in the navbar-->
-                  <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="user-image" alt="User Image">
-                  <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                  <span class="hidden-xs">Alexander Pierce</span>
-                </a>
-                <ul class="dropdown-menu">
-                  <!-- The user image in the menu -->
-                  <li class="user-header">
-                    <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="img-circle" alt="User Image">
-                    <p>
-                      Alexander Pierce - Web Developer
-                      <small>Member since Nov. 2012</small>
-                    </p>
-                  </li>
-                  <!-- Menu Body -->
-                  <li class="user-body">
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Followers</a>
-                    </div>
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Sales</a>
-                    </div>
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Friends</a>
-                    </div>
-                  </li>
-                  <!-- Menu Footer-->
-                  <li class="user-footer">
-                    <div class="pull-left">
-                      <a href="#" class="btn btn-default btn-flat">Profile</a>
-                    </div>
-                    <div class="pull-right">
-                      <a href="#" class="btn btn-default btn-flat">Sign out</a>
-                    </div>
-                  </li>
-                </ul>
-              </li>
-              <!-- Control Sidebar Toggle Button -->
-              <li>
-                <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-              </li>
-            </ul>
-          </div>
-        </nav>
-      </header>
-      <!-- Left side column. contains the logo and sidebar -->
-      <aside class="main-sidebar">
 
-        <!-- sidebar: style can be found in sidebar.less -->
-        <section class="sidebar">
 
-          <!-- Sidebar user panel (optional) -->
-          <%-- <div class="user-panel">
-            <div class="pull-left image">
-              <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="img-circle" alt="User Image">
-            </div>
-            <div class="pull-left info">
-              <p>Alexander Pierce</p>
-              <!-- Status -->
-              <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
-            </div>
-          </div> --%>
 
-<!--           search form (Optional)
-          <form action="#" method="get" class="sidebar-form">
-            <div class="input-group">
-              <input type="text" name="q" class="form-control" placeholder="Search...">
-              <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-          </form> -->
-          <!-- /.search form -->
+<p id="message">Please login</p>
 
-          <!-- Sidebar Menu -->
-          <ul class="sidebar-menu">
-          	<li class="header">HEADER</li>
-            
-            <li class="treeview">
-              <a href="#"><i class="fa fa-cogs"></i> <span>Settings</span> <i class="fa fa-angle-left pull-right"></i></a>
-               <ul class="treeview-menu">
-	                <li><input type="checkbox" id="drawControlCheckboxId" data-toggle="toggle" data-on="Show" data-off="Hide"></li>
-          			<li><div id="baseLayersDiv"></div></li>
-               </ul> 
-            </li>
-            
-            <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Places</span></a></li>
-            
-            <li class="treeview">
-              <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>Drawings List</span> <i class="fa fa-angle-left pull-right"></i></a>
-               <ul id="drawingsListUL" class="treeview-menu">
-	                <!-- <li><a href="#">Link in level 2</a></li>
-	                <li><a href="#">Link in level 2</a></li> -->
-	                
-	                <li>  <div id="userDrawingsListDiv"></div> </li>
-	                <li>  <div id="dispDrawingsCheckBoxDiv"> <ul id="includedDrawingsCheckBoxesUL"> </ul></div> </li>
-               </ul> 
-            </li>
-            
-            <li><a href="#" id="clearDrawingsAnchorId"><i class="fa fa-trash"></i> <span>Clear Drawings</span></a></li>
 
-            <li class="treeview">
-              <a href="#" id="newDrawingAnchorId"><i class="fa fa-plus-square"></i> <span>Start New Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu" id="includeDrawingsUL">
-	            <li>  <div id="includeDrawingsListDiv"></div> </li>
-              </ul>
-            </li>
-            
-            <li><a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a></li> 
-            <li><a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a></li>
-            
-             <!-- draw controls, layers list -->
-             
-             
-            <li class="treeview">
-              <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
-                <li><a href="#">Link in level 2</a></li>
-                <li><a href="#">Link in level 2</a></li>
-              </ul>
-            </li>
-
-			<li class="active"><a href="#"><i class="fa fa-link"></i> <span>Link</span></a></li>
-			
-            <li class="treeview">
-             <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
-                <li>  <input type="button" id="searchButtonId" class="button slideout-search-toggle" style="visibility:visible" value="Search"/> </li>
-                <li>  <input type="button" id="test" value="layers"/> </li>
-                <li>  <input type="button" id="test1" value="layers-1"/> </li>
-       			<li>  <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/> </li>
-				<li>  <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/> </li>
-				<!-- <li>  <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/> </li> -->
-				<!-- <li>  <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/> </li> -->
-				<!-- <li>  <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/> </li>
-				<li>  <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/> </li> -->
-				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" style="visibility:hidden"/> </li>
-				<li>  <input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/> </li>
-				<li>  <input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/> </li>
-				
-				
-				<!-- <li>  <div id="dispDrawingsCheckBoxDiv"></div> </li>
-				<li>  <div id="userDrawingsListDiv"></div> </li> -->
-				<li>  <div id="sharedDrawingsListDiv"></div> </li>
-              </ul>
-            </li>
-            
-          </ul><!-- /.sidebar-menu -->
-        </section>
-        <!-- /.sidebar -->
-      </aside>
-
-      <!-- Content Wrapper. Contains page content -->
-      <div class="content-wrapper">
-        <!-- Content Header (Page header) -->
-        <section class="content-header">
-          <h1>
-            Page Header
-            <small>Optional description</small>
-            
-          </h1>
-          <ol class="breadcrumb">
-            <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
-            <li class="active">Here</li>
-          </ol>
-        </section>
-
-        <!-- Main content -->
-        <section class="content">
-			<div id="map"></div>
-        </section><!-- /.content -->
-        
-      </div><!-- /.content-wrapper -->
 
 
 		<!-- search slide -->
@@ -1621,150 +1275,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			</div>
 		</div>
 
-		<div class="slideout-menu open">
-			<h3>Login <a href="#" class="slideout-menu-toggle">×</a></h3>
-			<table>		
-				<tbody>
-					<tr>
-						<td>User Id:</td>
-						<td><input type="text" id="userId" value="e" /></td>
-					</tr>
-					<tr>
-						<td>Password:</td>
-						<td><input type="password" id="password" value="e" /></td>
-					</tr>
-					<tr>
-						<td><input type="button" id="buttonLogin" value="Login" /></td>
-						<td></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
 
 
+<%-- 	<p>	${message}<br/>
+	<a href="${pageContext.request.contextPath}/team/add.html">Add new team</a><br/>
+	<a href="${pageContext.request.contextPath}/team/list.html">Team list</a><br/>
+	</p>
+ --%>
 
-
-      <!-- Main Footer -->
-      <footer class="main-footer">
-        <!-- To the right -->
-        <div class="pull-right hidden-xs">
-          Anything you want
-        </div>
-        <!-- Default to the left -->
-        <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved.
-      </footer>
-
-      <!-- Control Sidebar -->
-      <aside class="control-sidebar control-sidebar-dark">
-        <!-- Create the tabs -->
-        <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-          <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-          <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
-        </ul>
-        <!-- Tab panes -->
-        <div class="tab-content">
-          <!-- Home tab content -->
-          <div class="tab-pane active" id="control-sidebar-home-tab">
-            <h3 class="control-sidebar-heading">Recent Activity</h3>
-            <ul class="control-sidebar-menu">
-              <li>
-                <a href="javascript::;">
-                  <i class="menu-icon fa fa-birthday-cake bg-red"></i>
-                  <div class="menu-info">
-                    <h4 class="control-sidebar-subheading">Langdon's Birthday</h4>
-                    <p>Will be 23 on April 24th</p>
-                  </div>
-                </a>
-              </li>
-            </ul><!-- /.control-sidebar-menu -->
-
-            <h3 class="control-sidebar-heading">Tasks Progress</h3>
-            <ul class="control-sidebar-menu">
-              <li>
-                <a href="javascript::;">
-                  <h4 class="control-sidebar-subheading">
-                    Custom Template Design
-                    <span class="label label-danger pull-right">70%</span>
-                  </h4>
-                  <div class="progress progress-xxs">
-                    <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-                  </div>
-                </a>
-              </li>
-            </ul><!-- /.control-sidebar-menu -->
-
-          </div><!-- /.tab-pane -->
-          <!-- Stats tab content -->
-          <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div><!-- /.tab-pane -->
-          <!-- Settings tab content -->
-          <div class="tab-pane" id="control-sidebar-settings-tab">
-            <form method="post">
-              <h3 class="control-sidebar-heading">General Settings</h3>
-              <div class="form-group">
-                <label class="control-sidebar-subheading">
-                  Report panel usage
-                  <input type="checkbox" class="pull-right" checked>
-                </label>
-                <p>
-                  Some information about this general settings option
-                </p>
-              </div><!-- /.form-group -->
-            </form>
-          </div><!-- /.tab-pane -->
-        </div>
-      </aside><!-- /.control-sidebar -->
-      <!-- Add the sidebar's background. This div must be placed
-           immediately after the control sidebar -->
-      <div class="control-sidebar-bg"></div>
-      
-      
-      <!-- Control Sidebar -->
-      <aside class="control-SearchSideBar control-sidebar-dark">
-      
-          <!-- Home tab content -->
-          <div class="tab-pane active" id="control-sidebar-home-tab">
-            
-            <form action="#" method="get" class="sidebar-form">
-            <div class="input-group">
-              <input type="text" name="q" class="form-control" placeholder="Search...">
-              <span class="input-group-btn">
-                <button type="submit" name="search" id="search-btn" class="btn btn-flat"><i class="fa fa-search"></i></button>
-              </span>
-            </div>
-          </form>
-          </div><!-- /.tab-pane -->
-          
-      </aside><!-- /.control-sidebar -->
-      <!-- Add the sidebar's background. This div must be placed
-           immediately after the control sidebar -->
-      <div class="control-sidebar-bg"></div>
-      
-      
-      
-    </div><!-- ./wrapper -->
-
-    <!-- REQUIRED JS SCRIPTS -->
-
-    <!-- jQuery 2.1.4 -->
-    <script src="<spring:url value="/resources/UI/plugins/jQuery/jQuery-2.1.4.min.js"/>"></script>
-    <!-- Bootstrap 3.3.5 -->
-    <script src="<spring:url value="/resources/UI/bootstrap/js/bootstrap.min.js"/>"></script>
-    <!-- AdminLTE App -->
-    <script src="<spring:url value="/resources/UI/dist/js/app.js"/>"></script>
-
-    <!-- Optionally, you can add Slimscroll and FastClick plugins.
-         Both of these plugins are recommended to enhance the
-         user experience. Slimscroll is required when using the
-         fixed layout. -->
-         
-         
-   	<script src="<spring:url value="/resources/JS/lightbox.js"/>"></script>
+	<script src="<spring:url value="/resources/JS/lightbox.js"/>"></script>
 	
 	<script>
-	    lightbox.option({
-	      'resizeDuration': 400,
-	      'wrapAround': true
-	    });
+    lightbox.option({
+      'resizeDuration': 400,
+      'wrapAround': true
+    });
 	</script>
 	
 	<script type="text/javascript">
@@ -1772,7 +1297,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var map = L.map('map', {editable: true}).setView([39.505, -77.09], 6);
 
 		/* base layers */
-		/* var mapBoxLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
+		var mapBoxLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 			    maxZoom: 18,
 			    id: 'sudheerpitchika.ciep2uaqn0ituskkmmyu1j6ps',
 			    accessToken: 'pk.eyJ1Ijoic3VkaGVlcnBpdGNoaWthIiwiYSI6ImNpZXAydWJlcTBpeWNzMm0ycW10OTVpbmEifQ.z2zCTc_8_5R9JBxM1eFpmg'
@@ -1807,7 +1332,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		});
 		var Esri_WorldGrayCanvasLayer = L.tileLayer('http://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
 			maxZoom: 16
-		}); */
+		});
 
 
 		
@@ -1823,11 +1348,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		//g_satellite.setOpacity(0.6);
 		//g_terrain.setOpacity(0.6);
 		
-//		map.addLayer(mapquestLayer);
-		
+		map.addLayer(mapquestLayer);
 		
 		/* add base layers to layers group */
-/* 		var roadmap =L.layerGroup([g_roadmap]);
+		var roadmap =L.layerGroup([g_roadmap]);
 		var satellite = L.layerGroup([g_satellite]);
 		var terrain =L.layerGroup([g_terrain]);
 		var mapBox = L.layerGroup([mapBoxLayer]);
@@ -1842,12 +1366,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var Esri_WorldPhysical = L.layerGroup([Esri_WorldPhysicalLayer]);
 		var Esri_OceanBasemap = L.layerGroup([Esri_OceanBasemapLayer]);
 		var Esri_NatGeoWorldMap = L.layerGroup([Esri_NatGeoWorldMapLayer]);
-		var Esri_WorldGrayCanvas = L.layerGroup([Esri_WorldGrayCanvasLayer]); */
+		var Esri_WorldGrayCanvas = L.layerGroup([Esri_WorldGrayCanvasLayer]);
 
 /* 		var HERE_normalDayTransit = L.layerGroup([HERE_normalDayTransitLayer]); */
 		
 		/* add them to display list with radio button */
-		/* var layers = {
+		var layers = {
 			"Roadmap" : roadmap,
 			"Satellite" : satellite,
 			"Terrain" : terrain,
@@ -1864,20 +1388,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			"OceanBasemap" : Esri_OceanBasemap,
 			"NatGeoWorldMap" : Esri_NatGeoWorldMap,
 			"WorldGrayCanvas" : Esri_WorldGrayCanvas,
- 		//	"normalDayTransit" : HERE_normalDayTransit, 
-		}; */
+/* 			"normalDayTransit" : HERE_normalDayTransit, */
+		};
 
 		//add layer control
 /* 		var controls = L.control.layers(layers);		
-		controls.addTo(map); */		
+		controls.addTo(map);
+ */		
 
  		getBaseLayers();
-		
-		
+ 
  		var	drawnItems = L.featureGroup().addTo(map);
  		drawnItems.on('click', function(e) { layerClicked(e.layer); });
- 		
- 		
 // 		drawnItems.on('mouseover', function(e) { layerMouseover(e.layer); });
 // 		drawnItems.on('mouseout', function(e) { layerMouseout(e.layer); });
 
@@ -1970,7 +1492,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			    featureGroup: drawnItems
 			   }
 			  });
-			 // map.addControl(drawControl);
+			  map.addControl(drawControl);
 			  
 			  
 		  /* save properties for shapes from pop up */
@@ -2318,6 +1840,5 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		
 	</script>
 
-      
-  </body>
+</body>
 </html>
