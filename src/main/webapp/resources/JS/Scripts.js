@@ -414,7 +414,7 @@ function getDrawings(inUrl, callback){
 		success:function(message){
 			// call back upon successful service call
 			console.log("Success: "+message);
-			if(message.length>0)
+			//if(message.length>0)
 				callback(message);
 		},
 	    failure:function(message){
@@ -559,7 +559,7 @@ function submitSharingRequest(inUrl, shareDrawingId, shareWithGroups, shareWithM
 
 
 // get the drawings shared to the user by sending shared drawing Ids, (got these ids from getUserGroupsAndShareDrawings method)
-function getSharedDrawings(inUrl,sharedIdsUnique,callback){
+function getSharedDrawingsCall(inUrl,sharedIdsUnique,callback){
 	
 	console.log(sharedIdsUnique);
 	var url = inUrl+"/drawshapescontroller/getDrawingsList";
@@ -586,3 +586,60 @@ function getSharedDrawings(inUrl,sharedIdsUnique,callback){
 	    }
 	});
 }
+
+function createUser(inUrl, firstName, lastName, title, email, userId, password, callback){
+	
+	var url = inUrl+"/logincontroller/createUser";
+// ,"deleted":0
+	var json = {"userId":userId,"password": password, "userType": "", "firstName":firstName, "lastName": lastName, "title":title,"email":email};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: user created "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: user NOT created"+message);
+	    }
+	});
+}
+
+
+
+function deleteUsers(inUrl, userIds, callback){
+	
+	var url = inUrl+"/logincontroller/deleteUsers";
+
+	var json = userIds;
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: deleted users "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: users NOT deleted "+message);
+	    }
+	});
+}
+

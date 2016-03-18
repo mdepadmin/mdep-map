@@ -72,12 +72,17 @@ $.AdminLTE.options = {
     selector: ".control-sidebar",
     //Enable slide over content
     slide: true
-  },// S*I*D*E B*A*R
+  },
   controlSearchSideBarOptions: {
 	     toggleBtnSelector: "[data-toggle='control-SearchSideBar']",
 	     selector: ".control-SearchSideBar",
 	     slide: true
 	  },
+  controlShareSideBarOptions: {
+	     toggleBtnSelector: "[data-toggle='control-ShareSideBar']",
+	     selector: ".control-ShareSideBar",
+	     slide: true
+	  },	  
   //Box Widget Plugin. Enable this plugin
   //to allow boxes to be collapsed and/or removed
   enableBoxWidget: true,
@@ -284,6 +289,12 @@ function _init() {
             $(".content-wrapper, .right-side").css('min-height', controlSearchSideBar.height());
         }
         
+        var controlShareSideBar = $($.AdminLTE.options.controlShareSideBarOptions.selector);
+        if (typeof controlSearchSideBar !== "undefined") {
+          if (controlShareSideBar.height() > postSetWidth)
+            $(".content-wrapper, .right-side").css('min-height', controlShareSideBar.height());
+        }
+        
       }
     },
     fixSidebar: function () {
@@ -462,11 +473,6 @@ function _init() {
       //The toggle button
       var btn = $(o.toggleBtnSelector);
       
-      
-      var m = $.AdminLTE.options.controlSearchSideBarOptions;
-      var SearchSideBar = $(m.selector);
-      var SearchSideBarBtn = $(m.toggleBtnSelector);
-
       //Listen to the click event
       btn.on('click', function (e) {
         e.preventDefault();
@@ -480,6 +486,10 @@ function _init() {
         }
       });
       
+      var m = $.AdminLTE.options.controlSearchSideBarOptions;
+      var SearchSideBar = $(m.selector);
+      var SearchSideBarBtn = $(m.toggleBtnSelector);
+      
       SearchSideBarBtn.on('click', function (e) {
           e.preventDefault();
           //If the sidebar is not open
@@ -489,6 +499,23 @@ function _init() {
             _this.open(SearchSideBar, m.slide);
           } else {
             _this.close(SearchSideBar, m.slide);
+          }
+        });
+      
+      
+      var n = $.AdminLTE.options.controlShareSideBarOptions;
+      var ShareSideBar = $(n.selector);
+      var ShareSideBarBtn = $(n.toggleBtnSelector);
+      
+      ShareSideBarBtn.on('click', function (e) {
+          e.preventDefault();
+          //If the sidebar is not open
+          if (!ShareSideBar.hasClass('control-sidebar-open')
+                  && !$('body').hasClass('control-sidebar-open')) {
+            //Open the sidebar
+            _this.open(ShareSideBar, n.slide);
+          } else {
+            _this.close(ShareSideBar, n.slide);
           }
         });
 

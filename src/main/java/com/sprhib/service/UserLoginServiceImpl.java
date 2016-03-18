@@ -1,5 +1,6 @@
 package com.sprhib.service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.postgresql.util.PSQLException;
@@ -30,6 +31,16 @@ public class UserLoginServiceImpl implements UserLoginService {
 	@Override
 	public List<UserLogin> getUserList() throws PSQLException {
 		return userLoginDAO.getUserList();
+	}
+
+	@Override
+	public boolean createUser(UserLogin newuser) throws PSQLException {
+		return userLoginDAO.createUser(newuser);
+	}
+
+	@Override
+	public boolean deleteUsers(ArrayList<String> userIdList) throws PSQLException {
+		return userLoginDAO.deleteUsers(userIdList);
 	}
 
 }

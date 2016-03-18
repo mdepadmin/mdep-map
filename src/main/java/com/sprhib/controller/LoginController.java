@@ -1,5 +1,6 @@
 package com.sprhib.controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
@@ -62,6 +63,36 @@ public class LoginController {
 		}
 	}
 	
+	
+	
+		// create new user
+		@RequestMapping(value="/createUser", method=RequestMethod.POST, 
+				produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public boolean createUser(@RequestBody UserLogin newuser, HttpServletRequest request) throws PSQLException {
+			
+			boolean returnMessage = false;
+			newuser.setUserType("U");
+			newuser.setDeleted(0);
+			// save the user details in DB
+			returnMessage =	loginService.createUser(newuser);
+
+			return returnMessage;			
+		}
+		
+		// create new user
+		@RequestMapping(value="/deleteUsers", method=RequestMethod.POST, 
+				produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public boolean deleteUsers(@RequestBody ArrayList<String> userIdList, HttpServletRequest request) throws PSQLException {
+			
+			boolean returnMessage = false;
+			System.out.println(userIdList);
+			// soft delete users
+			returnMessage =	loginService.deleteUsers(userIdList);
+			
+			return returnMessage;			
+		}
 	
 	// logout request
 	@RequestMapping(value="/logout", method=RequestMethod.POST, 

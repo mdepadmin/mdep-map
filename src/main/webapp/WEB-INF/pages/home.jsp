@@ -195,6 +195,83 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				checkCredentials(url,loginCallback_success, loginCallback_failure);
 			});
  			
+ 			// check user credentials upon 'login' click
+ 			$('#anchorLogin').click(function(event){
+ 				event.preventDefault();
+				var url = "${pageContext.request.contextPath}";
+				userId = $('#userId').val();
+				checkCredentials(url,userLoginCallback_success, userLoginCallback_failure);
+			});
+ 			
+ 			function userLoginCallback_success(user){
+ 				userId = user.userId;
+ 				userType = user.userType;
+ 				
+ 				$('#profileMenuBody').hide();
+ 				$('#profileMenuHeader').show();
+ 				
+ 				$('#anchorLogin').hide();
+ 				$('#anchorLogout').show();
+
+				$("#loginHelpAnchor").hide();
+				$("#userProfileAnchor").show();
+				
+	 			// display the image
+				var url = "${pageContext.request.contextPath}";
+				var imagePath = url+'/'+'resources/UI/dist/img/user2-160x160.jpg';
+				console.log(imagePath);
+				
+			    $('#userImgBarDropdownId').attr('src',imagePath);
+			    $('#userNameBarDropdownDivId').html(userId);
+
+				$('#userNamePId').text(userId);
+				$('#userProfileImageId').attr('src',imagePath);
+ 				
+				$('#userId').empty();
+				$('#password').empty();
+
+				
+ 				 if(userType=="A"){
+ 					console.log("admin");
+ 					$('#adminSettingsGearAnchor').show();
+ 				}
+
+ 				getDrawings(url,getDrawingsCallback);
+ 			}
+ 			function userLoginCallback_failure(user){
+ 				console.log('login failed');
+ 			}
+ 			
+ 			// logout link click action, call service
+ 			$('#anchorLogout').on("click",function(event){
+ 			    event.preventDefault();
+				var url = "${pageContext.request.contextPath}";
+				logoutUser(url,userLogoutCallback); 
+				console.log('anchorLogout');
+			});
+ 			
+ 			function userLogoutCallback(){
+ 				$('#profileMenuBody').show();
+ 				$('#profileMenuHeader').hide();
+ 				
+ 				$('#anchorLogin').show();
+ 				$('#anchorLogout').hide();
+ 				
+ 				$("#loginHelpAnchor").show();
+				$("#userProfileAnchor").hide();
+				
+ 				var url = "${pageContext.request.contextPath}";
+				var imagePath = url+'/'+'resources/UI/dist/img/avatar5.png';
+				
+			    $('#userImgBarDropdownId').attr('src',imagePath);
+ 				$('#userNameBarDropdownDivId').html('Guest User');
+
+				$('#userNamePId').text('Guest User');
+				$('#userProfileImageId').attr('src',imagePath);
+				
+				$('#adminSettingsGearAnchor').hide();
+ 			}
+ 			
  			// upon successful login
  			// ui settings
  			function loginCallback_success(user){
@@ -308,82 +385,79 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 			
 			
-			// add sharing feed details to the slide upon successful service call
-			function addSharingFeed(){
-				
-				var userGroupIds = [];
-				for(var i=0; i < userGroupsDetails.length; i++){
-					var group = userGroupsDetails[i];
-					userGroupIds.push(group.groupId);
-				}
-				
-				// shared with groups the user is part of
-				var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
-				// shared directly to the user
-				var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
-				
-				// clear feed div and add the group sharing feed
-				$('#sharingFeedDiv').empty();
-				for(var i=0; i < groupShared.length; i++){
-					var shared = groupShared[i];
-					var common =  $(shared.sharedWithGroups).filter(userGroupIds);
-					
-					var commonGroupsString = "";
-					for(var i=0; i< common.length; i++)
-						commonGroupsString = commonGroupsString+"  "+common[i];
-					
-					$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
-					$("#sharingFeedDiv").append("<div> Shared With Group(s): "+commonGroupsString+"</div> <br/>");
-					$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
-				    
-				}
-				// drawings shared directly to the user
-				$("#sharingFeedDiv").append("<br/><hr/><br/>");
-				for(var i=0; i < memberShared.length; i++){		
-					var shared = memberShared[i];
-					
-					$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
-					$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
-				    
-				}
-			}
-
-			// toggle share slide
-			$('.slideout-share-toggle').on('click', function(event){
+			
+			$('#groupsTabAnchor').click(function(event){
 				event.preventDefault();
-				shareSlideOpen = !shareSlideOpen;
-				if(shareSlideOpen){
-					addDrawingsAndGroupsListToDropdown();
-				}
-		    	var shareSlide = $('.slideout-share');
-		    	toggleSlide(shareSlide);		    	
-		    });
-
-			// add saved drawings to the drop downs, and the groups the the user is part of to the slide
-			// user can select any drawing and groups, members to share the drawing
-			function addDrawingsAndGroupsListToDropdown(){
-	
-				$('#drawingShareDropdown').empty();
-				var sel = document.getElementById('drawingShareDropdown');
-				for(var i=0; i<loadedDrawings.length;i++){
-					var op = new Option();
-					op.value = i;
-					op.text = "Drawing-"+i;
-					sel.options.add(op);  
-				}
 				
-				$('#userGroupsDiv').empty();
-				for(var i=0; i<userGroupsDetails.length;i++){		
-					var group = userGroupsDetails[i];
-					var members = group.groupMembers;
-					
-					$("#userGroupsDiv").append("<div>  <input type='checkbox' id='groupList-"+i+"'>  "+group.groupName+"</div>");
-					$('#userGroupsDiv').append("<ul id='groupListUl"+i+"'></ul>");
-				    for (var j = 0; j < members.length; j++) {
-				          $("#groupListUl"+i).append("<li> <input type='checkbox' id='groupMember-"+i+"-"+j+"'> "+members[j]+"</li>");
-				    }
+				var url = "${pageContext.request.contextPath}";
+				getUsersList(url,getUsersListCallback);
+			});
+			
+			$('#usersTabAnchor').click(function(event){
+				event.preventDefault();
+				
+				var url = "${pageContext.request.contextPath}";
+				getUsersList(url,getUsersListCallbackForUsersTab);
+			});
+			
+			function getUsersListCallbackForUsersTab(userList){
+				
+				$("#existingUsersListUl").empty();
+				var ul = document.getElementById("existingUsersListUl");
+				
+				if(userList.length > 0){
+					var count = userList.length;
+					for(var i = 0; i < count; i++){
+						var user = userList[i];
+						var $ctrl = $('<label />').html(user.userId)
+                        .prepend($('<input/>').attr({ type: 'checkbox', name: 'existingUsers', value: user.userId, id: 'existingUsers'+i, checked:false}));
+           
+			            var li = document.createElement("li");
+			            li.className = 'list-group-item';
+			            $ctrl.appendTo(li);
+			            ul.appendChild(li);
+					}
+					addNewDeleteButton("button","Delete",ul);
 				}
 			}
+			
+			
+			// add a button dynamically to ul
+			function addNewDeleteButton(type, name, ul){
+				    var element = document.createElement("input"); 
+				    element.type = type;
+				    element.value = name; 
+				    element.name = name;
+				    element.className='btn btn-default';
+				    
+				    var ulist = document.getElementById("existingUsersListUl"); //replace with jquery
+				    var li = document.createElement("li");
+				    li.appendChild(element);
+					ulist.appendChild(li);
+					
+				    element.onclick = function() {
+				        deleteUsersButtonClickCallback();
+				    };
+			}
+			
+			function deleteUsersButtonClickCallback(callback){
+				var userIds = [], opt;
+				
+				$('input[type=checkbox][name=existingUsers]').each(function () {
+					 if(this.checked){
+						 userIds.push(this.value);
+					 }
+				 });
+				var url = "${pageContext.request.contextPath}";
+				console.log(userIds);
+				if(userIds.length > 0)
+					deleteUsers(url,userIds, deleteUsersCallback);
+			}
+			
+			function deleteUsersCallback(message){
+					
+			}
+			
 			
 			// upon clicking share button to save it in database
 			$('#submitSharingButton').click(function(event){
@@ -453,15 +527,39 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						 }
 					 });
 					 console.log (selectedUsers);
-					 var url = "${pageContext.request.contextPath}";
-					 createNewGroup(url, groupName, selectedUsers, createNewGroupCallback);
+					 if(selectedUsers.length>0){
+						 var url = "${pageContext.request.contextPath}";
+						 createNewGroup(url, groupName, selectedUsers, createNewGroupCallback);
+					 }
 				 }
 			 });
 			
 			 function createNewGroupCallback(message){
-				 var groupSlide = $('.slideout-creategroup');
-		    	 toggleSlide(groupSlide);
+				 /* var groupSlide = $('.slideout-creategroup');
+		    	 toggleSlide(groupSlide); */
 			 }
+			 
+			 
+			 $('#createUserButton').click(function(event){
+				 
+				 var url = "${pageContext.request.contextPath}";
+				 var firstName = $('#newuserFirstName').val();
+				 var lastName = $('#newuserLastName').val();
+				 var title = $('#newuserTitle').val();
+				 var email = $('#newuserEmail').val();
+				 var userId = $('#newuserUserId').val();
+				 var password = $('#newuserPassword').val();
+				
+				 if(firstName.length > 0 && lastName.length > 0 && title.length > 0 && email.length > 0 && userId.length > 0 && password.length > 0)
+					 createUser(url, firstName, lastName, title, email, userId, password, createUserSuccessCallback)
+			 });
+			 
+			 function createUserSuccessCallback(message){
+				 
+			 }
+			 
+			 
+			 
 			 
 			 // upon clicking save drawing button
 			$('#saveDrawingsAnchorId').click(function(event){
@@ -519,63 +617,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				
 			});
 
-			function getUserGroupsAndShareDrawingsCallback(msg){
-				
-			}
 			
 			
-			$('#test1').click(function(event){
-				var url = "${pageContext.request.contextPath}";
-				
-				var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
-				var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
-				var sharedIds=[];
-				
-				if(groupShared.length>0){
-					for(var i=0; i< groupShared.length; i++){
-						var shared = groupShared[i];
-						sharedIds.push(shared.sharedDrawingId);
-					}
-				}
-				
-				if(memberShared.length>0){
-					for(var i=0; i< memberShared.length; i++){
-						var shared = memberShared[i];
-						sharedIds.push(shared.sharedDrawingId);
-					}
-				}
-				
-				var sharedIdsUnique = [];
-				$.each(sharedIds, function(i, el){
-				    if($.inArray(el, sharedIdsUnique) === -1) sharedIdsUnique.push(el);
-				});
-				
-				getSharedDrawings(url,sharedIdsUnique,getSharedDrawingsCallback);
-				
-			});
+
 			
-			// once shared drawings are fetched from db, add them to the dropdown
-			function getSharedDrawingsCallback(drawings){
-				sharedDrawings = drawings;
 
-				if (sharedDrawings.length > 1) {
-					var sel = document.createElement("select");
-					sel.id = 'sharedDrawingsDropDown';
-
-					for (var i = 0; i < sharedDrawings.length; i++) {
-						var op = new Option();
-						op.value = i;
-						op.text = "Shared Drawing-" + i;
-						sel.options.add(op);
-					}
-					$('#sharedDrawingsListDiv').html(sel);
-				}
-
-				/* if (loadedDrawings.length > 0) {
-					var shapes = loadedDrawings[0];
-					showDrawings(true, shapes);
-				} */
-			}
 			
 			// display any shared drawing when selected
 			$(document).on('change', '#sharedDrawingsDropDown', function() {
@@ -601,7 +647,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			// 'new drawing' button click
 			$('#newDrawingButtonId').click(function(event){
 
-				// clear the drawings currently being displayed
+				/* // clear the drawings currently being displayed
 				clearDrawings();
 				
 				// add user drawings to multi select
@@ -625,7 +671,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					// add a dynamic button
 					// click this button to include the selected drawings in the current drawing 
 					addNewButton("button","Add", sel);
-				}
+				} */
 			});
 			
 			$('#newDrawingAnchorId').click(function(event){
@@ -797,12 +843,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				
 			    
 			    element.onclick = function() {
-			        buttonClickCallback(includeInNewDrawing);
+			        addDrawingsButtonClickCallback(includeInNewDrawing);
 			    };
 		}
 		
 		// add the selected drawings to the included drawings list upon clicking the button 
-		function buttonClickCallback(callback){
+		function addDrawingsButtonClickCallback(callback){
 			var opts = [], opt;
 			
 
@@ -874,10 +920,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		
 		// add fetched drawings (saved previously by the user) to the dropdown list
 		function getDrawingsCallback(drawings) {
-			loadedDrawings = drawings;
-			drawingsLoaded = true;
 			
-			if (loadedDrawings.length > 0) {
+			if (drawings.length > 0) {
+				loadedDrawings = drawings;
+				drawingsLoaded = true;
+				
 				var sel = document.createElement("select");
 				sel.id = 'dropDown';
 				sel.multiple="multiple";
@@ -894,6 +941,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 				$('#userDrawingsListDiv').html(sel);
 			}
+			console.log('calling getUserGroupsAndShareDrawingsCallback');
+			var url = "${pageContext.request.contextPath}";
+			getUserGroupsAndShareDrawings(url,getUserGroupsAndShareDrawingsCallback);
 			
 
 			/* if (loadedDrawings.length > 0) {
@@ -901,7 +951,148 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				showDrawings(true, shapes);
 			} */
 		}
+		
+		function getUserGroupsAndShareDrawingsCallback(msg){
+			addDrawingsAndGroupsListToDropdown();
+			getSharedDrawings();
+			addSharingFeed();
+		}
+		
+		
+		// add sharing feed details to the slide upon successful service call
+		function addSharingFeed(){
+			
+			var userGroupIds = [];
+			for(var i=0; i < userGroupsDetails.length; i++){
+				var group = userGroupsDetails[i];
+				userGroupIds.push(group.groupId);
+			}
+			
+			// shared with groups the user is part of
+			var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
+			// shared directly to the user
+			var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
+			
+			// clear feed div and add the group sharing feed
+			$('#sharingFeedDiv').empty();
+			for(var i=0; i < groupShared.length; i++){
+				var shared = groupShared[i];
+				var common =  $(shared.sharedWithGroups).filter(userGroupIds);
+				
+				var commonGroupsString = "";
+				for(var i=0; i< common.length; i++)
+					commonGroupsString = commonGroupsString+"  "+common[i];
+				
+				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+				$("#sharingFeedDiv").append("<div> Shared With Group(s): "+commonGroupsString+"</div> <br/>");
+				$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
+			    
+			}
+			// drawings shared directly to the user
+			$("#sharingFeedDiv").append("<br/><hr/><br/>");
+			for(var i=0; i < memberShared.length; i++){		
+				var shared = memberShared[i];
+				
+				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+				$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
+			    
+			}
+		}
+		
+		
+		/*
+		RECURSIVE FUNCTION TO GET ALL INCLUDED DRAWINGS
+		*/
+		function getSharedDrawings(){
+			var url = "${pageContext.request.contextPath}";
+			
+			var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
+			var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
+			var sharedIds=[];
+			
+			if(groupShared.length>0){
+				for(var i=0; i< groupShared.length; i++){
+					var shared = groupShared[i];
+					sharedIds.push(shared.sharedDrawingId);
+				}
+			}
+			
+			if(memberShared.length>0){
+				for(var i=0; i< memberShared.length; i++){
+					var shared = memberShared[i];
+					sharedIds.push(shared.sharedDrawingId);
+				}
+			}
+			
+			var sharedIdsUnique = [];
+			$.each(sharedIds, function(i, el){
+			    if($.inArray(el, sharedIdsUnique) === -1) sharedIdsUnique.push(el);
+			});
+			
+			getSharedDrawingsCall(url,sharedIdsUnique,getSharedDrawingsCallback);
+			
+		}
+		
+		// once shared drawings are fetched from db, add them to the dropdown
+		function getSharedDrawingsCallback(drawings){
+			sharedDrawings = drawings;
 
+			if (sharedDrawings.length > 0) {
+				var sel = document.createElement("select");
+				sel.id = 'sharedDrawingsDropDown';
+
+				for (var i = 0; i < sharedDrawings.length; i++) {
+					var op = new Option();
+					op.value = i;
+					op.text = "Shared Drawing-" + i;
+					sel.options.add(op);
+				}
+				$('#sharedDrawingsListDiv').html(sel);
+			}
+
+			/* if (loadedDrawings.length > 0) {
+				var shapes = loadedDrawings[0];
+				showDrawings(true, shapes);
+			} */
+		}
+		
+		// toggle share slide
+		$('.slideout-share-toggle').on('click', function(event){
+			event.preventDefault();
+			shareSlideOpen = !shareSlideOpen;
+			if(shareSlideOpen){
+				addDrawingsAndGroupsListToDropdown();
+			}
+	    	var shareSlide = $('.slideout-share');
+	    	toggleSlide(shareSlide);		    	
+	    });
+
+		// add saved drawings to the drop downs, and the groups the the user is part of to the slide
+		// user can select any drawing and groups, members to share the drawing
+		function addDrawingsAndGroupsListToDropdown(){
+
+			$('#drawingShareDropdown').empty();
+			var sel = document.getElementById('drawingShareDropdown');
+			if(typeof(loadedDrawings) !=  "undefined")
+			for(var i=0; i<loadedDrawings.length;i++){
+				var op = new Option();
+				op.value = i;
+				op.text = "Drawing-"+i;
+				sel.options.add(op);  
+			}
+			
+			$('#userGroupsDiv').empty();
+			for(var i=0; i<userGroupsDetails.length;i++){		
+				var group = userGroupsDetails[i];
+				var members = group.groupMembers;
+				
+				$("#userGroupsDiv").append("<div>  <input type='checkbox' id='groupList-"+i+"'>  "+group.groupName+"</div>");
+				$('#userGroupsDiv').append("<ul id='groupListUl"+i+"'></ul>");
+			    for (var j = 0; j < members.length; j++) {
+			          $("#groupListUl"+i).append("<li> <input type='checkbox' id='groupMember-"+i+"-"+j+"'> "+members[j]+"</li>");
+			    }
+			}
+		}
 		
 		// drop down change action
 		$(document).on('change', '#dropDown', function() {
@@ -1008,6 +1199,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					var includedId = includeIds[j];
 
 					// get the shapes from the loaded drawings for the included id
+					if(typeof(loadedDrawings) !=  "undefined")
 					for(var i=0; i<loadedDrawings.length; i++){
 						var drawings = loadedDrawings[i];
 						if(drawings.hasOwnProperty('drawingId')){
@@ -1397,55 +1589,56 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </li>
                 </ul>
               </li>
+              
               <!-- User Account Menu -->
               <li class="dropdown user user-menu">
                 <!-- Menu Toggle Button -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   <!-- The user image in the navbar-->
-                  <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="user-image" alt="User Image">
+                  <img id="userImgBarDropdownId" src="<spring:url value="/resources/UI/dist/img/avatar5.png"/>" class="user-image" alt="User Image">
                   <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                  <span class="hidden-xs">Alexander Pierce</span>
+                  <span class="hidden-xs" id="userNameBarDropdownDivId">Guest User</span>
                 </a>
+                
                 <ul class="dropdown-menu">
                   <!-- The user image in the menu -->
-                  <li class="user-header">
-                    <img src="<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>" class="img-circle" alt="User Image">
-                    <p>
+                  <li id="profileMenuHeader" class="user-header" style="display: none">
+                    <img id="userProfileImageId" src="" class="img-circle" alt="User Image">
+                    <p id="userNamePId">
                       Alexander Pierce - Web Developer
-                      <small>Member since Nov. 2012</small>
                     </p>
+                    <!-- <small>Member</small> -->
                   </li>
                   <!-- Menu Body -->
-                  <li class="user-body">
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Followers</a>
-                    </div>
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Sales</a>
-                    </div>
-                    <div class="col-xs-4 text-center">
-                      <a href="#">Friends</a>
-                    </div>
-                  </li>
-                  <!-- Menu Footer-->
-                  <li class="user-footer">
+                  <li id="profileMenuBody" class="user-body">
+                 		<form class="form" id="formLogin" class="pull-right"> 
+	                  		<input type="text" id="userId" placeholder="Username" />
+							<input type="password" id="password" placeholder="Password" /><!-- value="e"  -->
+						</form>
+				  </li>
+                  <!-- Menu Footer-->                  
+                  <li id="profileMenuFooter" class="user-footer">
                     <div class="pull-left">
-                      <a href="#" class="btn btn-default btn-flat">Profile</a>
+                      <a href="#" class="btn btn-default btn-flat" id="loginHelpAnchor">Help?</a>
+                      <a href="#" class="btn btn-default btn-flat" style="display:none" id="userProfileAnchor">Profile</a>
                     </div>
-                    <div class="pull-right">
-                      <a href="#" class="btn btn-default btn-flat">Sign out</a>
+                    <div id="logInOutAnchorDivId" class="pull-right">
+                      <a href="#" class="btn btn-default btn-flat" id="anchorLogin">Sign In</a>
+                      <a href="#" class="btn btn-default btn-flat" style="display:none" id="anchorLogout">Sign Out</a>                      
                     </div>
                   </li>
                 </ul>
               </li>
               <!-- Control Sidebar Toggle Button -->
               <li>
-                <a href="#" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                <a href="#" id="adminSettingsGearAnchor" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+  <!--               <a href="#" id="adminSettingsGearAnchor" style="display:none" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a> -->
               </li>
             </ul>
           </div>
         </nav>
       </header>
+      
       <!-- Left side column. contains the logo and sidebar -->
       <aside class="main-sidebar">
 
@@ -1488,6 +1681,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </li>
             
             <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Places</span></a></li>
+            <li><a href="#" id="shareAnchorId" data-toggle='control-ShareSideBar'><i class="fa fa-share-alt"></i> <span>Share Drawings</span></a></li>
             
             <li class="treeview">
               <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>Drawings List</span> <i class="fa fa-angle-left pull-right"></i></a>
@@ -1537,14 +1731,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				<!-- <li>  <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/> </li> -->
 				<!-- <li>  <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/> </li>
 				<li>  <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/> </li> -->
-				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" style="visibility:hidden"/> </li>
+				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" /> </li> <!-- style="visibility:hidden" -->
 				<li>  <input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/> </li>
 				<li>  <input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/> </li>
 				
 				
 				<!-- <li>  <div id="dispDrawingsCheckBoxDiv"></div> </li>
 				<li>  <div id="userDrawingsListDiv"></div> </li> -->
-				<li>  <div id="sharedDrawingsListDiv"></div> </li>
+				<!-- <li>  <div id="sharedDrawingsListDiv"></div> </li> -->
               </ul>
             </li>
             
@@ -1591,35 +1785,35 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		<!-- create group slide -->
 		<div class="slideout-creategroup open">
 			<h3>Search <a href="#" class="slideout-creategroup-toggle">×</a></h3>
-			<input type="text" id="groupNameTextBox" value=""/>
+			<!-- <input type="text" id="groupNameTextBox" value=""/>
 			<input type="button" id="createNewGroupButtonId" class="button" value="Create"/>
 			
 			<div id="userListDiv" class="searchResults">
 				Users<br/>
-			</div>	
+			</div> -->	
 		</div>
 
 		<!-- share slide -->
 		<div class="slideout-share open">
 			<h3>Share <a href="#" class="slideout-share-toggle">×</a></h3>
-			<input type="button" id="submitSharingButton" class="button" value="Share"/>
+			<!-- <input type="button" id="submitSharingButton" class="button" value="Share"/>
 			<br/><br/>
 			<select id ="drawingShareDropdown">
 			</select>
 			<br/><br/>
 			<div id="userGroupsDiv" class="searchResults">
 				Groups <br/>
-			</div>
+			</div> -->
 		</div>
 
 		<!-- sharing feed slide -->
-		<div class="slideout-sharingFeed open">
+		<!-- <div class="slideout-sharingFeed open">
 			<h3>Share Feed<a href="#" class="slideout-sharingFeed-toggle">×</a></h3>
 			<br/><br/>
 			<div id="sharingFeedDiv" class="searchResults">
 				Groups <br/>
 			</div>
-		</div>
+		</div> -->
 
 		<div class="slideout-menu open">
 			<h3>Login <a href="#" class="slideout-menu-toggle">×</a></h3>
@@ -1654,17 +1848,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved.
       </footer>
 
-      <!-- Control Sidebar -->
-      <aside class="control-sidebar control-sidebar-dark">
+
+	<!-- maps, notices, groups, users, templates -->
+    
+	<aside class="control-sidebar control-sidebar-dark">
         <!-- Create the tabs -->
         <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-          <li class="active"><a href="#control-sidebar-home-tab" data-toggle="tab"><i class="fa fa-home"></i></a></li>
-          <li><a href="#control-sidebar-settings-tab" data-toggle="tab"><i class="fa fa-gears"></i></a></li>
+          <li class="active"><a href="#control-sidebar-maps-tab" data-toggle="tab"><i class="fa fa-map"></i></a></li>
+          <li><a href="#control-sidebar-notices-tab" data-toggle="tab"><i class="fa fa-edit"></i></a></li>
+          <li><a href="#control-sidebar-users-tab" data-toggle="tab" id="usersTabAnchor"><i class="fa fa-user"></i></a></li>
+          <li><a href="#control-sidebar-groups-tab" data-toggle="tab" id="groupsTabAnchor"><i class="fa fa-group"></i></a></li>
+          <li><a href="#control-sidebar-templates-tab" data-toggle="tab"><i class="fa fa-clone"></i></a></li>
         </ul>
+        
         <!-- Tab panes -->
         <div class="tab-content">
-          <!-- Home tab content -->
-          <div class="tab-pane active" id="control-sidebar-home-tab">
+        
+          <!-- Maps tab content -->
+          <div class="tab-pane active" id="control-sidebar-maps-tab">
             <h3 class="control-sidebar-heading">Recent Activity</h3>
             <ul class="control-sidebar-menu">
               <li>
@@ -1677,27 +1878,47 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </a>
               </li>
             </ul><!-- /.control-sidebar-menu -->
-
-            <h3 class="control-sidebar-heading">Tasks Progress</h3>
-            <ul class="control-sidebar-menu">
-              <li>
-                <a href="javascript::;">
-                  <h4 class="control-sidebar-subheading">
-                    Custom Template Design
-                    <span class="label label-danger pull-right">70%</span>
-                  </h4>
-                  <div class="progress progress-xxs">
-                    <div class="progress-bar progress-bar-danger" style="width: 70%"></div>
-                  </div>
-                </a>
-              </li>
-            </ul><!-- /.control-sidebar-menu -->
-
           </div><!-- /.tab-pane -->
-          <!-- Stats tab content -->
-          <div class="tab-pane" id="control-sidebar-stats-tab">Stats Tab Content</div><!-- /.tab-pane -->
-          <!-- Settings tab content -->
-          <div class="tab-pane" id="control-sidebar-settings-tab">
+
+
+		  <!-- Notices tab content -->
+          <div class="tab-pane" id="control-sidebar-notices-tab">Notices Tab Content</div><!-- /.tab-pane -->
+          
+          <!-- Users tab content -->
+          <div class="tab-pane" id="control-sidebar-users-tab">
+          
+	          <form>
+	            <input type="text" id="newuserFirstName" class="form-control" placeholder="First Name"/> 
+				<input type="text" id="newuserLastName" class="form-control" placeholder="Last Name"/>
+				<input type="text" id="newuserTitle" class="form-control" placeholder="Title"/>
+				<input type="text" id="newuserEmail" class="form-control" placeholder="email"/>
+				<input type="text" id="newuserUserId" class="form-control" placeholder="User Id"/>
+				<input type="text" id="newuserPassword" class="form-control" placeholder="Password"/>
+				<button type="submit" id="createUserButton" class="btn btn-default"><i>Create</i></button>
+				
+				<br/>
+				
+				Users List
+				<ul id="existingUsersListUl" class="list-group">
+				</ul>
+				
+	          </form>
+          </div><!-- /.tab-pane -->
+                   
+          <!-- Groups tab content -->
+          <div class="tab-pane" id="control-sidebar-groups-tab">Groups <br />
+	          	<input type="text" id="groupNameTextBox" value=""/>
+				<input type="button" id="createNewGroupButtonId" class="button" value="Create"/>
+				
+				Users<br/>
+				<div id="userListDiv" class="searchResults">
+					
+				</div>
+          </div><!-- /.tab-pane -->
+
+
+          <!-- Templates tab content -->
+          <div class="tab-pane" id="control-sidebar-templates-tab">
             <form method="post">
               <h3 class="control-sidebar-heading">General Settings</h3>
               <div class="form-group">
@@ -1711,8 +1932,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </div><!-- /.form-group -->
             </form>
           </div><!-- /.tab-pane -->
+          
         </div>
       </aside><!-- /.control-sidebar -->
+      
       <!-- Add the sidebar's background. This div must be placed
            immediately after the control sidebar -->
       <div class="control-sidebar-bg"></div>
@@ -1720,10 +1943,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
       
       <!-- Control Sidebar -->
       <aside class="control-SearchSideBar control-sidebar-dark">
-      
-          <!-- Home tab content -->
-          <div class="tab-pane active" id="control-sidebar-home-tab">
-            
+        
+          <!-- Search tab content -->
+          <div class="tab-pane active" id="control-sidebar-searchPlaces-tab">
             <form action="#" method="get" class="sidebar-form">
             <div class="input-group">
               <input type="text" name="q" class="form-control" placeholder="Search...">
@@ -1734,7 +1956,51 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </form>
           </div><!-- /.tab-pane -->
           
+          
       </aside><!-- /.control-sidebar -->
+      <!-- Add the sidebar's background. This div must be placed
+           immediately after the control sidebar -->
+      <div class="control-sidebar-bg"></div>
+      
+      
+      
+      <!-- Control Sidebar -->
+      <aside class="control-ShareSideBar control-sidebar-dark">
+      
+   		<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
+          	<li class="active"><a href="#control-sidebar-shareNew-tab" data-toggle="tab"><i class="fa fa-share"></i></a></li>
+			<li><a href="#control-sidebar-shared-tab" data-toggle="tab"><i class="fa fa-share-alt"></i></a></li>
+          	<li><a href="#control-sidebar-shareFeed-tab" data-toggle="tab"><i class="fa fa-rss"></i></a></li>
+        </ul>
+      
+      	<div class="tab-content">
+          <div class="tab-pane active" id="control-sidebar-shareNew-tab">
+            Share Any Drawing<br />
+            
+            <input type="button" id="submitSharingButton" class="button" value="Share"/>
+			<br/><br/>
+			<select id ="drawingShareDropdown">
+			</select>
+			<br/><br/>
+			<div id="userGroupsDiv" class="searchResults">
+				Groups <br/>
+			</div>
+          </div>
+          
+          
+          <div class="tab-pane" id="control-sidebar-shared-tab">
+          	Shared Tab Content
+       		<div id="sharedDrawingsListDiv"></div>
+          </div>
+          
+          <div class="tab-pane" id="control-sidebar-shareFeed-tab">Share Feed Tab Content
+          	<div id="sharingFeedDiv" class="searchResults">
+				Groups <br/>
+			</div>
+          </div>
+        </div>  
+      </aside><!-- /.control-sidebar -->
+      
       <!-- Add the sidebar's background. This div must be placed
            immediately after the control sidebar -->
       <div class="control-sidebar-bg"></div>

@@ -102,14 +102,15 @@ public class GroupsDAOImpl implements GroupsDAO{
 	public ArrayList<SharedDrawing> getGroupSharedDrawings(ArrayList<Groups> groups) throws PSQLException{
 		System.out.println("get user shared drawings");
 		
-		ArrayList<SharedDrawing> sharedGroupDrawings = null;
+		ArrayList<SharedDrawing> sharedGroupDrawings = new ArrayList<SharedDrawing>();
 
 		// get the shared drawings for each group and add it to a list to return
 		for(Groups g: groups){
 			String queryString = "from SharedDrawing as shared where "+ g.getGroupId()+" in elements(shared.sharedWithGroups)";
 			Query query = getCurrentSession().createQuery(queryString);
 			// sharedGroupDrawings =  (ArrayList<SharedDrawing>) query.list();
-			sharedGroupDrawings.addAll((ArrayList<SharedDrawing>) query.list());
+			ArrayList<SharedDrawing> drawingsList = (ArrayList<SharedDrawing>) query.list();
+			sharedGroupDrawings.addAll(drawingsList);
 		}
 
 		for(SharedDrawing draw: sharedGroupDrawings)

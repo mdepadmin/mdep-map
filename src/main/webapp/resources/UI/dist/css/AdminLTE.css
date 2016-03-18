@@ -720,6 +720,22 @@ a:focus {
 
 
 
+
+.control-ShareSideBar {
+  top: 0;
+  right: -230px;
+  width: 230px;
+  -webkit-transition: right 0.3s ease-in-out;
+  -o-transition: right 0.3s ease-in-out;
+  transition: right 0.3s ease-in-out;
+}
+.control-ShareSideBar {
+  position: absolute;
+  padding-top: 50px;
+  z-index: 1010;
+}
+
+
 @media (max-width: 768px) {
   .control-sidebar {
     padding-top: 100px;
@@ -731,14 +747,21 @@ a:focus {
 .control-SearchSideBar > .tab-content {
   padding: 10px 15px;
 }
+.control-ShareSideBar > .tab-content {
+  padding: 10px 15px;
+}
+
+
 .control-sidebar.control-sidebar-open,
 .control-sidebar.control-sidebar-open + .control-sidebar-bg {
   right: 0;
 }
-
-
 .control-SearchSideBar.control-sidebar-open,
 .control-SearchSideBar.control-sidebar-open + .control-sidebar-bg {
+  right: 0;
+}
+.control-ShareSideBar.control-sidebar-open,
+.control-ShareSideBar.control-sidebar-open + .control-sidebar-bg {
   right: 0;
 }
 
