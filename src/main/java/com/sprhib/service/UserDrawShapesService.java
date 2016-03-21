@@ -15,4 +15,8 @@ public interface UserDrawShapesService {
 	public UserDrawShapes getDrawing(String drawingId);
 	public ArrayList<UserDrawShapes> getDrawingList(ArrayList<Integer> drawingIdList)
 			throws PSQLException, JSONException;
+	
+	public List<UserDrawShapes> getAllDrawings();
+	public boolean deleteDrawings(ArrayList<Integer> drawingIdList) throws PSQLException, JSONException;
+	
 }

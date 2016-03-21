@@ -101,7 +101,7 @@ function logoutUser(inUrl,callback){
 }
 
 // save the user drawings (shapes, zoom level, center etc)
-function saveDrawings(inUrl, map, drawnItems, callback){
+function saveDrawings(inUrl, map, drawingName, drawnItems, callback){
 	
 	var len = drawnItems.getLayers().length;
 	
@@ -176,7 +176,7 @@ function saveDrawings(inUrl, map, drawnItems, callback){
 	
 	console.log(geo);
 
-	var json = {"userId":'', "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter()), "zoomLevel":map.getZoom()};
+	var json = {"userId":'', 'drawingName':drawingName, "jsonData":JSON.stringify(geo), "jsonCenter":JSON.stringify(map.getCenter()), "zoomLevel":map.getZoom()};
 	var jsonData = JSON.stringify(json);
 
 	console.log(jsonData);
@@ -398,9 +398,9 @@ function openSlide(slide){
 
 
 // get the user drawings
-function getDrawings(inUrl, callback){
+function getUserDrawings(inUrl, callback){
 
-	var url = inUrl+"/drawshapescontroller/getDrawings";
+	var url = inUrl+"/drawshapescontroller/getUserDrawings";
 	
 	// no data to be sent, the url would do
 	$.ajax({
@@ -422,6 +422,35 @@ function getDrawings(inUrl, callback){
 	    }
 	});
 }
+
+
+//get the all drawings - admin
+function getAllDrawings(inUrl, callback){
+
+	var url = inUrl+"/drawshapescontroller/getAllDrawings";
+	
+	// no data to be sent, the url would do
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			// call back upon successful service call
+			console.log("Success: "+message);
+			tt=message;
+			//if(message.length>0)
+				callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: "+message);
+	    }
+	});
+}
+
 
 // get the list of users for this applications
 function getUsersList(inUrl, callback){
@@ -639,6 +668,33 @@ function deleteUsers(inUrl, userIds, callback){
 		},
 	    failure:function(message){
 	    	console.log("Failure: users NOT deleted "+message);
+	    }
+	});
+}
+
+function deleteAllUserDarawingsServiceCall(inUrl, drawingIds, callback){
+	
+	var url = inUrl+"/drawshapescontroller/deleteAllUserDrawings";
+	
+	var json = drawingIds;
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: deleted drawings "+message);
+			tt=message;
+			callback(drawingIds, message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: drawings NOT deleted "+message);
 	    }
 	});
 }

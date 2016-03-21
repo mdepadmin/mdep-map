@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
+import com.sprhib.model.UserLogin;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -73,8 +74,13 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 	@Override
 	public UserDrawShapes getDrawing(String drawingId) throws PSQLException,
 			JSONException {
-		Criteria criteria = getCurrentSession().createCriteria(UserDrawShapes.class);
-		UserDrawShapes shapes = (UserDrawShapes) criteria.add(Restrictions.eq("drawingid", drawingId));
+		System.out.println(drawingId);
+		//Criteria criteria = getCurrentSession().createCriteria(UserDrawShapes.class);
+		//UserDrawShapes shapes = (UserDrawShapes) criteria.add(Restrictions.eq("drawingid", drawingId));
+		
+		UserDrawShapes shapes = (UserDrawShapes) getCurrentSession().get(UserDrawShapes.class, Integer.parseInt(drawingId));
+
+		
 		return shapes;
 	}
 
@@ -94,6 +100,27 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 		ArrayList<UserDrawShapes> drawingsList =  (ArrayList<UserDrawShapes>) query.list();
 
 		return drawingsList;
+	}
+
+	@Override
+	public List<UserDrawShapes> getAllDrawings() throws PSQLException {
+		Criteria criteria = getCurrentSession().createCriteria(UserDrawShapes.class);
+		List<UserDrawShapes> shapes = criteria.add(Restrictions.eq("deleted", 0)).list();
+		return shapes;
+	}
+
+	@Override
+	public boolean deleteDrawings(ArrayList<Integer> drawingIdList) throws PSQLException, JSONException {
+		System.out.println("deleting "+drawingIdList);
+		for(Integer drawingId : drawingIdList){
+			String strId = Integer.toString(drawingId);
+			UserDrawShapes shape = getDrawing(strId);
+			shape.setDeleted(1);
+			// updateUserDrawings(shape);
+			getCurrentSession().update(shape);
+		}
+		
+		return true;
 	}
 
 }

@@ -73,6 +73,21 @@ public class UserDrawShapesServiceImpl implements UserDrawShapesService {
 		return shapesDAO.getDrawingList(drawingIdList);
 	}
 
+	@Override
+	public List<UserDrawShapes> getAllDrawings() {
+		try {
+			return shapesDAO.getAllDrawings();
+		} catch (PSQLException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+	@Override
+	public boolean deleteDrawings(ArrayList<Integer> drawingIdList) throws PSQLException, JSONException {
+		return shapesDAO.deleteDrawings(drawingIdList);
+	}
+
 	
 	
 

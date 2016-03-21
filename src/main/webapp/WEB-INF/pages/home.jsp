@@ -148,9 +148,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var baseLayers = [];
 		var curBaseLayerIndex = -1;
 		
+		var allUserDrawings = [];
+		
 		var tempvalue;
 		var chk;
 		var hehe;
+		var temp;
 		
 		$(document).ready(function() {
 			
@@ -236,7 +239,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
  					$('#adminSettingsGearAnchor').show();
  				}
 
- 				getDrawings(url,getDrawingsCallback);
+ 				getUserDrawings(url,getDrawingsCallback);
  			}
  			function userLoginCallback_failure(user){
  				console.log('login failed');
@@ -406,10 +409,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				var ul = document.getElementById("existingUsersListUl");
 				
 				if(userList.length > 0){
-					var count = userList.length;
-					for(var i = 0; i < count; i++){
+					
+					for(var i = 0; i < userList.length; i++){
 						var user = userList[i];
-						var $ctrl = $('<label />').html(user.userId)
+						temp=user;
+						var $ctrl = $('<label />').html(user.firstName+', '+user.lastName+' ('+user.userId+')')
                         .prepend($('<input/>').attr({ type: 'checkbox', name: 'existingUsers', value: user.userId, id: 'existingUsers'+i, checked:false}));
            
 			            var li = document.createElement("li");
@@ -565,11 +569,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			$('#saveDrawingsAnchorId').click(function(event){
 				event.preventDefault();
 				
+				var drawingName = $("#drawingNameId").val();
+				
 				var url = "${pageContext.request.contextPath}";
 
 				if(drawingId==0){
 					// if the drawing is not already saved					
-					saveDrawings(url, map, drawnItems, saveDrawingsCallback);
+					saveDrawings(url, map, drawingName, drawnItems, saveDrawingsCallback);
 				}
 				else{
 					// already saved, to update the drawing
@@ -580,9 +586,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			 // upon clicking saveas new drawing button
 			$('#saveAsNewDrawingsAnchorId').click(function(event){
 				event.preventDefault();
+				var drawingName = $("#drawingNameId").val();
 				
 				var url = "${pageContext.request.contextPath}";
-				saveDrawings(url, map, drawnItems, saveDrawingsCallback);
+				saveDrawings(url, map, drawingName, drawnItems, saveDrawingsCallback);
 			});			
 			
 			
@@ -590,21 +597,96 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			// get saved drawings from the database
  			$('#getDrawingsButtonId').click(function(event){
 				var url = "${pageContext.request.contextPath}";
-				 getDrawings(url,getDrawingsCallback);				
+				 getUserDrawings(url,getDrawingsCallback);				
 			}); 
  			
  			$('#getDrawingsAnchorId').click(function(event){
  				event.preventDefault();
- 				
- 				
+
  				//if(drawingsLoaded || typeof(loadedDrawings)=="undefined")
  				if(drawingsLoaded)	
  					return;
- 					
+
 				var url = "${pageContext.request.contextPath}";
-				getDrawings(url,getDrawingsCallback);
+				getUserDrawings(url,getDrawingsCallback);
+			});
+ 			
+ 			
+ 			$('#allDrawingsTabAnchor').click(function(event){
+ 				event.preventDefault();
+
+ 				var url = "${pageContext.request.contextPath}";
+				getAllDrawings(url,getAllDrawingsCallback);
+			});
+ 			
+ 			function getAllDrawingsCallback(allDrawings){
  				
-			}); 
+ 				allUserDrawings = allDrawings;
+ 				
+ 				$('#allDrawingsUl').empty();
+				var ul = document.getElementById("allDrawingsUl");
+				
+				for (var i=0; i < allUserDrawings.length; i++){
+					 var drawing = allUserDrawings[i];
+					 temp = drawing;
+	 				 var $ctrl = $('<label />').html(drawing.drawingName+' ('+drawing.userId+')')
+	                 .prepend($('<input/>').attr({ type: 'checkbox', name: 'allDrawingCheckbox', value: drawing.drawingId, id: 'allUserDrawing'+i, checked:false}));
+					
+					var li = document.createElement("li");
+					$ctrl.appendTo(li);
+					ul.appendChild(li);
+				}
+				
+				
+				var element = document.createElement("input"); 
+			    element.type = 'button';
+			    element.value = 'Delete'; 
+			    element.name = 'deleteDrawingsAllUsers';
+			    element.className='btn btn-default';
+			    
+			    var ulist = document.getElementById("allDrawingsUl"); //replace with jquery
+			    var li = document.createElement("li");
+			    li.appendChild(element);
+				ulist.appendChild(li);
+				
+			    element.onclick = function() {
+			        deleteAllUserDrawingsButtonClickCallback();
+			    };			    
+ 			}
+ 			
+ 			function deleteAllUserDrawingsButtonClickCallback(){
+ 				var drawingIds = [];
+ 				
+ 				$('input[type=checkbox][name=allDrawingCheckbox]').each(function () {
+ 					 if(this.checked)
+ 						drawingIds.push(parseInt(this.value));
+ 				 });
+
+ 				var url = "${pageContext.request.contextPath}";
+
+ 				if(drawingIds.length > 0)
+ 					deleteAllUserDarawingsServiceCall(url, drawingIds, deleteAllUserDarawingsServiceCallBack);
+ 					//deleteAllUserDarawingsServiceCallBack(drawingIds);
+ 			}
+ 			
+ 			Array.prototype.removeValue = function(name, value){
+				   var array = $.map(this, function(v,i){
+				      return v[name] === value ? null : v;
+				   });
+				   this.length = 0; //clear original array
+				   this.push.apply(this, array); //push all elements except the one we want to delete
+			}
+ 			
+ 			function deleteAllUserDarawingsServiceCallBack(drawingIds){
+				console.log(drawingIds);
+ 				for(var i=0; i < drawingIds.length; i++){
+ 					removeAllUserDrawing(drawingIds[i]);
+ 					allUserDrawings.removeValue('drawingId', drawingIds[i]);
+ 				}
+ 				getAllDrawingsCallback(allUserDrawings);
+ 			}
+ 			
+ 			
  			
 			$('#test').click(function(event){
 //				var url = "${pageContext.request.contextPath}";
@@ -616,12 +698,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$("#dropdown-menu_content_div").html(greeting);
 				
 			});
-
-			
-			
-
-			
-
 			
 			// display any shared drawing when selected
 			$(document).on('change', '#sharedDrawingsDropDown', function() {
@@ -645,35 +721,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			
 			
 			// 'new drawing' button click
-			$('#newDrawingButtonId').click(function(event){
-
-				/* // clear the drawings currently being displayed
-				clearDrawings();
-				
-				// add user drawings to multi select
-				// user can include the existing drawins in the new drawing by selecting items from this list
-				if(loadedDrawings.length>1)
-				{
-					var sel = document.createElement("select");
-					sel.id='dropDownMultiSelect';
-					sel.multiple="multiple";
-					sel.size = "3";
-					
-					for(var i=0; i<loadedDrawings.length;i++){
-						// change to drawing name instead
-						var op = new Option();
-						op.value = i;
-						op.text = "Drawing-"+i;
-						sel.options.add(op);  
-					}
-					
-					$('#includeDrawingsListDiv').html(sel);
-					// add a dynamic button
-					// click this button to include the selected drawings in the current drawing 
-					addNewButton("button","Add", sel);
-				} */
-			});
-			
 			$('#newDrawingAnchorId').click(function(event){
 				event.preventDefault();
 				
@@ -690,14 +737,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 				// add user drawings to multi select
 				// user can include the existing drawins in the new drawing by selecting items from this list
-				if(loadedDrawings.length>1)
+				if(loadedDrawings.length > 0)
 				{
-
 					for(var i=0; i<loadedDrawings.length;i++){
 						// change to drawing name here
+						var drawing = loadedDrawings[i];
 						
 						// add checkbox to add/remove
-						 var $ctrl = $('<label />').html('Drawing '+i)
+						 var $ctrl = $('<label />').html(drawing.drawingName+' ('+drawing.userId+')')
                          .prepend($('<input/>').attr({ type: 'checkbox', name: 'includeInNewDrawingCheckbox', value: i, id: 'incDrawing'+i, checked:false}));
 						
 						var li = document.createElement("li");
@@ -711,8 +758,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 			});
 			
-			
-			
 		});
 	
 		// add the list of users to the slide
@@ -724,7 +769,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				for(var i = 0; i < count; i++){
 					var user = userList[i];
 					
-					var $ctrl = $('<label />').html(user.userId)
+					var $ctrl = $('<label />').html(user.firstName+', '+user.lastName+' ('+user.userId+')')
                     .prepend($('<input/>').attr({ type: 'checkbox', name: 'listUsers', value: user.userId, id: 'listUser'+i, checked:false}));
 					 $("#userListDiv").append($ctrl);
 					 $ctrl = $('<br/>');
@@ -818,7 +863,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			var optionSelected = $("option:selected", this);
 			hehe = optionSelected;
 			
-			//console.log(optionSelected.text()+"*******"+optionSelected.val());
 			curSelection = parseInt(optionSelected.index());
 			
 			var curBaseLayer = baseLayers[curBaseLayerIndex];
@@ -858,17 +902,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					 opts.push(shapes);
 				 }
 			 });
-			
-			
-		    /* for (var i=0, len=sel.options.length; i<len; i++) {
-		        opt = sel.options[i];
-		        if ( opt.selected ) {
-		        	tempvalue = opt;    	
-		            var curSelection = opt.value;
-				    var shapes = loadedDrawings[curSelection];
-				    opts.push(shapes);
-		        }
-		    } */
 		    
 		    if (callback) {
 		    	callback(opts);
@@ -917,7 +950,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			clearDrawings();
 			showDrawings(true, updatedDrawing);
 		}
-		
+	
 		// add fetched drawings (saved previously by the user) to the dropdown list
 		function getDrawingsCallback(drawings) {
 			
@@ -934,9 +967,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					sel.size = loadedDrawings.length;				
 				
 				for (var i = 0; i < drawings.length; i++) {
+					var drawing = drawings[i];
+					
 					var op = new Option();
 					op.value = i;
-					op.text = "Drawing-" + i;
+					op.text = drawing.drawingName;
 					sel.options.add(op);
 				}
 				$('#userDrawingsListDiv').html(sel);
@@ -992,8 +1027,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			$("#sharingFeedDiv").append("<br/><hr/><br/>");
 			for(var i=0; i < memberShared.length; i++){		
 				var shared = memberShared[i];
+				var name=shared.sharedDrawingId;
+				/* for(var j=0; j<sharedDrawings.length; j++){
+					var draw = sharedDrawings[j];
+					if(shared.sharedDrawingId == draw.drawingId){
+						name = draw.drawingName;
+						break;
+					}
+				} */
 				
-				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+name+"</div> <br/>");
 				$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
 			    
 			}
@@ -1042,9 +1085,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				sel.id = 'sharedDrawingsDropDown';
 
 				for (var i = 0; i < sharedDrawings.length; i++) {
+					var drawing = sharedDrawings[i];
+					
 					var op = new Option();
 					op.value = i;
-					op.text = "Shared Drawing-" + i;
+					op.text = drawing.drawingName+' ('+drawing.userId+')'
 					sel.options.add(op);
 				}
 				$('#sharedDrawingsListDiv').html(sel);
@@ -1075,10 +1120,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			var sel = document.getElementById('drawingShareDropdown');
 			if(typeof(loadedDrawings) !=  "undefined")
 			for(var i=0; i<loadedDrawings.length;i++){
+				var drawing = loadedDrawings[i];
 				var op = new Option();
 				op.value = i;
-				op.text = "Drawing-"+i;
-				sel.options.add(op);  
+				op.text = drawing.drawingName;
+				sel.options.add(op);
 			}
 			
 			$('#userGroupsDiv').empty();
@@ -1231,8 +1277,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 								});
 
 								// add checkbox to add/remove
-								 var $ctrl = $('<label />').html('Drawing '+i)
-		                          .prepend($('<input/>').attr({ type: 'checkbox', name: includedId, value: includedId, id: 'drawing'+i, checked:true}));
+								 var $ctrl = $('<label />').html(drawings.drawingName)
+		                          .prepend($('<input/>').attr({ type: 'checkbox', name: includedId, value: includedId, id: 'inclDrawing'+i, checked:true}));
 								
 								var li = document.createElement("li");
 								$ctrl.appendTo(li);
@@ -1255,8 +1301,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			var id = chk.attr('id');
 			var drawId = parseInt(chk.attr('value'));
 
-
-			if (id.match("^drawing")){
+			
+			if (id.match("^allUserDrawing")){
+				// drawings add/remove
+				if(chk.is(":checked")){
+					addAllUserDrawing(drawId);
+				}else{
+					removeAllUserDrawing(drawId);
+				}
+			}
+			else if (id.match("^inclDrawing")){
 				// drawings add/remove
 				if(chk.is(":checked")){
 					addIncludeDrawing(drawId);
@@ -1371,6 +1425,46 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					drawnItems.removeLayer(layer);
 			});
 		}
+		
+		
+		
+		// get the the drawing from allDrawings and show them on the baselayer
+		function addAllUserDrawing(includedId){
+
+			// get the drawing to be included from loadedDrawings
+			for(var i=0; i<allUserDrawings.length; i++){
+				var drawings = allUserDrawings[i];
+				var drwId = drawings.drawingId;
+				if(includedId == drwId){
+
+					geoData = JSON.parse(drawings.jsonData);
+					savedLayers = L.geoJson(geoData);
+					
+					savedLayers.eachLayer(function(lay) {
+						var props = lay.feature.props;
+						var type = props.type;
+						//lay.options.color = getColor(type);
+						lay.options.color = props.color;
+						lay.options.opacity = props.opacity;
+						console.log(type);
+						//if (type == 'circle') {} else{}
+
+						// add to display layers	
+						drawnItems.addLayer(lay);
+					});
+					break;
+				}
+			}
+		}
+		
+		// remove alluser drawing
+		function removeAllUserDrawing(drawId){
+			drawnItems.eachLayer(function(layer){
+				if(layer.feature.props.drawingId == drawId)
+					drawnItems.removeLayer(layer);
+			});
+		}
+		
 		
 	</script>
     
@@ -1703,7 +1797,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </ul>
             </li>
             
-            <li><a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a></li> 
+            
+            <li class="treeview">
+              <a href="#"><i class="fa fa-save"></i> <span>Save Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
+              <ul class="treeview-menu">
+                <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name"> </li>
+                <li><a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a></li>
+              </ul>
+            </li>
+            
+             
             <li><a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a></li>
             
              <!-- draw controls, layers list -->
@@ -1854,7 +1957,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<aside class="control-sidebar control-sidebar-dark">
         <!-- Create the tabs -->
         <ul class="nav nav-tabs nav-justified control-sidebar-tabs">
-          <li class="active"><a href="#control-sidebar-maps-tab" data-toggle="tab"><i class="fa fa-map"></i></a></li>
+          <li class="active"><a href="#control-sidebar-maps-tab" data-toggle="tab" id="allDrawingsTabAnchor"><i class="fa fa-map"></i></a></li>
           <li><a href="#control-sidebar-notices-tab" data-toggle="tab"><i class="fa fa-edit"></i></a></li>
           <li><a href="#control-sidebar-users-tab" data-toggle="tab" id="usersTabAnchor"><i class="fa fa-user"></i></a></li>
           <li><a href="#control-sidebar-groups-tab" data-toggle="tab" id="groupsTabAnchor"><i class="fa fa-group"></i></a></li>
@@ -1866,8 +1969,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
         
           <!-- Maps tab content -->
           <div class="tab-pane active" id="control-sidebar-maps-tab">
-            <h3 class="control-sidebar-heading">Recent Activity</h3>
-            <ul class="control-sidebar-menu">
+            <!-- <h3 class="control-sidebar-heading">Recent Activity</h3> -->
+            <!-- <ul class="control-sidebar-menu">
               <li>
                 <a href="javascript::;">
                   <i class="menu-icon fa fa-birthday-cake bg-red"></i>
@@ -1877,7 +1980,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   </div>
                 </a>
               </li>
-            </ul><!-- /.control-sidebar-menu -->
+            </ul> --><!-- /.control-sidebar-menu -->
+            
+            
+            <ul class="control-sidebar-menu" id="allDrawingsUl">
+
+            </ul>
+            
+            
           </div><!-- /.tab-pane -->
 
 

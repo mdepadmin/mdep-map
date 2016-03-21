@@ -14,10 +14,13 @@ public class UserDrawShapes {
 	@GeneratedValue
 	private Integer drawingId;
 	private String userId;
+	private String drawingName;
 	private String jsonData;
 	private String jsonCenter;
 	private Integer zoomLevel;
 	private Timestamp insertedTime;
+	private Integer deleted;
+	
 	
 	public Integer getDrawingId() {
 		return drawingId;
@@ -30,6 +33,12 @@ public class UserDrawShapes {
 	}
 	public void setUserId(String userId) {
 		this.userId = userId;
+	}
+	public String getDrawingName() {
+		return drawingName;
+	}
+	public void setDrawingName(String drawingName) {
+		this.drawingName = drawingName;
 	}
 	public String getJsonData() {
 		return jsonData;
@@ -54,5 +63,11 @@ public class UserDrawShapes {
 	}
 	public void setInsertedTime(Timestamp insertedTime) {
 		this.insertedTime = insertedTime;
+	}
+	public Integer getDeleted() {
+		return deleted;
+	}
+	public void setDeleted(Integer deleted) {
+		this.deleted = deleted;
 	}
 }

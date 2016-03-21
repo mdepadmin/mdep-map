@@ -59,12 +59,32 @@ public class DrawShapesController {
 		drawing.setUserId(userId);
 		// drawingId will be generated (auto increment column in db)
 		drawing.setDrawingId(null);
+		drawing.setDeleted(0);
 
 		// saving the drawing
 		returnId =	drawShapeService.saveUserDrawings(drawing);
 		return returnId;
 	}
 	
+	
+	// delete drawings
+	@RequestMapping(value="/deleteAllUserDrawings", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean deleteDrawings(@RequestBody ArrayList<Integer> drawingIdList, HttpServletRequest request) throws PSQLException, JSONException {
+		
+		boolean returnMessage = false;
+
+		// soft delete drawings
+		
+		HttpSession session = request.getSession();
+		String userType = (String)session.getAttribute("userType");
+		
+		//if(userType.equals("A"))
+			returnMessage =	drawShapeService.deleteDrawings(drawingIdList);
+		
+		return returnMessage;			
+	}
 		
 	// get the list of drawings saved by the user
 	
@@ -83,6 +103,8 @@ public class DrawShapesController {
 
 	}
 
+	
+	
 	
 	// update existing saved drawing	
 	@RequestMapping(value="/updateDrawings", method=RequestMethod.POST, 
@@ -105,16 +127,32 @@ public class DrawShapesController {
 	
 	
 	
-	@RequestMapping(value="/getDrawings", method=RequestMethod.POST, 
+	@RequestMapping(value="/getUserDrawings", method=RequestMethod.POST, 
 			produces=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
 	public List<UserDrawShapes> getDrawings(HttpServletRequest request) {
 		
 		HttpSession session = request.getSession();
 		String userId = (String)session.getAttribute("userId");
-		System.out.println("In Team Controller - getDrawings");
+		System.out.println("In Shapes Controller - getDrawings");
 		List<UserDrawShapes> shapes = null;
 		shapes =	drawShapeService.getUserDrawings(userId);
+		return shapes;
+	}
+	
+	@RequestMapping(value="/getAllDrawings", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public List<UserDrawShapes> getAllDrawings(HttpServletRequest request) {
+		
+		HttpSession session = request.getSession();
+		String userType = (String)session.getAttribute("userType");
+		List<UserDrawShapes> shapes = null;
+		
+		System.out.println("In Shapes Controller - getAllDrawings");	
+		//if(userType!=null && userType.equals("A"))
+			shapes =	drawShapeService.getAllDrawings();
+		
 		return shapes;
 	}
 		

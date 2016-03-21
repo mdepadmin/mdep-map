@@ -39,7 +39,11 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 		Criteria cr = getCurrentSession().createCriteria(UserLogin.class)
 			    .setProjection(Projections.projectionList()
 			      .add(Projections.property("userId"), "userId")
-			      .add(Projections.property("userType"), "userType"))
+			      .add(Projections.property("userType"), "userType")
+			      .add(Projections.property("email"), "email")
+			      .add(Projections.property("firstName"), "firstName")
+			      .add(Projections.property("lastName"), "lastName")
+			      .add(Projections.property("title"), "title"))
 			    .setResultTransformer(Transformers.aliasToBean(UserLogin.class));
 		
 		List<UserLogin> list = cr.add(Restrictions.eq("deleted", 0)).list();
