@@ -31,8 +31,27 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 	
 	// get the user details based on userId and return it
 	public UserLogin getUser(String userId) throws PSQLException{
-		UserLogin user = (UserLogin) getCurrentSession().get(UserLogin.class, userId);
-		return user;
+//		UserLogin user = (UserLogin) getCurrentSession().get(UserLogin.class, userId);
+//		return user;
+		
+		Criteria cr = getCurrentSession().createCriteria(UserLogin.class)
+			    .setProjection(Projections.projectionList()
+			      .add(Projections.property("userId"), "userId")
+			      .add(Projections.property("password"), "password")
+			      .add(Projections.property("userType"), "userType")
+			      .add(Projections.property("email"), "email")
+			      .add(Projections.property("firstName"), "firstName")
+			      .add(Projections.property("lastName"), "lastName")
+			      .add(Projections.property("title"), "title"))
+			    .setResultTransformer(Transformers.aliasToBean(UserLogin.class));
+		
+		cr.add(Restrictions.eq("userId", userId));
+		
+		List<UserLogin> list = cr.add(Restrictions.eq("deleted", 0)).list();
+		
+		if(list != null && list.size() != 0)
+			return list.get(0);
+		return null;
 	}
 
 	// get the list of users (added by admin)
