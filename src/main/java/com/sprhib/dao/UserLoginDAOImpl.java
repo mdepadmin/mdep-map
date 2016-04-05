@@ -4,15 +4,18 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.hibernate.Criteria;
+import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
 import org.hibernate.transform.Transformers;
+import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.sprhib.model.UserDrawShapes;
 import com.sprhib.model.UserLogin;
 
 @Repository
@@ -72,6 +75,24 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 		}
 		return true;
 	}
-	
-	
+
+	@Override
+	public ArrayList<UserLogin> getUserList(ArrayList<String> userIdList) throws PSQLException {
+		
+		ArrayList<String> users = new ArrayList<String>();
+		
+		for(String id : userIdList){
+			id = "\""+id+"\"";
+			users.add(id);
+		}
+		
+		System.out.println(users);
+		// idList is a dummy parameter which should contain the list of drawing Ids 
+		String queryString = "from UserLogin where userid IN (:idList)";
+		Query query = getCurrentSession().createQuery(queryString);
+		query.setParameterList("idList", userIdList);
+		ArrayList<UserLogin> usersList =  (ArrayList<UserLogin>) query.list();
+		return usersList;
+	}
+
 }

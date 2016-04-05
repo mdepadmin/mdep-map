@@ -149,6 +149,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var curBaseLayerIndex = -1;
 		
 		var allUserDrawings = [];
+		var allUsersList = [];
 		
 		var tempvalue;
 		var chk;
@@ -210,6 +211,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
  				userId = user.userId;
  				userType = user.userType;
  				
+ 				$('#shareDrawingsLI').show();
+ 				$('#drawingsListLI').show();
+ 				$('#clearDrawingsLI').show();
+ 				$('#startNewDrawingLI').show();
+ 				$('#saveDrawingLI').show();
+ 				
+ 				
  				$('#profileMenuBody').hide();
  				$('#profileMenuHeader').show();
  				
@@ -230,9 +238,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$('#userNamePId').text(userId);
 				$('#userProfileImageId').attr('src',imagePath);
  				
-				$('#userId').empty();
-				$('#password').empty();
-
+				$('#userId').val('');
+				$('#password').val('');
 				
  				 if(userType=="A"){
  					console.log("admin");
@@ -254,6 +261,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			});
  			
  			function userLogoutCallback(){
+ 				
+ 				$('#shareDrawingsLI').hide();
+ 				$('#drawingsListLI').hide();
+ 				$('#clearDrawingsLI').hide();
+ 				$('#startNewDrawingLI').hide();
+ 				$('#saveDrawingLI').hide();
+ 				
+ 				/* $('#shareDrawingsLI').css('display', 'none');
+ 				$('#drawingsListLI').css('display', 'none');
+ 				$('#clearDrawingsLI').css('display', 'none');
+ 				$('#startNewDrawingLI').css('display', 'none');
+ 				$('#saveDrawingLI').css('display', 'none'); */
+ 				
  				$('#profileMenuBody').show();
  				$('#profileMenuHeader').hide();
  				
@@ -763,6 +783,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		// add the list of users to the slide
 		// user can select any number of users to include in the group
 		function getUsersListCallback(userList){
+			allUsersList = userList;
+			
 	 		$("#userListDiv").empty();
 			if(userList.length > 0){
 				var count = userList.length;
@@ -990,7 +1012,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		function getUserGroupsAndShareDrawingsCallback(msg){
 			addDrawingsAndGroupsListToDropdown();
 			getSharedDrawings();
-			addSharingFeed();
+			//addSharingFeed();
 		}
 		
 		
@@ -1003,42 +1025,142 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				userGroupIds.push(group.groupId);
 			}
 			
+			
 			// shared with groups the user is part of
 			var groupShared = userGroupsAndSharedDrawings.groupSharedDrawingsInfo;
 			// shared directly to the user
 			var memberShared = userGroupsAndSharedDrawings.memberSharedDrawingsInfo;
 			
+			var userGroups = userGroupsAndSharedDrawings.userGroups;
+			
+			
 			// clear feed div and add the group sharing feed
 			$('#sharingFeedDiv').empty();
+			
+			var feedULGroup = document.getElementById("shareFeedULGroup");
+			var feedULSelf = document.getElementById("shareFeedULSelf");
+			
 			for(var i=0; i < groupShared.length; i++){
 				var shared = groupShared[i];
 				var common =  $(shared.sharedWithGroups).filter(userGroupIds);
 				
 				var commonGroupsString = "";
-				for(var i=0; i< common.length; i++)
-					commonGroupsString = commonGroupsString+"  "+common[i];
+				for(var a=0; a< common.length; a++){
+					for(var b=0; b<userGroups.length; b++){
+						var group = userGroups[b];
+						if(group.groupId == common[a]){
+							commonGroupsString = commonGroupsString+"  "+group.groupName;
+							break;
+						}
+					}
+				}
 				
-				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+shared.sharedDrawingId+"</div> <br/>");
+				var drawingName = "";
+				for(var a=0; a < sharedDrawings.length; a++){
+					var draw = sharedDrawings[a];
+					if(draw.drawingId == shared.sharedDrawingId){
+						drawingName = draw.drawingName;
+					}
+				}
+				
+				var userName = shared.sharedByUser;
+				for(var a = 0; a < userGroupsAndSharedDrawings.usersInfo.length; a++){
+					var curUser = userGroupsAndSharedDrawings.usersInfo[a];
+					if(curUser.userId == shared.sharedByUser){
+						userName = curUser.firstName + ", "+ curUser.lastName;
+						break;
+					}
+				}
+				
+				/* $("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+drawingName+"</div> <br/>");
 				$("#sharingFeedDiv").append("<div> Shared With Group(s): "+commonGroupsString+"</div> <br/>");
-				$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
-			    
+				$("#sharingFeedDiv").append("<div> Shared By User      : "+userName+"</div> <br/>"); */
+				
+				
+				var li = document.createElement("li");
+				
+				var img = document.createElement('img');
+				img.src = '<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>';
+				img.className = 'img-circle';
+				img.style.margin = 'auto 10px auto auto';
+				img.style.width = '40px';
+				img.style.width = '40px';
+				
+				var rightDiv = document.createElement("div");
+				rightDiv.className ="pull-left";
+				
+				rightDiv.appendChild(img);
+				
+				var h4 = document.createElement("h4");
+				h4.textContent = drawingName;
+				
+				var p = document.createElement("p");
+				var text = document.createTextNode(userName);
+				p.appendChild(text);
+				
+				var a = document.createElement('a');
+				a.appendChild(rightDiv);
+				a.appendChild(h4);
+				a.appendChild(p);
+				
+				li.appendChild(a);
+				
+				feedULGroup.appendChild(li);
 			}
+			
 			// drawings shared directly to the user
 			$("#sharingFeedDiv").append("<br/><hr/><br/>");
 			for(var i=0; i < memberShared.length; i++){		
 				var shared = memberShared[i];
-				var name=shared.sharedDrawingId;
-				/* for(var j=0; j<sharedDrawings.length; j++){
-					var draw = sharedDrawings[j];
-					if(shared.sharedDrawingId == draw.drawingId){
-						name = draw.drawingName;
+				
+				var drawingName = "";
+				for(var a=0; a < sharedDrawings.length; a++){
+					var draw = sharedDrawings[a];
+					if(draw.drawingId == shared.sharedDrawingId){
+						drawingName = draw.drawingName;
+					}
+				}
+				
+				var userName = shared.sharedByUser;
+				for(var a = 0; a < userGroupsAndSharedDrawings.usersInfo.length; a++){
+					var curUser = userGroupsAndSharedDrawings.usersInfo[a];
+					if(curUser.userId == shared.sharedByUser){
+						userName = curUser.firstName + ", "+ curUser.lastName;
 						break;
 					}
-				} */
+				}
 				
-				$("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+name+"</div> <br/>");
-				$("#sharingFeedDiv").append("<div> Shared By User      : "+shared.sharedByUser+"</div> <br/>");
-			    
+				/* $("#sharingFeedDiv").append("<div> Shared Drawing Id   : "+drawingName+"</div> <br/>");
+				$("#sharingFeedDiv").append("<div> Shared By User      : "+userName+"</div> <br/>"); */
+				var li = document.createElement("li");
+				
+				var img = document.createElement('img');
+				img.src = '<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>';
+				img.className = 'img-circle';
+				img.style.margin = 'auto 10px auto auto';
+				img.style.width = '40px';
+				img.style.width = '40px';
+				
+				var rightDiv = document.createElement("div");
+				rightDiv.className ="pull-left";
+				
+				rightDiv.appendChild(img);
+				
+				var h4 = document.createElement("h4");
+				h4.textContent = drawingName;
+				
+				var p = document.createElement("p");
+				var text = document.createTextNode(userName);
+				p.appendChild(text);
+				
+				var a = document.createElement('a');
+				a.appendChild(rightDiv);
+				a.appendChild(h4);
+				a.appendChild(p);
+				
+				li.appendChild(a);
+				
+				feedULSelf.appendChild(li);
 			}
 		}
 		
@@ -1094,7 +1216,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 				$('#sharedDrawingsListDiv').html(sel);
 			}
-
+			
+			addSharingFeed();
+			
 			/* if (loadedDrawings.length > 0) {
 				var shapes = loadedDrawings[0];
 				showDrawings(true, shapes);
@@ -1568,12 +1692,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Logo -->
         <a href="#" class="logo">
           <!-- mini logo for sidebar mini 50x50 pixels -->
-          <span class="logo-mini">ALT</span>
+          <%-- <span class="logo-mini" style="max-width:20%; max-height:20%;"><img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" class="img-circle" alt="User Image"></span> --%>
+          <span class="logo-mini" style="max-width:20%; max-height:20%;"><img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" style="width:40px; height:40px;" alt="User Image"></span>
           <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><b>Mojavedata</b>***</span>
+          <span class="logo-lg"><b>Mojavedata</b></span>
         </a>
         
-
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
           <!-- Sidebar toggle button-->
@@ -1725,8 +1849,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
               </li>
               <!-- Control Sidebar Toggle Button -->
               <li>
-                <a href="#" id="adminSettingsGearAnchor" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
-  <!--               <a href="#" id="adminSettingsGearAnchor" style="display:none" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a> -->
+                <!-- <a href="#" id="adminSettingsGearAnchor" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a> -->
+                <a href="#" id="adminSettingsGearAnchor" style="display:none" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
               </li>
             </ul>
           </div>
@@ -1764,21 +1888,27 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
           <!-- Sidebar Menu -->
           <ul class="sidebar-menu">
-          	<li class="header">HEADER</li>
+          	<li class="header">Menu</li>
             
             <li class="treeview">
-              <a href="#"><i class="fa fa-cogs"></i> <span>Settings</span> <i class="fa fa-angle-left pull-right"></i></a>
+              <a href="#"><i class="fa fa-map"></i> <span>Base Layers</span> <i class="fa fa-angle-left pull-right"></i></a>
+               <ul class="treeview-menu">
+	                <li><div id="baseLayersDiv"></div></li>
+               </ul> 
+            </li>
+            
+            <li class="treeview">
+              <a href="#"><i class="fa fa-edit"></i> <span>Drawing Tools</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
 	                <li><input type="checkbox" id="drawControlCheckboxId" data-toggle="toggle" data-on="Show" data-off="Hide"></li>
-          			<li><div id="baseLayersDiv"></div></li>
                </ul> 
             </li>
             
             <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Places</span></a></li>
-            <li><a href="#" id="shareAnchorId" data-toggle='control-ShareSideBar'><i class="fa fa-share-alt"></i> <span>Share Drawings</span></a></li>
+            <li id="shareDrawingsLI" style="display:none"><a href="#" id="shareAnchorId" data-toggle='control-ShareSideBar'><i class="fa fa-share-alt"></i> <span>Share Drawings</span></a></li>
             
-            <li class="treeview">
-              <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>Drawings List</span> <i class="fa fa-angle-left pull-right"></i></a>
+            <li id="drawingsListLI" class="treeview" style="display:none">
+              <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>My Maps</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul id="drawingsListUL" class="treeview-menu">
 	                <!-- <li><a href="#">Link in level 2</a></li>
 	                <li><a href="#">Link in level 2</a></li> -->
@@ -1788,9 +1918,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
                </ul> 
             </li>
             
-            <li><a href="#" id="clearDrawingsAnchorId"><i class="fa fa-trash"></i> <span>Clear Drawings</span></a></li>
+            <li id="clearDrawingsLI" style="display:none"><a href="#" id="clearDrawingsAnchorId"><i class="fa fa-trash"></i> <span>Clear Drawings</span></a></li>
 
-            <li class="treeview">
+            <li id="startNewDrawingLI" class="treeview" style="display:none">
               <a href="#" id="newDrawingAnchorId"><i class="fa fa-plus-square"></i> <span>Start New Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
               <ul class="treeview-menu" id="includeDrawingsUL">
 	            <li>  <div id="includeDrawingsListDiv"></div> </li>
@@ -1798,23 +1928,28 @@ scratch. This page gets rid of all links and provides the needed markup only.
             </li>
             
             
-            <li class="treeview">
+            <li id="saveDrawingLI" class="treeview" style="display:none">
               <a href="#"><i class="fa fa-save"></i> <span>Save Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
               <ul class="treeview-menu">
                 <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name"> </li>
-                <li><a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a></li>
+                <li>
+                	<a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a>
+                	<a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a>
+                </li>
               </ul>
             </li>
             
-             
-            <li><a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a></li>
+           
             
              <!-- draw controls, layers list -->
              
              
             <li class="treeview">
               <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
+              <ul class="treeview-menu" style="height:200px;overflow: auto">
+                <li><a href="#">Link in level 2</a></li>
+                <li><a href="#">Link in level 2</a></li>
+                <li><a href="#">Link in level 2</a></li>
                 <li><a href="#">Link in level 2</a></li>
                 <li><a href="#">Link in level 2</a></li>
               </ul>
@@ -1853,7 +1988,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Content Wrapper. Contains page content -->
       <div class="content-wrapper">
         <!-- Content Header (Page header) -->
-        <section class="content-header">
+        <!-- <section class="content-header">
           <h1>
             Page Header
             <small>Optional description</small>
@@ -1863,7 +1998,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li><a href="#"><i class="fa fa-dashboard"></i> Level</a></li>
             <li class="active">Here</li>
           </ol>
-        </section>
+        </section> -->
 
         <!-- Main content -->
         <section class="content">
@@ -2104,9 +2239,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </div>
           
           <div class="tab-pane" id="control-sidebar-shareFeed-tab">Share Feed Tab Content
-          	<div id="sharingFeedDiv" class="searchResults">
+          	<!-- <div id="sharingFeedDiv" class="searchResults">
 				Groups <br/>
-			</div>
+			</div> -->
+			
+			<ul id="shareFeedULGroup" style="margin:0; padding: 0; height: 250px; overflow: auto">
+				
+			</ul>
+			
+			<ul id="shareFeedULSelf" style="margin:0; padding: 0; height: 250px; overflow: auto">
+				
+			</ul>
+			
+			
           </div>
         </div>  
       </aside><!-- /.control-sidebar -->
@@ -2336,11 +2481,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			      color: 'green'
 			     },
 			    },
-			    circle: {
+			    circle: false
+			    /* circle: {
 			     shapeOptions: {
 			      color: 'steelblue'
 			     },
-			    },
+			    }, */
 			   },
 			   edit: {
 			    featureGroup: drawnItems

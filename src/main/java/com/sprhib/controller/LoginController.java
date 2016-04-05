@@ -42,6 +42,8 @@ public class LoginController {
 		// get the user details from DB based on userId field 
 		UserLogin regUser =	loginService.getUser(user.getUserId());
 		session.setAttribute("userId", null);
+		session.setAttribute("userType", null);
+
 		
 		if(regUser!=null){
 			
@@ -51,6 +53,7 @@ public class LoginController {
 				// successful login and save the userId in session
 				message = true;
 				session.setAttribute("userId", user.getUserId());
+				session.setAttribute("userType", user.getUserType());
 				System.out.println("user logged in "+session.getAttribute("userId"));
 			}
 		}
@@ -80,7 +83,7 @@ public class LoginController {
 			return returnMessage;			
 		}
 		
-		// create new user
+		// delete users
 		@RequestMapping(value="/deleteUsers", method=RequestMethod.POST, 
 				produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
 		@ResponseBody
@@ -88,8 +91,14 @@ public class LoginController {
 			
 			boolean returnMessage = false;
 			System.out.println(userIdList);
+			
 			// soft delete users
-			returnMessage =	loginService.deleteUsers(userIdList);
+			
+			HttpSession session = request.getSession();
+			String userType = (String)session.getAttribute("userType");
+			
+			//if(userType.equals("A"))
+				returnMessage =	loginService.deleteUsers(userIdList);
 			
 			return returnMessage;			
 		}
@@ -102,6 +111,7 @@ public class LoginController {
 		
 		// removing the user from the session
 		session.setAttribute("userId", null);
+		session.setAttribute("userType", null);
 		System.out.println("user log out");
 		return true;
 	}
@@ -117,8 +127,13 @@ public class LoginController {
 		System.out.println("In Login Controller - getUsersList");
 		List<UserLogin> userList = null;
 		
-		// get userId, userType (admin or user) of all users 
-		userList =	loginService.getUserList();
+		HttpSession session = request.getSession();
+		String userType = (String)session.getAttribute("userType");
+		
+		//if(userType!=null && userType.equals("A"))
+			// get userId, userType (admin or user) of all users 
+			userList =	loginService.getUserList();
+		
 		return userList;
 	}
 	

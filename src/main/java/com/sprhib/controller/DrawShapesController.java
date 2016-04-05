@@ -93,6 +93,9 @@ public class DrawShapesController {
 	@ResponseBody
 	public ArrayList<UserDrawShapes> getDrawingsList(@RequestBody ArrayList<Integer> uniqueIds, HttpServletRequest request) throws JSONException, PSQLException {
 		
+		if(uniqueIds == null || uniqueIds.size()==0)
+			return null;
+		
 		int returnId = 0;
 		System.out.println("Share Drawings List ..! "+uniqueIds);
 		HttpSession session = request.getSession();
@@ -136,7 +139,8 @@ public class DrawShapesController {
 		String userId = (String)session.getAttribute("userId");
 		System.out.println("In Shapes Controller - getDrawings");
 		List<UserDrawShapes> shapes = null;
-		shapes =	drawShapeService.getUserDrawings(userId);
+		if(userId != null)
+			shapes =	drawShapeService.getUserDrawings(userId);
 		return shapes;
 	}
 	

@@ -43,4 +43,9 @@ public class UserLoginServiceImpl implements UserLoginService {
 		return userLoginDAO.deleteUsers(userIdList);
 	}
 
+	@Override
+	public ArrayList<UserLogin> getUserList(ArrayList<String> userIdList) throws PSQLException {
+		return userLoginDAO.getUserList(userIdList);
+	}
+
 }

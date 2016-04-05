@@ -89,17 +89,13 @@ public class UserDrawShapesDAOImpl implements UserDrawShapesDAO{
 	public ArrayList<UserDrawShapes> getDrawingList(ArrayList<Integer> drawingIdList)
 			throws PSQLException, JSONException {
 		
-//		int[] array = new int[drawingIdList.size()];
-//		for(int i=0;i<drawingIdList.size();i++)
-//			array[i] = drawingIdList.get(i);
-		
 		// idList is a dummy parameter which should contain the list of drawing Ids 
 		String queryString = "from UserDrawShapes as shapes where shapes.drawingId IN :idList";
 		Query query = getCurrentSession().createQuery(queryString);
 		query.setParameterList("idList", drawingIdList);
 		ArrayList<UserDrawShapes> drawingsList =  (ArrayList<UserDrawShapes>) query.list();
-
 		return drawingsList;
+		
 	}
 
 	@Override

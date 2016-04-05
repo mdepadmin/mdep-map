@@ -1,6 +1,7 @@
 package com.sprhib.controller;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,7 +19,9 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import com.sprhib.model.Groups;
 import com.sprhib.model.GroupsAndSharedDrawings;
 import com.sprhib.model.SharedDrawing;
+import com.sprhib.model.UserLogin;
 import com.sprhib.service.GroupsService;
+import com.sprhib.service.UserLoginService;
 
 // controller for groups related methods, such as create new group, share drawings etc
 
@@ -29,9 +32,10 @@ public class GroupsController {
 	@Autowired
 	private GroupsService groupsService;
 	
+	@Autowired
+	private UserLoginService loginService;
 	
 	// create new group
-	
 	@RequestMapping(value="/createNewGroup", method=RequestMethod.POST, 
 			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
 	@ResponseBody
@@ -93,6 +97,27 @@ public class GroupsController {
 		groupAndDrawings.setUserGroups(groups);
 		groupAndDrawings.setGroupSharedDrawingsInfo(groupSharedDrawings);
 		groupAndDrawings.setMemberSharedDrawingsInfo(memberSharedDrawings);
+		
+		ArrayList<UserLogin> sharedByUsers = new ArrayList<UserLogin>();
+		HashSet<String> uIdSet = new HashSet<String>();
+		
+		for(SharedDrawing drawing : groupSharedDrawings){
+			String uId = drawing.getSharedByUser();
+			uIdSet.add(uId);
+		}
+		
+		for(SharedDrawing drawing : memberSharedDrawings){
+			String uId = drawing.getSharedByUser();
+			uIdSet.add(uId);
+		}
+		
+		
+		if(uIdSet.size() > 0){
+			ArrayList<String> uIdList = new ArrayList<String>();
+			uIdList.addAll(uIdSet);
+			sharedByUsers = loginService.getUserList(uIdList);
+		}
+		groupAndDrawings.setUsersInfo(sharedByUsers);
 		return groupAndDrawings;
 	}
 

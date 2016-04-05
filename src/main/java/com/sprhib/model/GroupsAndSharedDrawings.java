@@ -8,6 +8,9 @@ public class GroupsAndSharedDrawings {
 	ArrayList<SharedDrawing> memberSharedDrawingsInfo;
 	ArrayList<SharedDrawing> groupSharedDrawingsInfo;
 	
+	private ArrayList<Groups> groupsInfo;
+	private ArrayList<UserLogin> usersInfo;
+	
 	public String getUserId() {
 		return userId;
 	}
@@ -33,5 +36,17 @@ public class GroupsAndSharedDrawings {
 	public void setGroupSharedDrawingsInfo(
 			ArrayList<SharedDrawing> groupSharedDrawingsInfo) {
 		this.groupSharedDrawingsInfo = groupSharedDrawingsInfo;
+	}
+	public ArrayList<Groups> getGroupsInfo() {
+		return groupsInfo;
+	}
+	public void setGroupsInfo(ArrayList<Groups> groupsInfo) {
+		this.groupsInfo = groupsInfo;
+	}
+	public ArrayList<UserLogin> getUsersInfo() {
+		return usersInfo;
+	}
+	public void setUsersInfo(ArrayList<UserLogin> usersInfo) {
+		this.usersInfo = usersInfo;
 	}
 }
