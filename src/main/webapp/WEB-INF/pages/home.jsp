@@ -21,8 +21,32 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- Tell the browser to be responsive to screen width -->
     <meta content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" name="viewport">
     
-    <!-- Bootstrap 3.3.5 -->    
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/bootstrap/css/bootstrap.min.css"/>"/>
+ 
+    
+    
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/bootstrap/css/bootstrap.min.css"/>"/>    
+    
+    <script type="text/javascript" src="<spring:url value="/resources/JS/jquery-1.11.3.min.js"/>"></script>	
+	
+	
+	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
+	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
+	
+	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
+	<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
+	
+	
+	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/CSS/Styles.css"/>"/> 
+	<script type="text/javascript" src="<spring:url value="/resources/JS/Scripts.js"/>"></script>
+
+
+	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
+	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
+
+
+
+   <!-- Bootstrap 3.3.5 -->    
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.4.0/css/font-awesome.min.css">
     <!-- Ionicons -->
@@ -44,26 +68,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
     
     
     
-    
-    
-    
-    
-    
-    <script type="text/javascript" src="<spring:url value="/resources/JS/jquery-1.11.3.min.js"/>"></script>	
-	<script src="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.js"></script>
-	<link rel="stylesheet" href="http://cdn.leafletjs.com/leaflet-0.7.5/leaflet.css" />
-	
-	<link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" />
-	<!-- <script src="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/js/bootstrap.min.js"></script> -->
-	
-	
-	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/CSS/Styles.css"/>"/> 
-	<script type="text/javascript" src="<spring:url value="/resources/JS/Scripts.js"/>"></script>
-
-
-	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
-	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
-
 	<script src="<spring:url value="/resources/libs/leaflet-src.js"/>"></script>
 	<link rel="stylesheet" href="<spring:url value="/resources/libs/leaflet.css"/>"/>
 
@@ -156,6 +160,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var chk;
 		var hehe;
 		var temp;
+		
+		
+		var deleteLayersSelected = 0;
 		
 		$(document).ready(function() {
 			
@@ -486,6 +493,30 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					
 			}
 			
+			
+			
+            
+			$('#addBaseLayerButton').click(function(event){
+				
+				var layerProviderTextValue = $('#layerProviderText').val();
+				var layerURLTextValue = $('#layerURLText').val();
+				var layerDisplayNameTextValue = $('#layerDisplayNameText').val();
+				var layerOptionsTextValue = $('#layerOptionsText').val();
+				
+				var url = "${pageContext.request.contextPath}";
+				addBaseLayer(url, layerProviderTextValue, layerURLTextValue, layerDisplayNameTextValue, layerOptionsTextValue, addBaseLayerSuccessCallback);
+								
+			});
+			
+			
+			function addBaseLayerSuccessCallback(successMessage){
+				console.log(successMessage);
+				alert('Success');
+				$('#layerProviderText').val('');
+				$('#layerURLText').val('');
+				$('#layerDisplayNameText').val('');
+				$('#layerOptionsText').val('');
+			}
 			
 			// upon clicking share button to save it in database
 			$('#submitSharingButton').click(function(event){
@@ -1824,10 +1855,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             
             <li id="drawingsListLI" class="treeview" style="display:none">
               <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>My Maps</span> <i class="fa fa-angle-left pull-right"></i></a>
-               <ul id="drawingsListUL" class="treeview-menu">
-	                <!-- <li><a href="#">Link in level 2</a></li>
-	                <li><a href="#">Link in level 2</a></li> -->
-	                
+               <ul id="drawingsListUL" class="treeview-menu">	                
 	                <li>  <div id="userDrawingsListDiv"></div> </li>
 	                <li>  <div id="dispDrawingsCheckBoxDiv"> <ul id="includedDrawingsCheckBoxesUL"> </ul></div> </li>
                </ul> 
@@ -1853,13 +1881,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </li>
               </ul>
             </li>
-            
-           
-            
-             <!-- draw controls, layers list -->
              
-             
-            <li class="treeview">
+            <!-- <li class="treeview">
               <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
               <ul class="treeview-menu" style="height:200px;overflow: auto">
                 <li><a href="#">Link in level 2</a></li>
@@ -1880,20 +1903,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <li>  <input type="button" id="test1" value="layers-1"/> </li>
        			<li>  <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/> </li>
 				<li>  <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/> </li>
-				<!-- <li>  <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/> </li> -->
-				<!-- <li>  <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/> </li> -->
-				<!-- <li>  <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/> </li>
-				<li>  <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/> </li> -->
-				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" /> </li> <!-- style="visibility:hidden" -->
+				<li>  <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/> </li>
+				<li>  <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/> </li>
+				<li>  <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/> </li>
+				<li>  <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/> </li>
+				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" /> </li> style="visibility:hidden"
 				<li>  <input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/> </li>
 				<li>  <input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/> </li>
 				
 				
-				<!-- <li>  <div id="dispDrawingsCheckBoxDiv"></div> </li>
-				<li>  <div id="userDrawingsListDiv"></div> </li> -->
-				<!-- <li>  <div id="sharedDrawingsListDiv"></div> </li> -->
+				<li>  <div id="dispDrawingsCheckBoxDiv"></div> </li>
+				<li>  <div id="userDrawingsListDiv"></div> </li>
+				<li>  <div id="sharedDrawingsListDiv"></div> </li>
               </ul>
-            </li>
+            </li> -->
             
           </ul><!-- /.sidebar-menu -->
         </section>
@@ -2079,18 +2102,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
           <!-- Templates tab content -->
           <div class="tab-pane" id="control-sidebar-templates-tab">
-            <form method="post">
-              <h3 class="control-sidebar-heading">General Settings</h3>
-              <div class="form-group">
-                <label class="control-sidebar-subheading">
-                  Report panel usage
-                  <input type="checkbox" class="pull-right" checked>
-                </label>
-                <p>
-                  Some information about this general settings option
-                </p>
-              </div><!-- /.form-group -->
-            </form>
+
+                <input type="text" id="layerProviderText" class="form-control" placeholder="Provider"/> 
+				<input type="text" id="layerURLText" class="form-control" placeholder="URL"/>
+				<input type="text" id="layerDisplayNameText" class="form-control" placeholder="Display Name"/>
+				<input type="text" id="layerOptionsText" class="form-control" placeholder="Options"/>
+				<button type="submit" id="addBaseLayerButton" class="btn btn-default"><i>Add</i></button>
+
           </div><!-- /.tab-pane -->
           
         </div>
@@ -2182,7 +2200,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     <!-- REQUIRED JS SCRIPTS -->
 
     <!-- jQuery 2.1.4 -->
-    <script src="<spring:url value="/resources/UI/plugins/jQuery/jQuery-2.1.4.min.js"/>"></script>
+<%--     <script src="<spring:url value="/resources/UI/plugins/jQuery/jQuery-2.1.4.min.js"/>"></script> --%>
     <!-- Bootstrap 3.3.5 -->
     <script src="<spring:url value="/resources/UI/bootstrap/js/bootstrap.min.js"/>"></script>
     <!-- AdminLTE App -->
@@ -2311,7 +2329,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		
 		
  		var	drawnItems = L.featureGroup().addTo(map);
- 		drawnItems.on('click', function(e) { layerClicked(e.layer); });
+ 		drawnItems.on('click', function(e) { if(deleteLayersSelected == 0) {layerClicked(e.layer);} });
  		
  		
 // 		drawnItems.on('mouseover', function(e) { layerMouseover(e.layer); });
@@ -2580,6 +2598,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				});
 		  });
 		  
+		  
+		  
+		  map.on('draw:deleteSelected', function() {
+				console.log('delete selected');
+				deleteLayersSelected = 1;
+		  });
+		  
+
+		  map.on('draw:deleteDeselected', function() {
+			  console.log('delete deselected ****');
+			  deleteLayersSelected = 0;
+		  });
+		  
+		  
 		 // when new shape is created
 		 map.on('draw:created', function(event) {
 		     
@@ -2748,10 +2780,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			    $('#imageAnchor').attr('href',imagePath);
 		     }
 		}
-	
-		
-
-		
 		
 	</script>
 

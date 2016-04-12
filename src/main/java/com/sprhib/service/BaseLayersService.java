@@ -7,5 +7,6 @@ import com.sprhib.model.UserDrawShapes;
 
 public interface BaseLayersService {
 	// base layers related methods
-	public List<BaseLayer> getBaseLayers(String userId);
+	public List<BaseLayer> getBaseLayers(String userId, String siteId);
+	public boolean saveBaseLayer(BaseLayer baseLayer);
 }

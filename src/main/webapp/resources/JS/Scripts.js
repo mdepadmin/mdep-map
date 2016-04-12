@@ -4,6 +4,7 @@
 var userGroupsAndSharedDrawings;
 var userGroupsDetails;
 var tt;
+var siteId = "ABC";
 
 function showForm(){
 	$('#loginForm').toggle(1000);
@@ -480,10 +481,13 @@ function getUsersList(inUrl, callback){
 function getBaseLayersFromService(inUrl, callback){
 
 	var url = inUrl+"/baselayerscontroller/getBaseLayers";
+	var json = {"siteId":siteId};
+	var jsonData = JSON.stringify(json);
 	
 	$.ajax({
 		url: url,
 		type:"POST",
+		data: jsonData,
 		headers: { 
 	        'Accept': 'application/json',
 	        'Content-Type': 'application/json; charset=utf-8' 
@@ -695,6 +699,33 @@ function deleteAllUserDarawingsServiceCall(inUrl, drawingIds, callback){
 		},
 	    failure:function(message){
 	    	console.log("Failure: drawings NOT deleted "+message);
+	    }
+	});
+}
+
+function addBaseLayer(inUrl, provider, layerUrl, displayname, options, callback){
+	
+	var url = inUrl+"/baselayerscontroller/addBaseLayer";
+
+	var json = {"options":options, "provider": provider, "url": layerUrl, "displayName": displayname,"siteId":siteId};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: base layer added "+message);
+			tt=message;
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: base layer NOT added "+message);
 	    }
 	});
 }

@@ -20,17 +20,20 @@ public class BaseLayersServiceImpl implements BaseLayersService {
 
 	
 	@Override
-	public List<BaseLayer> getBaseLayers(String userId) {
+	public List<BaseLayer> getBaseLayers(String userId, String siteId) {
 		try {
-			return baseLayersDAO.getBaseLayers(userId);
+			return baseLayersDAO.getBaseLayers(userId, siteId);
 		} catch (PSQLException e) {
 			e.printStackTrace();
 			return null;
 		}
 	}
 
-	
-	
+
+	@Override
+	public boolean saveBaseLayer(BaseLayer baseLayer) {
+		return baseLayersDAO.saveBaseLayer(baseLayer);
+	}
 
 
 }

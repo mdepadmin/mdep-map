@@ -12,10 +12,12 @@ public class BaseLayer {
 	@Id
 	@GeneratedValue
 	private Integer id;
+	private String siteId;
 	private String displayName;
 	private String provider;
 	private String url;
 	private String options;
+	
 	
 	public Integer getId() {
 		return id;
@@ -46,5 +48,11 @@ public class BaseLayer {
 	}
 	public void setOptions(String options) {
 		this.options = options;
+	}
+	public String getSiteId() {
+		return siteId;
+	}
+	public void setSiteId(String siteId) {
+		this.siteId = siteId;
 	}
 }

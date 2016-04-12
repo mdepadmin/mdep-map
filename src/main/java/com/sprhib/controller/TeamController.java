@@ -226,7 +226,7 @@ public class TeamController {
 		String userId = (String)session.getAttribute("userId");
 		
 		List<BaseLayer> baseLayers = null;
-		baseLayers = baseLayersService.getBaseLayers(userId);
+		baseLayers = baseLayersService.getBaseLayers(userId,"");
 		return baseLayers;
 	}
 	

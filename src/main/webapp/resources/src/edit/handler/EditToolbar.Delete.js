@@ -27,6 +27,8 @@ L.EditToolbar.Delete = L.Handler.extend({
 		}
 		this.fire('enabled', { handler: this.type});
 
+		this._map.fire('draw:deleteSelected');
+		
 		this._map.fire('draw:deletestart', { handler: this.type });
 
 		L.Handler.prototype.enable.call(this);
@@ -45,6 +47,7 @@ L.EditToolbar.Delete = L.Handler.extend({
 
 		L.Handler.prototype.disable.call(this);
 
+		this._map.fire('draw:deleteDeselected');
 		this._map.fire('draw:deletestop', { handler: this.type });
 
 		this.fire('disabled', { handler: this.type});
