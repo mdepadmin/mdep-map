@@ -181,6 +181,8 @@ public class DrawShapesController {
         if (!"".equalsIgnoreCase(fileName))
             multipartFile.transferTo(new File(serverDir+newFileName));
  
+        System.out.println("Saving the image to "+serverDir+newFileName);
+        
         return newFileName;
     }
 	

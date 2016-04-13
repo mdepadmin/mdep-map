@@ -1639,85 +1639,112 @@ scratch. This page gets rid of all links and provides the needed markup only.
                      files=event.target.files;
                     });
     // submit button click
-    $(document)
-            .on(
-                    "click",
-                    "#fileSubmit",
-                    function() {
-                    processUpload();
-                    });
+    $(document).on(
+            "click",
+            "#fileSubmit",
+            function() {
+        	     processUpload();
+     		}
+     );
+    
     // upload process
-    function processUpload()
-              {
-		    	var url = "${pageContext.request.contextPath}";
-                  var oMyForm = new FormData();
-                  oMyForm.append("file", files[0]);
-                 
-                 // call drawshapescontroller/savefiles.html file to upload any type of file 
-                 $.ajax({dataType : 'text',
-                        url : url+"/drawshapescontroller/savefiles.html",
-                        data : oMyForm,
-                        type : "POST",
-                        enctype: 'multipart/form-data',		// data will be sent as multi part
-                        processData: false, 
-                        contentType:false,
-
-                        success : function(msg) {
-                        	// save the image name in its properties and display the image upon successful upload
-
-                        	
-                        	result = msg;
-                            console.log("Success: "+result);
-                            files = [];
-                            
-                           	var layer = popUpLayer;
-           			     	var fea = layer.feature;
-            				var props;
-
-            				if(typeof(fea)!="undefined")
-            					props = fea.props;
-            				else
-            					props= layer.props;
-            				
-            				// save in properties
-                            props.image = result;
-                            
-                            // display the image
-            				var url = "${pageContext.request.contextPath}";
-            				var imagePath = url+'/'+props.image;
-            			    $('#imageHolder').attr('src',imagePath).height(60).width(60);
-            			    $('#imageAnchor').attr('href',imagePath);
-                        },
-                        error : function(msg){
-                        	result = msg;
-                        	console.log("Error: "+result);
-                        }
-                    });
-              }
-    </script>
+    function processUpload(){
     	
-	
+	  	var url = "${pageContext.request.contextPath}";
+              
+        console.log('total files: '+files.length);
+        tt = files;
+        
+        var filesCount = files.length;
+              
+
+        var layer = popUpLayer;
+	     	var fea = layer.feature;
+		var props;
+
+		if(typeof(fea)!="undefined")
+			props = fea.props;
+		else
+			props= layer.props;
+
+		
+
+		console.log('type of imgs '+typeof(props.images));
+		
+		// save in properties
+        if(typeof(props.images)=="undefined")
+			props.images = [];
+
+
+		
+		var completedFiles = 0;
+		
+        for(var i=0; i< filesCount; i++){
+        
+           var oMyForm = new FormData();
+           oMyForm.append("file", files[i]);
+           
+           console.log(files[i].name);
+           
+           
+           
+          // $('#imageAnchorDiv').empty();
+		     
+           // call drawshapescontroller/savefiles.html file to upload any type of file 
+           $.ajax({dataType : 'text',
+                  url : url+"/drawshapescontroller/savefiles.html",
+                  data : oMyForm,
+                  type : "POST",
+                  enctype: 'multipart/form-data',		// data will be sent as multi part
+                  processData: false, 
+                  contentType:false,
+
+                  success : function(msg) {
+                  	// save the image name in its properties and display the image upon successful upload
+
+          			completedFiles++;
+                  	
+                  	
+                  	if(completedFiles == filesCount){
+                  		files = [];
+                  		// display the image
+          				
+                  		var imagePath = url+'/'+msg;
+          			    $('#imageHolder').attr('src',imagePath).height(60).width(60);
+          			    $('#imageAnchor').attr('href',imagePath);
+                  	}
+                  	else{
+                  		image = msg;
+           		    	var imagePath = url+'/'+image;
+           					
+           			    var mydiv = document.getElementById("imageAnchorDiv");
+           			    var aTag = document.createElement('a');
+           			    aTag.setAttribute('href',imagePath);
+           			    aTag.setAttribute('data-lightbox',"Image");
+           			    mydiv.appendChild(aTag);
+                  	}
+                  	
+                  	
+                  	result = msg;
+                    console.log("Success: "+result);
+        		    
+                   	                      
+                      
+                      // save in properties
+                      props.images.push(result);
+                      
+                  },
+                  error : function(msg){
+                  	result = msg;
+                  	console.log("Error: "+result);
+                  }
+              });
+                 
+        }
+     }
+    </script>
   </head>
-  <!--
-  BODY TAG OPTIONS:
-  =================
-  Apply one or more of the following classes to get the
-  desired effect
-  |---------------------------------------------------------|
-  | SKINS         | skin-blue                               |
-  |               | skin-black                              |
-  |               | skin-purple                             |
-  |               | skin-yellow                             |
-  |               | skin-red                                |
-  |               | skin-green                              |
-  |---------------------------------------------------------|
-  |LAYOUT OPTIONS | fixed                                   |
-  |               | layout-boxed                            |
-  |               | layout-top-nav                          |
-  |               | sidebar-collapse                        |
-  |               | sidebar-mini                            |
-  |---------------------------------------------------------|
-  -->
+ 
   <body class="hold-transition skin-blue sidebar-mini">
     <div class="wrapper">
 
@@ -2562,10 +2589,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		 			  +'<label id="sizeValue" style="font-weight: normal !important;"></label> <br/><br/>'
 		 			  +'<input id="opacitySlider" type ="range" min ="0" max="1.0" step ="0.1"/>'
 		 			  +'<span id="slidernumber">1</span>'
-		 			  +'<input type="file" name="file" id="fileLoader" /><br/>'
+		 			  +'<input type="file" name="file" id="fileLoader" multiple /><br/>'
 		 			  +'<input type="button" id="fileSubmit" value="Upload"/><br/><br/>'
 		 			  
-		 			  +'<a id="imageAnchor" class="example-image-link" href="" data-lightbox="Image"> <img id="imageHolder" src="" alt="Deleted"/></a> <br/><br/>'
+		 			  +'<a id="imageAnchor" class="example-image-link" href="" data-lightbox="Image"> <div id="imageAnchorDiv"> </div> <img id="imageHolder" src="" alt="NA"/> </a> <br/><br/>'
 		 			  
 		 			  +'<input type="button" id="okBtn" value="Save" onclick="saveIdIW()"/>';
 	    	 
@@ -2730,7 +2757,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				props= layer.props;
 			
 			var type = props.type;
-			var image = props.image;
+			var images = props.images;
+			var image;
+			
+			if(typeof(images)!= "undefined")
+				image = images[0];
 			
 			 idIW = L.popup();
 		     var content = getPopupMarkup();
@@ -2778,6 +2809,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				var imagePath = url+'/'+image;
 			    $('#imageHolder').attr('src',imagePath).height(60).width(60);
 			    $('#imageAnchor').attr('href',imagePath);
+		     }
+		     
+		     $('#imageAnchorDiv').empty();
+		     
+		     if(typeof(images)!= "undefined")
+		     for(var t=1; t< props.images.length; t++)
+		     {	 
+		    	 image = props.images[t];
+		    	 url = "${pageContext.request.contextPath}";
+				 imagePath = url+'/'+image;
+					
+			     var mydiv = document.getElementById("imageAnchorDiv");
+			     var aTag = document.createElement('a');
+			     aTag.setAttribute('href',imagePath);
+			     aTag.setAttribute('data-lightbox',"Image");
+			     mydiv.appendChild(aTag);
 		     }
 		}
 		
