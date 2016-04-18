@@ -127,6 +127,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<!-- http://www.bootstraptoggle.com/ -->
 	<link href="https://gitcdn.github.io/bootstrap-toggle/2.2.0/css/bootstrap-toggle.min.css" rel="stylesheet">
 	<script src="https://gitcdn.github.io/bootstrap-toggle/2.2.0/js/bootstrap-toggle.min.js"></script>
+	
+	
+	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/Print/leaflet.print.css"/>"/> 
+	<script type="text/javascript" src="<spring:url value="/resources/Print/leaflet.print.js"/>"></script>
+	
 		
 	<script type="text/javascript">
 
@@ -236,6 +241,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$("#loginHelpAnchor").hide();
 				$("#userProfileAnchor").show();
 				
+				$("#createAccountAnchor").hide();
+				$("#drawControlsLI").show();
+				
 	 			// display the image
 				var url = "${pageContext.request.contextPath}";
 				var imagePath = url+'/'+'resources/UI/dist/img/user2-160x160.jpg';
@@ -294,13 +302,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
  				$("#loginHelpAnchor").show();
 				$("#userProfileAnchor").hide();
 				
+				$("#createAccountAnchor").show();
+				$("#drawControlsLI").hide();
+				
  				var url = "${pageContext.request.contextPath}";
 				var imagePath = url+'/'+'resources/UI/dist/img/avatar5.png';
 				
 			    $('#userImgBarDropdownId').attr('src',imagePath);
- 				$('#userNameBarDropdownDivId').html('Guest User');
+ 				$('#userNameBarDropdownDivId').html('Guest');
 
-				$('#userNamePId').text('Guest User');
+				$('#userNamePId').text('Guest');
 				$('#userProfileImageId').attr('src',imagePath);
 				
 				$('#adminSettingsGearAnchor').hide();
@@ -426,6 +437,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				var url = "${pageContext.request.contextPath}";
 				getUsersList(url,getUsersListCallback);
 			});
+
+			$('#userGroupsTabAnchor').click(function(event){
+				event.preventDefault();
+				console.log('getting users list for create group by user');
+				var url = "${pageContext.request.contextPath}";
+				getUsersList(url,getUsersListCallbackForCreateGroupByUserTab);
+			});
+
 			
 			$('#usersTabAnchor').click(function(event){
 				event.preventDefault();
@@ -593,6 +612,25 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				 }
 			 });
 			
+			
+			 
+			 $('#createNewGroupByUserButtonId').click(function(event){
+				 var groupName = $('#groupNameTextBoxByUser').val();
+				 if(groupName.length > 0){
+					 var selectedUsers = [];
+					 $('input[type=checkbox][name=listUsersByUser]').each(function () {
+						 if(this.checked){
+							 selectedUsers.push(this.value);
+						 }
+					 });
+					 console.log (selectedUsers);
+					 if(selectedUsers.length>0){
+						 var url = "${pageContext.request.contextPath}";
+						 createNewGroup(url, groupName, selectedUsers, createNewGroupCallback);
+					 }
+				 }
+			 });
+			 
 			 function createNewGroupCallback(message){
 				 /* var groupSlide = $('.slideout-creategroup');
 		    	 toggleSlide(groupSlide); */
@@ -835,6 +873,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			}
 		}
 		
+		
+		function getUsersListCallbackForCreateGroupByUserTab(userList){
+			allUsersList = userList;
+			console.log('retrieved the list');
+	 		$("#userListDivForCreateGroupByUser").empty();
+			if(userList.length > 0){
+				var count = userList.length;
+				for(var i = 0; i < count; i++){
+					var user = userList[i];
+					
+					var $ctrl = $('<label />').html(user.firstName+', '+user.lastName+' ('+user.userId+')')
+                    .prepend($('<input/>').attr({ type: 'checkbox', name: 'listUsersByUser', value: user.userId, id: 'listUser'+i, checked:false}));
+					 $("#userListDivForCreateGroupByUser").append($ctrl);
+					 $ctrl = $('<br/>');
+					 $("#userListDivForCreateGroupByUser").append($ctrl);
+				}
+			}
+		}
  
 		function getBaseLayers(){
 			var url = "${pageContext.request.contextPath}";
@@ -1788,7 +1844,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <!-- The user image in the navbar-->
                   <img id="userImgBarDropdownId" src="<spring:url value="/resources/UI/dist/img/avatar5.png"/>" class="user-image" alt="User Image">
                   <!-- hidden-xs hides the username on small devices so only the image appears. -->
-                  <span class="hidden-xs" id="userNameBarDropdownDivId">Guest User</span>
+                  <span class="hidden-xs" id="userNameBarDropdownDivId">Guest</span>
                 </a>
                 
                 <ul class="dropdown-menu">
@@ -1803,20 +1859,33 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   <!-- Menu Body -->
                   <li id="profileMenuBody" class="user-body">
                  		<form class="form" id="formLogin" class="pull-right"> 
-	                  		<input type="text" id="userId" placeholder="Username" />
-							<input type="password" id="password" placeholder="Password" /><!-- value="e"  -->
+							
+						<div class="input-group" style="margin:10px 0px 10px 0px;">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-user"></i></span>
+                            <input id="userId"  type="text" class="form-control" name="email" value="" placeholder="User ID">                                        
+                        </div>
+
+                        <div class="input-group" style="margin:10px 0px 10px 0px;">
+                            <span class="input-group-addon"><i class="glyphicon glyphicon-lock"></i></span>
+                            <input id="password" type="password" class="form-control" name="password" value="" placeholder="Password">                                        
+                        </div>
 						</form>
 				  </li>
                   <!-- Menu Footer-->                  
                   <li id="profileMenuFooter" class="user-footer">
-                    <div class="pull-left">
-                      <a href="#" class="btn btn-default btn-flat" id="loginHelpAnchor">Help?</a>
-                      <a href="#" class="btn btn-default btn-flat" style="display:none" id="userProfileAnchor">Profile</a>
-                    </div>
-                    <div id="logInOutAnchorDivId" class="pull-right">
-                      <a href="#" class="btn btn-default btn-flat" id="anchorLogin">Sign In</a>
-                      <a href="#" class="btn btn-default btn-flat" style="display:none" id="anchorLogout">Sign Out</a>                      
-                    </div>
+                  	
+                  	<!-- <div id="logInOutAnchorDivId" class="pull-right"> -->
+                      <a href="#" class="btn btn-primary" id="anchorLogin" style="color: white;background: green; margin:10px 0px 10px 0px;">Sign In</a>
+                      <a href="#" class="btn btn-primary" style="display:none;color: white;background: tomato;" id="anchorLogout">Sign Out</a>                      
+                    <!-- </div> -->
+                  
+                    <!-- <div class="pull-left"> -->
+                      <a href="#" class="btn btn-primary" id="loginHelpAnchor" style=" margin:10px 0px 10px 0px;" >Forgot Password</a>
+                      <a href="#" class="btn btn-primary" style="display:none; margin:10px 0px 10px 0px;" id="userProfileAnchor">Profile</a>
+                    <!-- </div> -->
+                    
+                    <a href="#" class="btn btn-primary" id="createAccountAnchor" style=" margin:10px 0px 10px 0px;" >Create Account</a>
+                    
                   </li>
                 </ul>
               </li>
@@ -1870,14 +1939,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
                </ul> 
             </li>
             
-            <li class="treeview">
+            <li class="treeview" id="drawControlsLI" style="display:none">
               <a href="#"><i class="fa fa-edit"></i> <span>Drawing Tools</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
 	                <li><input type="checkbox" id="drawControlCheckboxId" data-toggle="toggle" data-on="Show" data-off="Hide"></li>
                </ul> 
             </li>
             
-            <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Places</span></a></li>
+            <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Data</span></a></li>
             <li id="shareDrawingsLI" style="display:none"><a href="#" id="shareAnchorId" data-toggle='control-ShareSideBar'><i class="fa fa-share-alt"></i> <span>Share Drawings</span></a></li>
             
             <li id="drawingsListLI" class="treeview" style="display:none">
@@ -1908,43 +1977,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 </li>
               </ul>
             </li>
-             
-            <!-- <li class="treeview">
-              <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu" style="height:200px;overflow: auto">
-                <li><a href="#">Link in level 2</a></li>
-                <li><a href="#">Link in level 2</a></li>
-                <li><a href="#">Link in level 2</a></li>
-                <li><a href="#">Link in level 2</a></li>
-                <li><a href="#">Link in level 2</a></li>
-              </ul>
-            </li>
-
-			<li class="active"><a href="#"><i class="fa fa-link"></i> <span>Link</span></a></li>
-			
-            <li class="treeview">
-             <a href="#"><i class="fa fa-link"></i> <span>Multilevel</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
-                <li>  <input type="button" id="searchButtonId" class="button slideout-search-toggle" style="visibility:visible" value="Search"/> </li>
-                <li>  <input type="button" id="test" value="layers"/> </li>
-                <li>  <input type="button" id="test1" value="layers-1"/> </li>
-       			<li>  <input type="button" id="loginButtonId" class="button slideout-menu-toggle" style="visibility:visible" value="Login"/> </li>
-				<li>  <input type="button" id="logoutButtonId" class="button" style="visibility:hidden" value="Logout"/> </li>
-				<li>  <input type="button" id="saveDrawingsButtonId" class="button" value="Save Drawings"/> </li>
-				<li>  <input type="button" id="getDrawingsButtonId" class="button" value="Get Drawings"/> </li>
-				<li>  <input type="button" id="clearDrawingsButtonId" class="button" value="Clear Drawings"/> </li>
-				<li>  <input type="button" id="newDrawingButtonId" class="button" value="New Drawing"/> </li>
-				<li>  <input type="button" id="createGroupButtonId" class="button slideout-creategroup-toggle" value="Create Group" /> </li> style="visibility:hidden"
-				<li>  <input type="button" id="shareButtonId" class="button slideout-share-toggle" style="visibility:visible" value="Share"/> </li>
-				<li>  <input type="button" id="shareFeedButtonId" class="button slideout-sharingFeed-toggle" style="visibility:visible" value="Share Feed"/> </li>
-				
-				
-				<li>  <div id="dispDrawingsCheckBoxDiv"></div> </li>
-				<li>  <div id="userDrawingsListDiv"></div> </li>
-				<li>  <div id="sharedDrawingsListDiv"></div> </li>
-              </ul>
-            </li> -->
-            
           </ul><!-- /.sidebar-menu -->
         </section>
         <!-- /.sidebar -->
@@ -2041,18 +2073,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 
 
-      <!-- Main Footer -->
-      <footer class="main-footer">
-        <!-- To the right -->
+      <footer class="main-footer" style="height: 40px;">
         <div class="pull-right hidden-xs">
-          Anything you want
+          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/info_icon.jpg"/>" style="width:20px; height:20px;" alt="Info"/> </a>
         </div>
-        <!-- Default to the left -->
-        <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved.
+        
+       
+<!--         <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved. -->
+        
+        <p><a href="#">Site Map</a>&nbsp;&nbsp;&nbsp;<a href="#">Privacy &amp; Security</a>&nbsp;&nbsp;&nbsp;<a href="#">FOIA</a>&nbsp;&nbsp;&nbsp;<a href="#">No Fear Act</a>&nbsp;&nbsp;&nbsp;<a href="#">License</a>&nbsp;&nbsp;&nbsp;<a href="http://dodcio.defense.gov/DoDSection508/Std_Stmt.aspx" target="_blank">Accessibility/Section 508</a>&nbsp;&nbsp;&nbsp;<a href="http://www.usa.gov" target="_blank">USA.gov</a></p>
       </footer>
 
 
-	<!-- maps, notices, groups, users, templates -->
+	<!-- maps, notices, groups, users, templates ***** Admin Section ***** -->
     
 	<aside class="control-sidebar control-sidebar-dark">
         <!-- Create the tabs -->
@@ -2169,13 +2202,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
       
       
       
-      <!-- Control Sidebar -->
+      <!-- Control Sidebar  SHARE -->
       <aside class="control-ShareSideBar control-sidebar-dark">
       
    		<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
           	<li class="active"><a href="#control-sidebar-shareNew-tab" data-toggle="tab"><i class="fa fa-share"></i></a></li>
 			<li><a href="#control-sidebar-shared-tab" data-toggle="tab"><i class="fa fa-share-alt"></i></a></li>
           	<li><a href="#control-sidebar-shareFeed-tab" data-toggle="tab"><i class="fa fa-rss"></i></a></li>
+          	<li><a href="#control-sidebar-user-groups-tab" data-toggle="tab" id="userGroupsTabAnchor"><i class="fa fa-group"></i></a></li>
         </ul>
       
       	<div class="tab-content">
@@ -2193,10 +2227,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </div>
           
           
+          <!-- Groups tab content -->
+          <div class="tab-pane" id="control-sidebar-user-groups-tab">Groups <br />
+	          	<input type="text" id="groupNameTextBoxByUser" value=""/>
+				<input type="button" id="createNewGroupByUserButtonId" class="button" value="Create"/>
+				
+				Users<br/>
+				<div id="userListDivForCreateGroupByUser" class="searchResults">
+					
+				</div>
+          </div><!-- /.tab-pane -->
+          
+          
           <div class="tab-pane" id="control-sidebar-shared-tab">
           	Shared Tab Content
        		<div id="sharedDrawingsListDiv"></div>
           </div>
+
           
           <div class="tab-pane" id="control-sidebar-shareFeed-tab">Share Feed Tab Content
           	<!-- <div id="sharingFeedDiv" class="searchResults">
@@ -2357,6 +2404,33 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		
  		var	drawnItems = L.featureGroup().addTo(map);
  		drawnItems.on('click', function(e) { if(deleteLayersSelected == 0) {layerClicked(e.layer);} });
+ 		
+ 		var printConfig='{"scales":[{"name":"1:25,000","value":"25000.0"},{"name":"1:50,000","value":"50000.0"},{"name":"1:100,000","value":"100000.0"},{"name":"1:200,000","value":"200000.0"},{"name":"1:500,000","value":"500000.0"},{"name":"1:1,000,000","value":"1000000.0"},{"name":"1:2,000,000","value":"2000000.0"},{"name":"1:4,000,000","value":"4000000.0"}],"dpis":[{"name":"75","value":"75"},{"name":"150","value":"150"},{"name":"300","value":"300"}],"outputFormats":[{"name":"pdf"}],"layouts":[{"name":"A4 portrait","map":{"width":440,"height":483},"rotation":true},{"name":"Legal","map":{"width":440,"height":483},"rotation":false}],"printURL":"http://10.10.11.20/geoserver-2.6.0/pdf/print.pdf","createURL":"http://10.10.11.20/geoserver-2.6.0/pdf/create.json"}';
+
+ 		
+ 		
+ 		
+ 		var printProvider = L.print.provider({
+ 		   method: 'GET',
+ 		   //url: ' http://path/to/mapfish/print',
+ 		   // capabilities: printConfig,
+ 		   //url:'http://10.10.11.20/geoserver-2.6.0/pdf/info.json?var=printConfig',
+ 		   autoLoad: true,
+ 		   dpi: 254,
+		   outputFormat: 'pdf',
+		   customParams: {
+				mapTitle: 'Print Test',
+				comment: 'Testing Leaflet printing'
+		   }
+
+ 		});
+ 		var printControl = L.control.print({
+ 		   provider: printProvider,
+ 		  position	: 'topleft'
+ 		});        
+ 		map.addControl(printControl);
+ 		
+ 		
  		
  		
 // 		drawnItems.on('mouseover', function(e) { layerMouseover(e.layer); });
