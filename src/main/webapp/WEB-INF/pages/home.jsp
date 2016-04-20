@@ -2075,7 +2075,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
       <footer class="main-footer" style="height: 40px;">
         <div class="pull-right hidden-xs">
-          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/info_icon.jpg"/>" style="width:20px; height:20px;" alt="Info"/> </a>
+          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/icon_info.jpg"/>" style="width:20px; height:20px;" alt="Info"/> </a>
         </div>
         
        
