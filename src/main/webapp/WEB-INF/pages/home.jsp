@@ -57,7 +57,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect.
     -->
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-blue.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-red.min.css"/>">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -811,6 +811,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				event.preventDefault();
 				clearDrawings();
 			});
+			
+
+			$('#sendNewNoticeButton').click(function(event){
+				var data = $('#noticeTextArea').val();
+				
+			});
+				
+			
 			
 			
 			// 'new drawing' button click
@@ -1801,7 +1809,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </script>
   </head>
  
-  <body class="hold-transition skin-blue sidebar-mini">
+  <body class="hold-transition skin-red sidebar-mini">
     <div class="wrapper">
 
       <!-- Main Header -->
@@ -1876,7 +1884,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
                   	
                   	<!-- <div id="logInOutAnchorDivId" class="pull-right"> -->
                       <a href="#" class="btn btn-primary" id="anchorLogin" style="color: white;background: green; margin:10px 0px 10px 0px;">Sign In</a>
-                      <a href="#" class="btn btn-primary" style="display:none;color: white;background: tomato;" id="anchorLogout">Sign Out</a>                      
+                      <a href="#" class="btn btn-primary" style="display:none;color: white;background: #dd4b39;" id="anchorLogout">Sign Out</a>                      
                     <!-- </div> -->
                   
                     <!-- <div class="pull-left"> -->
@@ -2075,7 +2083,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
       <footer class="main-footer" style="height: 40px;">
         <div class="pull-right hidden-xs">
-          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/icon_info.jpg"/>" style="width:20px; height:20px;" alt="Info"/> </a>
+          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" style="width:20px; height:20px;" alt="Info"/> </a>
         </div>
         
        
@@ -2125,7 +2133,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 
 		  <!-- Notices tab content -->
-          <div class="tab-pane" id="control-sidebar-notices-tab">Notices Tab Content</div><!-- /.tab-pane -->
+          <div class="tab-pane" id="control-sidebar-notices-tab">
+          Notices Tab Content
+          <br/>
+          
+          <textarea rows="4" cols="25" name="comment" id="noticeTextArea"> </textarea>
+		  <input type="button" id="sendNewNoticeButton" class="btn btn-primary">Send</button>
+          
+				
+          </div><!-- /.tab-pane -->
           
           <!-- Users tab content -->
           <div class="tab-pane" id="control-sidebar-users-tab">
@@ -2299,6 +2315,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	
 		var map = L.map('map', {editable: true}).setView([39.505, -77.09], 6);
 
+		
+		var newHeight = $(document).height() - 90;
+		var newWidth = $(document).width();
+		
+		$('#map').css('height', newHeight+'px');
+		$('#map').css('width',newWidth+'px');
+		
+		// $(window).height();
+		// $(document).height();
+		// screen.height;
+		
+		
+		
 		/* base layers */
 		/* var mapBoxLayer = L.tileLayer('https://api.tiles.mapbox.com/v4/{id}/{z}/{x}/{y}.png?access_token={accessToken}', {
 			    maxZoom: 18,

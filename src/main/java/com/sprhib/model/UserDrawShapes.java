@@ -2,6 +2,7 @@ package com.sprhib.model;
 
 import java.sql.Timestamp;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
@@ -15,6 +16,7 @@ public class UserDrawShapes {
 	private Integer drawingId;
 	private String userId;
 	private String drawingName;
+	@Column(length = 99999)
 	private String jsonData;
 	private String jsonCenter;
 	private Integer zoomLevel;
