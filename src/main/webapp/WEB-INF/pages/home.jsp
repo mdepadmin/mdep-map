@@ -258,15 +258,32 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$('#userId').val('');
 				$('#password').val('');
 				
- 				 if(userType=="A"){
+ 				if(userType=="A"){
  					console.log("admin");
  					$('#adminSettingsGearAnchor').show();
  				}
 
+ 				getNotices(url, userNoticesFetchSuccessCallback);
  				getUserDrawings(url,getDrawingsCallback);
  			}
  			function userLoginCallback_failure(user){
  				console.log('login failed');
+ 			}
+ 			
+ 			function userNoticesFetchSuccessCallback(data){
+ 				
+ 				$('#noticesNotificationsLI').show();
+ 				$('#notificationsUL').empty();
+ 				$('#notifListHeader').text('You have '+data.length+' notices');
+ 				
+ 				for(var i=0; i<data.length; i++){
+ 					var notice = data[i];
+					$listItem = $('#notificationItem').clone().attr('id','notificationItem'+i).attr('style','display:inline');
+					$("#notificationHeading", $listItem).text(notice.noticeHeading);
+					$("#notificationContent", $listItem).text(notice.noticeText);
+					$listItem.appendTo('#notificationsUL');
+ 				}
+ 				
  			}
  			
  			// logout link click action, call service
@@ -287,11 +304,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
  				$('#startNewDrawingLI').hide();
  				$('#saveDrawingLI').hide();
  				
- 				/* $('#shareDrawingsLI').css('display', 'none');
- 				$('#drawingsListLI').css('display', 'none');
- 				$('#clearDrawingsLI').css('display', 'none');
- 				$('#startNewDrawingLI').css('display', 'none');
- 				$('#saveDrawingLI').css('display', 'none'); */
+ 				$('#noticesNotificationsLI').hide();
  				
  				$('#profileMenuBody').show();
  				$('#profileMenuHeader').hide();
@@ -814,11 +827,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			
 
 			$('#sendNewNoticeButton').click(function(event){
+				var heading = $('#noticeHeading').val();
 				var data = $('#noticeTextArea').val();
 				
-			});
+				var url = "${pageContext.request.contextPath}";
 				
-			
+				sendNotice(url, heading, data, sendNoticeSuccessCallback);	
+			});
+
+			function sendNoticeSuccessCallback(){
+				console.log('notice sent');
+				alert('Sent Successfully');
+			}
 			
 			
 			// 'new drawing' button click
@@ -845,7 +865,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 						var drawing = loadedDrawings[i];
 						
 						// add checkbox to add/remove
-						 var $ctrl = $('<label />').html(drawing.drawingName+' ('+drawing.userId+')')
+						 var $ctrl = $('<label />').html('  '+drawing.drawingName+' ('+drawing.userId+')')
                          .prepend($('<input/>').attr({ type: 'checkbox', name: 'includeInNewDrawingCheckbox', value: i, id: 'incDrawing'+i, checked:false}));
 						
 						var li = document.createElement("li");
@@ -1000,13 +1020,14 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			    element.type = type;
 			    element.value = name; 
 			    element.name = name;
+			    element.style.color = "black";
 			    
 			    var ulist = document.getElementById("includeDrawingsUL"); //replace with jquery
 			    var li = document.createElement("li");
 			    li.appendChild(element);
 				ulist.appendChild(li);
 				
-			    
+				 
 			    element.onclick = function() {
 			        addDrawingsButtonClickCallback(includeInNewDrawing);
 			    };
@@ -1080,7 +1101,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				drawingsLoaded = true;
 				
 				var sel = document.createElement("select");
-				sel.id = 'dropDown';
+				sel.id = 'myMapsDropDown';
 				sel.multiple="multiple";
 				if(loadedDrawings.length > 4 )
 					sel.size="4";
@@ -1364,7 +1385,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		}
 		
 		// drop down change action
-		$(document).on('change', '#dropDown', function() {
+		$(document).on('change', '#myMapsDropDown', function() {
 			console.log('option changed');
 			var optionSelected = $("option:selected", this);
 
@@ -1844,6 +1865,47 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <div class="navbar-custom-menu">
             <ul class="nav navbar-nav">
               
+              <li class="dropdown tasks-menu" id="noticesNotificationsLI" style="display:none">
+
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                  <i class="fa fa-flag-o"></i>
+                  <span class="label label-warning"></span>
+                </a>
+                
+                <ul class="dropdown-menu">
+                  <li class="header" id="notifListHeader">You have 9 tasks</li>
+                  
+                  <li id="notificationItem" style="display:none">
+                    <ul class="menu">
+                      <li>
+                        <a href="#">
+                        <div id="notificationHeading" style="overflow: hidden;  text-overflow: ellipsis;"> heading</div>
+                          <div id="notificationContent" style="overflow: hidden;  text-overflow: ellipsis;">
+                            Design some buttons Design some buttons Design some buttons Design some buttons Design some buttons
+                          </div>
+                        </a>
+                      </li>
+                    </ul>
+                  </li>
+                
+                  
+                  <li>
+                  <div class="notificationsList">
+	                  <ul id="notificationsUL">
+		      	       	  
+	                  </ul>
+                  </div>
+                  </li>
+		                  
+                  
+                  <!-- <li class="footer">	<a href="#">View all tasks</a>	</li> -->
+                </ul>
+                
+              </li>
+
+
+
+
 
               <!-- User Account Menu -->
               <li class="dropdown user user-menu">
@@ -1950,11 +2012,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li class="treeview" id="drawControlsLI" style="display:none">
               <a href="#"><i class="fa fa-edit"></i> <span>Drawing Tools</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
-	                <li><input type="checkbox" id="drawControlCheckboxId" data-toggle="toggle" data-on="Show" data-off="Hide"></li>
+	                <li> <label style="color:white">Controls  </label><input type="checkbox" id="drawControlCheckboxId" style="float:right" data-toggle="toggle" data-on="Show" data-off="Hide"/></li>
                </ul> 
             </li>
             
-            <li><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Data</span></a></li>
+            <li style="clear:both"><a href="#" id="searchAnchorId" data-toggle='control-SearchSideBar'><i class="fa fa-search"></i> <span>Search Data</span></a></li>
             <li id="shareDrawingsLI" style="display:none"><a href="#" id="shareAnchorId" data-toggle='control-ShareSideBar'><i class="fa fa-share-alt"></i> <span>Share Drawings</span></a></li>
             
             <li id="drawingsListLI" class="treeview" style="display:none">
@@ -1978,7 +2040,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li id="saveDrawingLI" class="treeview" style="display:none">
               <a href="#"><i class="fa fa-save"></i> <span>Save Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
               <ul class="treeview-menu">
-                <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name"> </li>
+                <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name" style="width: 216px;"/>
                 <li>
                 	<a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a>
                 	<a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a>
@@ -2137,8 +2199,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
           Notices Tab Content
           <br/>
           
+          <input type="text" id="noticeHeading" class="form-control" placeholder="Heading"/>
           <textarea rows="4" cols="25" name="comment" id="noticeTextArea"> </textarea>
-		  <input type="button" id="sendNewNoticeButton" class="btn btn-primary">Send</button>
+		  <button type="submit" id="sendNewNoticeButton" class="btn btn-primary"><i>Send</i></button>
+
           
 				
           </div><!-- /.tab-pane -->

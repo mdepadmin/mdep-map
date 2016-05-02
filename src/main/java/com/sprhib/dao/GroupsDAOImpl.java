@@ -6,17 +6,23 @@ import java.util.List;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
+import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.criterion.Projections;
+import org.hibernate.criterion.Restrictions;
+import org.hibernate.transform.Transformers;
 import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.sprhib.model.Groups;
+import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
+import com.sprhib.model.UserLogin;
 
 @Repository
 public class GroupsDAOImpl implements GroupsDAO{
@@ -118,6 +124,18 @@ public class GroupsDAOImpl implements GroupsDAO{
 
 		// return all the drawings shared to given groups
 		return sharedGroupDrawings;
+	}
+
+	@Override
+	public int sendNotice(Notices notice) throws PSQLException, JSONException {
+		getCurrentSession().save(notice);
+		return 0;
+	}
+
+	@Override
+	public ArrayList<Notices> getNotices() throws PSQLException {
+		// TODO Auto-generated method stub
+		return (ArrayList<Notices>) getCurrentSession().createCriteria(Notices.class).list();
 	}
 	
 }

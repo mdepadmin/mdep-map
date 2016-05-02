@@ -730,3 +730,52 @@ function addBaseLayer(inUrl, provider, layerUrl, displayname, options, callback)
 	});
 }
 
+
+function sendNotice(inUrl, noticeHeading, noticeText, callback){
+	
+	var url = inUrl+"/groupscontroller/sendNotice";
+
+	var json = {"noticeHeading": noticeHeading, "noticeText":noticeText};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: notice sent "+message);
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: notice NOT sent "+message);
+	    }
+	});
+}
+
+
+function getNotices(inUrl, callback){
+	var url = inUrl+"/groupscontroller/getNotices";
+	console.log(url);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: getNotices");
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure:getNotices  "+message);
+	    }
+	});	
+}

@@ -2,6 +2,7 @@ package com.sprhib.controller;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sprhib.model.Groups;
 import com.sprhib.model.GroupsAndSharedDrawings;
+import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserLogin;
 import com.sprhib.service.GroupsService;
@@ -121,4 +123,38 @@ public class GroupsController {
 		return groupAndDrawings;
 	}
 
+	
+	// create new group
+		@RequestMapping(value="/sendNotice", method=RequestMethod.POST, 
+				produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public int sendNotice(@RequestBody Notices notice, HttpServletRequest request) throws JSONException, PSQLException {
+
+			int returnId = 0;
+			
+			HttpSession session = request.getSession();
+			String userId = (String)session.getAttribute("userId");
+			notice.setAuthor(userId);
+			
+			groupsService.sendNotice(notice);
+			return returnId;
+		}
+		
+		// get the notices
+		@RequestMapping(value="/getNotices", method=RequestMethod.POST, 
+				produces=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public List<Notices> getNotices(HttpServletRequest request) throws PSQLException {
+			
+			System.out.println("In Groups Controller - getNotices");
+			List<Notices> noticesList = null;
+			
+			HttpSession session = request.getSession();
+			String userType = (String)session.getAttribute("userType");
+			
+			//if(userType!=null && userType.equals("A"))
+			noticesList =	groupsService.getNotices();
+			
+			return noticesList;
+		}
 }
