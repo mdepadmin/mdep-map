@@ -742,13 +742,13 @@ a:focus {
   }
 }
 .control-sidebar > .tab-content {
-  padding: 10px 15px;
+  padding: 15px 15px 15px 20px;
 }
 .control-SearchSideBar > .tab-content {
-  padding: 10px 15px;
+  padding: 15px 15px 15px 20px;
 }
 .control-ShareSideBar > .tab-content {
-  padding: 10px 15px;
+  padding: 15px 15px 15px 20px;
 }
 
 
@@ -2648,7 +2648,7 @@ instead)*/
 }
 .nav-tabs-custom > .tab-content {
   background: #fff;
-  padding: 10px;
+  padding: 15px 15px 15px 20px;
   border-bottom-right-radius: 3px;
   border-bottom-left-radius: 3px;
 }

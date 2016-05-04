@@ -1,6 +1,10 @@
 @CHARSET "ISO-8859-1";
 
-#map { height: 540px; }
+#map{ 
+	height: 540px;
+    margin-left: -15px;
+    margin-top: -15px; 
+}
 
 
 .notificationsList{

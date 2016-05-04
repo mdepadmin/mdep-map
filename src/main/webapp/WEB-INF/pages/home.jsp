@@ -39,10 +39,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/CSS/Styles.css"/>"/> 
 	<script type="text/javascript" src="<spring:url value="/resources/JS/Scripts.js"/>"></script>
 
+	<script type="text/javascript" src="<spring:url value="/resources/JS/initial.js"/>"></script>
 
 	<script src="http://code.jquery.com/ui/1.11.0/jquery-ui.js"></script>
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
-
 
 
    <!-- Bootstrap 3.3.5 -->    
@@ -57,7 +57,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect.
     -->
-    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-red.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-blue.min.css"/>">
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -249,12 +249,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				var imagePath = url+'/'+'resources/UI/dist/img/user2-160x160.jpg';
 				console.log(imagePath);
 				
-			    $('#userImgBarDropdownId').attr('src',imagePath);
+			    
 			    $('#userNameBarDropdownDivId').html(user.firstName+", "+user.lastName);
-
-				$('#userNamePId').text(userId);
-				$('#userProfileImageId').attr('src',imagePath);
- 				
+			    //$('#userImgBarDropdownId').attr('src',imagePath);
+				$('#userImgBarDropdownId').attr('data-name',user.firstName+", "+user.lastName);
+				$('#userImgBarDropdownId').initial({name: user.firstName+", "+user.lastName});
+				$('#userImgBarDropdownId').show();
+				
+				$('#userNamePId').text(user.firstName+", "+user.lastName);
+				//$('#userProfileImageId').attr('src',imagePath);
+				$('#userProfileImageId').attr('data-name',user.firstName+", "+user.lastName);
+				$('#userProfileImageId').initial({name: user.firstName+", "+user.lastName});
+				$('#userProfileImageId').show();
+				
+				
 				$('#userId').val('');
 				$('#password').val('');
 				
@@ -319,13 +327,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$("#drawControlsLI").hide();
 				
  				var url = "${pageContext.request.contextPath}";
-				var imagePath = url+'/'+'resources/UI/dist/img/avatar5.png';
+				/* var imagePath = url+'/'+'resources/UI/dist/img/avatar5.png'; */
 				
-			    $('#userImgBarDropdownId').attr('src',imagePath);
- 				$('#userNameBarDropdownDivId').html('Guest');
-
+			    $('#userNameBarDropdownDivId').html('Guest');
+			    //$('#userImgBarDropdownId').attr('src',imagePath);
+				$('#userImgBarDropdownId').attr('data-name','Guest');
+				$('#userImgBarDropdownId').initial({name:'Guest'});
+				$('#userImgBarDropdownId').hide();
+				
 				$('#userNamePId').text('Guest');
-				$('#userProfileImageId').attr('src',imagePath);
+				//$('#userProfileImageId').attr('src',imagePath);
+				$('#userProfileImageId').attr('data-name','Guest');
+				$('#userProfileImageId').initial({name:'Guest'});
+				$('#userProfileImageId').hide();
 				
 				$('#adminSettingsGearAnchor').hide();
  			}
@@ -837,6 +851,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 			function sendNoticeSuccessCallback(){
 				console.log('notice sent');
+				
+				$('noticeHeading').val('');
+				$('noticeTextArea').val('');
+				
 				alert('Sent Successfully');
 			}
 			
@@ -1198,7 +1216,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				
 				
 				var li = document.createElement("li");
-				
+// todo				
 				var img = document.createElement('img');
 				img.src = '<spring:url value="/resources/UI/dist/img/user2-160x160.jpg"/>';
 				img.className = 'img-circle';
@@ -1830,7 +1848,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
     </script>
   </head>
  
-  <body class="hold-transition skin-red sidebar-mini">
+  <body class="hold-transition skin-blue sidebar-mini">
+  
+  
     <div class="wrapper">
 
       <!-- Main Header -->
@@ -1912,7 +1932,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <!-- Menu Toggle Button -->
                 <a href="#" class="dropdown-toggle" data-toggle="dropdown">
                   <!-- The user image in the navbar-->
-                  <img id="userImgBarDropdownId" src="<spring:url value="/resources/UI/dist/img/avatar5.png"/>" class="user-image" alt="User Image">
+                  <%-- <img id="userImgBarDropdownId" src="<spring:url value="/resources/UI/dist/img/avatar5.png"/>" class="user-image" alt="User Image"> --%>
+                   <img data-name="Guest" id="userImgBarDropdownId" style="display:none" class="user-image" alt="User Image"/>
                   <!-- hidden-xs hides the username on small devices so only the image appears. -->
                   <span class="hidden-xs" id="userNameBarDropdownDivId">Guest</span>
                 </a>
@@ -1920,7 +1941,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
                 <ul class="dropdown-menu">
                   <!-- The user image in the menu -->
                   <li id="profileMenuHeader" class="user-header" style="display: none">
-                    <img id="userProfileImageId" src="" class="img-circle" alt="User Image">
+                    <!-- <img id="userProfileImageId" src="" class="img-circle" alt="User Image"> -->
+                    <img data-name="Guest" id="userProfileImageId" class="img-circle" alt="User Image"/>
                     <p id="userNamePId">
                       Alexander Pierce - Web Developer
                     </p>
@@ -1998,11 +2020,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
           </form> -->
           <!-- /.search form -->
 
+
+ 
+
+
           <!-- Sidebar Menu -->
+          
           <ul class="sidebar-menu">
+          	
           	<li class="header">Menu</li>
             
             <li class="treeview">
+            
               <a href="#"><i class="fa fa-map"></i> <span>Base Layers</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
 	                <li><div id="baseLayersDiv"></div></li>
@@ -2199,9 +2228,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
           Notices Tab Content
           <br/>
           
-          <input type="text" id="noticeHeading" class="form-control" placeholder="Heading"/>
-          <textarea rows="4" cols="25" name="comment" id="noticeTextArea"> </textarea>
-		  <button type="submit" id="sendNewNoticeButton" class="btn btn-primary"><i>Send</i></button>
+          <input type="text" id="noticeHeading" style="width:200px" class="form-control" placeholder="Heading"/>
+          <br />
+          <textarea rows="4" cols="25" style="width:200px" name="comment" placeholder="Notice Text" id="noticeTextArea"> </textarea>
+          <br />
+		  <button type="submit" id="sendNewNoticeButton"  class="btn btn-primary"><i>Send</i></button>
 
           
 				
