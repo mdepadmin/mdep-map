@@ -2702,7 +2702,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
    		<ul class="nav nav-tabs nav-justified control-sidebar-tabs">
           	<li class="active"><a href="#control-sidebar-shareNew-tab" data-toggle="tab"><i class="fa fa-share"></i></a></li>
 			<li><a href="#control-sidebar-shared-tab" data-toggle="tab"><i class="fa fa-share-alt"></i></a></li>
-          	<li><a href="#control-sidebar-shareFeed-tab" data-toggle="tab"><i class="fa fa-rss"></i></a></li>
+          	<!-- <li><a href="#control-sidebar-shareFeed-tab" data-toggle="tab"><i class="fa fa-rss"></i></a></li> -->
           	<li><a href="#control-sidebar-user-groups-tab" data-toggle="tab" id="userGroupsTabAnchor"><i class="fa fa-group"></i></a></li>
         </ul>
       
@@ -2740,10 +2740,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
           
           <div class="tab-pane" id="control-sidebar-shareFeed-tab">Share Feed Tab Content
-          	<!-- <div id="sharingFeedDiv" class="searchResults">
-				Groups <br/>
-			</div> -->
-			
+          
 			<ul id="shareFeedULGroup" style="margin:0; padding: 0; height: 250px; overflow: auto">
 				
 			</ul>
