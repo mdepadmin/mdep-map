@@ -13,5 +13,6 @@ public interface UserLoginDAO {
 	public List<UserLogin> getUserList() throws PSQLException;
 	public ArrayList<UserLogin> getUserList(ArrayList<String> userIdList) throws PSQLException;
 	public boolean createUser(UserLogin newuser) throws PSQLException;
+	public boolean saveUser(UserLogin user) throws PSQLException;
 	public boolean deleteUsers(ArrayList<String> userIdList) throws PSQLException;
 }

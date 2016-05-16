@@ -6,6 +6,7 @@ import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 
 import com.sprhib.model.Groups;
+import com.sprhib.model.InfoContent;
 import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
@@ -22,4 +23,6 @@ public interface GroupsDAO {
 	public ArrayList<SharedDrawing> getGroupSharedDrawings(ArrayList<Groups> groups) throws PSQLException;
 	public int sendNotice(Notices notice) throws PSQLException, JSONException;
 	public ArrayList<Notices> getNotices() throws PSQLException;
+	public int updateInfoContent(InfoContent infoContent) throws PSQLException, JSONException;
+	public InfoContent getInfoContent() throws PSQLException;
 }

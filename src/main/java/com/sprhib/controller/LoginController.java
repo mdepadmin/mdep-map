@@ -137,4 +137,23 @@ public class LoginController {
 		return userList;
 	}
 	
+	// upate user profile
+	@RequestMapping(value="/updateUser", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean updateUser(@RequestBody UserLogin user, HttpServletRequest request) throws PSQLException {
+		
+		boolean returnMessage = false;
+		UserLogin regUser =	loginService.getUser(user.getUserId());
+		
+		regUser.setFirstName(user.getFirstName());
+		regUser.setLastName(user.getLastName());
+		regUser.setEmail(user.getEmail());
+		regUser.setTitle(user.getTitle());
+		
+		returnMessage =	loginService.saveUser(regUser);
+
+		return returnMessage;			
+	}
+	
 }

@@ -48,4 +48,9 @@ public class UserLoginServiceImpl implements UserLoginService {
 		return userLoginDAO.getUserList(userIdList);
 	}
 
+	@Override
+	public boolean saveUser(UserLogin user) throws PSQLException {
+		return userLoginDAO.saveUser(user);
+	}
+
 }

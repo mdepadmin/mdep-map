@@ -45,6 +45,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
 
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/1.2.0/superagent.js"></script>
+
+
+
+
    <!-- Bootstrap 3.3.5 -->    
 
     <!-- Font Awesome -->
@@ -132,6 +137,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/Print/leaflet.print.css"/>"/> 
 	<script type="text/javascript" src="<spring:url value="/resources/Print/leaflet.print.js"/>"></script>
 	
+	
+<style>
+.ui-dialog{
+	left: 20px;
+	top: 20px;
+}
+</style>
+
+
 		
 	<script type="text/javascript">
 
@@ -160,6 +174,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var allUserDrawings = [];
 		var allUsersList = [];
 		var loginUser;
+		var infoContent = "";
+		var leftNavOpen = false;
+		
+		var searchSlideOpen = false;
+		var shareSlideOpen = false;
+		var adminSlideOpen = false;
+		
 		
 		var tempvalue;
 		var chk;
@@ -169,7 +190,107 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		
 		var deleteLayersSelected = 0;
 		
+		
+		function pageLoaded(){
+			var windowWidth = $(window).width();
+			var windowHeight = $(window).height();
+			
+			var mapHeight;
+			
+          	if(windowWidth < 760){
+          		leftNavOpen = false;
+          		mapHeight = windowHeight - 140;
+          	}else{
+          		leftNavOpen = true;	
+          		mapHeight = windowHeight - 90;
+          	}
+          				
+			$('.content-wrapper').css("height", mapHeight+"px");
+			$('.content-wrapper').css("min-height", mapHeight+"px");
+			
+          	changeScrollSettings();
+		}
+		
+		function windowResized(){
+			
+			var windowHeight = $(window).height();
+          	var windowWidth = $(window).width();
+          	console.log('window resized '+windowWidth);
+          	
+          	if(windowWidth < 760){
+          		leftNavOpen = false;
+          	}else{
+          		leftNavOpen = true;	
+          	}
+         	
+          	console.log(leftNavOpen);
+          	changeScrollSettings();
+		}
+		
+		function changeScrollSettings(){
+			
+			var windowWidth = $(window).width();
+			var windowHeight = $(window).height();
+			
+			var mapHeight;
+          	if(windowWidth < 760){
+          		mapHeight = windowHeight - 140;
+          	}else{
+          		mapHeight = windowHeight - 90;
+          	}
+			 
+			$('.mapArea').css("height", mapHeight+"px");
+			$('.mapArea').css("width", windowWidth+"px");
+			
+			if(leftNavOpen){
+				console.log("216px");
+				$('.treeview-menu').css("width", "216px");
+				$('.scrollItem').css("width", "216px");
+			}else{
+				console.log("170px");
+				$('.treeview-menu').css("width", "170px");
+				$('.scrollItem').css("width", "170px");
+			}
+		}
+		
+		
+		
 		$(document).ready(function() {
+
+			$('#searchAnchorId').click(function(event){
+				if(shareSlideOpen)
+					$("#shareAnchorId").click();
+				if(adminSlideOpen)
+					$("#adminSettingsGearAnchor").click();
+				
+				searchSlideOpen = !searchSlideOpen;				
+			});
+			
+			$('#shareAnchorId').click(function(event){
+				if(searchSlideOpen)
+					$("#searchAnchorId").click();
+				if(adminSlideOpen)
+					$("#adminSettingsGearAnchor").click();
+				
+				shareSlideOpen = !shareSlideOpen;				
+			});
+			
+			$('#adminSettingsGearAnchor').click(function(event){
+				if(searchSlideOpen)
+					$("#searchAnchorId").click();
+				if(shareSlideOpen)
+					$("#shareAnchorId").click();
+				
+				adminSlideOpen = !adminSlideOpen;				
+			});
+
+			
+			
+			$('#sidebar-toggle-id').click(function(event){
+				leftNavOpen = !leftNavOpen;
+				console.log('toggled');
+				changeScrollSettings();
+			});
 			
 			// call voyager service when 'search' button is clicked, with search term from the search box
 			$('#searchButton').click(function(event){
@@ -200,11 +321,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				}
 			}
 		}
-			
-		$('#showForm').click(function(event){
-			showForm();	
-		});
-
 			// check user credentials upon 'login' button click
  			$('#buttonLogin').click(function(event){
 				var url = "${pageContext.request.contextPath}";
@@ -212,6 +328,161 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				checkCredentials(url,loginCallback_success, loginCallback_failure);
 			});
  			
+			
+ 			$('#userProfileAnchor').click(function(event){
+				openProfileDialog(); 				
+			});
+			
+ 			
+ 			function openProfileDialog(){
+ 				
+ 				$('#userProfileId').val(loginUser.userId);
+ 				$('#userProfileFirstName').val(loginUser.firstName);
+ 				$('#userProfileLastName').val(loginUser.lastName);
+ 				$('#userProfileTitle').val(loginUser.title);
+ 				$('#userProfileEmail').val(loginUser.email);
+ 				
+ 				
+ 				$("#dialog-profile").dialog({
+ 				    modal: true,
+ 				    draggable: true,
+ 				    resizable: true,
+ 				    position: [200, 200],
+ 				    show: 'blind',
+ 				    hide: 'blind',
+ 				    open: function () {
+				        $(this).parent().promise().done(function () {
+				            console.log("[#Dialog] Opened");
+				          var windowHeight = $(window).height();
+				          var windowWidth = $(window).width();
+				          var dialogWidth = 400;
+				          
+				          if(windowWidth < 400 ){
+				        	dialogWidth = 250;
+				          }
+				          
+				          var dialogLeft = (windowWidth - dialogWidth)/2;
+				          var dialogTop = (windowHeight/2)-200;
+				          
+							$('.ui-dialog').css("left", dialogLeft+"px");
+							$('.ui-dialog').css("top", dialogTop+"px");
+							$('.ui-dialog').css("width", dialogWidth+"px");
+				        });
+				    },
+ 				    width: 400,
+ 				    dialogClass: 'ui-dialog-osx',
+ 				    buttons: {
+ 				        "Update": function() {
+ 				            updateProfile();
+ 				        },
+ 				       "Close": function() {
+				            $(this).dialog("close");
+				        }
+ 				    }
+ 				});
+ 			}
+ 			
+ 			function updateProfile(){
+ 				
+ 				var userProfileFirstName = $('#userProfileFirstName').val();
+ 				var userProfileLastName = $('#userProfileLastName').val();
+ 				var userProfileTitle = $('#userProfileTitle').val();
+ 				var userProfileEmail = $('#userProfileEmail').val();
+ 				
+ 				if(userProfileFirstName.length == 0 || userProfileLastName.length == 0 || userProfileTitle.length == 0 || userProfileEmail.length == 0)
+ 					return;
+ 				
+ 				var updatedUser = loginUser;
+ 				updatedUser.firstName = userProfileFirstName;
+ 				updatedUser.lastName = userProfileLastName;
+ 				updatedUser.title = userProfileTitle;
+ 				updatedUser.email = userProfileEmail;
+				
+ 				var url = "${pageContext.request.contextPath}";
+				updateUserProfile(url, updatedUser, updateUserProfileSuccessCallBack);				
+ 			}
+ 			
+ 			function updateUserProfileSuccessCallBack(updatedUser){
+ 				loginUser = updatedUser;
+ 				var user = loginUser;
+ 				
+ 				//change image etc
+ 				$('#userNameBarDropdownDivId').html(user.firstName+", "+user.lastName);
+			    //$('#userImgBarDropdownId').attr('src',imagePath);
+				$('#userImgBarDropdownId').attr('data-name',user.firstName+", "+user.lastName);
+				$('#userImgBarDropdownId').initial({name: user.firstName+", "+user.lastName});
+				$('#userImgBarDropdownId').show();
+				
+				$('#userNamePId').text(user.firstName+", "+user.lastName);
+				//$('#userProfileImageId').attr('src',imagePath);
+				$('#userProfileImageId').attr('data-name',user.firstName+", "+user.lastName);
+				$('#userProfileImageId').initial({name: user.firstName+", "+user.lastName});
+				$('#userProfileImageId').show();
+				
+				
+ 				alert('updated');
+ 			}
+ 			
+ 			
+			function alertInfo(){
+				
+ 				$("#dialog-info").dialog({
+ 				    modal: true,
+ 				    draggable: true,
+ 				    resizable: true,
+ 				    position: [200, 200],
+ 				    show: 'blind',
+ 				    open: function () {
+ 				        $(this).parent().promise().done(function () {
+ 				            console.log("[#Dialog] Opened");
+ 				          var windowHeight = $(window).height();
+				          var windowWidth = $(window).width();
+ 				          var dialogWidth = 400;
+ 				          
+ 				          if(windowWidth < 400 ){
+ 				        	dialogWidth = 250;
+ 				          }
+ 				          
+ 				          var dialogLeft = (windowWidth - dialogWidth)/2;
+ 				          var dialogTop = (windowHeight/2)-200;
+ 				          
+ 							$('.ui-dialog').css("left", dialogLeft+"px");
+ 							$('.ui-dialog').css("top", dialogTop+"px");
+ 							$('.ui-dialog').css("width", dialogWidth+"px");
+ 				        });
+ 				    },
+ 				    hide: 'blind',
+ 				    width: 400,
+ 				    dialogClass: 'ui-dialog-osx',
+ 				    buttons: {
+ 				        "I've read and understand this": function() {
+ 				            $(this).dialog("close");
+ 				        }
+ 				    }
+ 				});
+			}
+			
+ 			$('#infoIconAnchor').click(function(event){
+ 				event.preventDefault();
+				if(infoContent.length > 1){
+					$('#info-para').html(infoContent);
+					alertInfo();
+				}
+				else{
+					var url = "${pageContext.request.contextPath}";
+					getInfoContent(url, getInfoAndAlertCallback);
+				}
+
+			});
+ 			
+ 			function getInfoAndAlertCallback(data){
+ 				infoContent = data.info;
+ 				//alert(infoContent);
+ 				
+ 				$('#info-para').html(infoContent);
+ 				alertInfo();
+ 			}
+			
  			// check user credentials upon 'login' click
  			$('#anchorLogin').click(function(event){
  				event.preventDefault();
@@ -247,7 +518,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	 			// display the image
 				var url = "${pageContext.request.contextPath}";
 				var imagePath = url+'/'+'resources/UI/dist/img/user2-160x160.jpg';
-				console.log(imagePath);
+				// console.log(imagePath);
 				
 			    
 			    $('#userNameBarDropdownDivId').html(user.firstName+", "+user.lastName);
@@ -271,8 +542,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
  					$('#adminSettingsGearAnchor').show();
  				}
 
+ 				// set edit profile info here
+ 				
+ 				
  				getNotices(url, userNoticesFetchSuccessCallback);
  				getUserDrawings(url,getDrawingsCallback);
+ 				getInfoContent(url, getInfoContentCallback);
  			}
  			function userLoginCallback_failure(user){
  				console.log('login failed');
@@ -342,6 +617,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$('#userProfileImageId').hide();
 				
 				$('#adminSettingsGearAnchor').hide();
+				
+				if(searchSlideOpen)
+					$("#searchAnchorId").click();
+				if(shareSlideOpen)
+					$("#shareAnchorId").click();
+				if(adminSlideOpen)
+					$("#adminSettingsGearAnchor").click();
+
+				loadedDrawings = [];
+				drawingsLoaded = false;
+				$('#userDrawingsListDiv').empty();
+				
  			}
  			
  			// upon successful login
@@ -562,6 +849,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$('#layerURLText').val('');
 				$('#layerDisplayNameText').val('');
 				$('#layerOptionsText').val('');
+			}
+			
+			$('#updateInfoButtonId').click(function(event){
+				var infoContent = $('#infoTextArea').val();
+				var url = "${pageContext.request.contextPath}";
+				updateInfoContent(url, infoContent, infoContentUpdateSuccessCallback);
+			});
+			
+			
+			function infoContentUpdateSuccessCallback(successMessage, info){
+				infoContent = info;
+				alert('info upated');
+			}
+			
+			function getInfoContentCallback(data){
+				infoContent = data.info;
+				$('#infoTextArea').val(infoContent);
 			}
 			
 			// upon clicking share button to save it in database
@@ -952,10 +1256,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			sel.id = 'baseLayersDropDown';
 			sel.multiple="multiple";
 			sel.size="4";
-							
-			
-			
-
+			sel.className = "scrollItem";
 			
 			
 			for(var i=0; i < returnBaseLayers.length; i++){
@@ -1120,6 +1421,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				
 				var sel = document.createElement("select");
 				sel.id = 'myMapsDropDown';
+				sel.className  = 'scrollItem';
 				sel.multiple="multiple";
 				if(loadedDrawings.length > 4 )
 					sel.size="4";
@@ -1135,7 +1437,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					sel.options.add(op);
 				}
 				$('#userDrawingsListDiv').html(sel);
+			}else{
+				loadedDrawings = [];
+				drawingsLoaded = false;
 			}
+			
 			console.log('calling getUserGroupsAndShareDrawingsCallback');
 			var url = "${pageContext.request.contextPath}";
 			getUserGroupsAndShareDrawings(url,getUserGroupsAndShareDrawingsCallback);
@@ -1539,13 +1845,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 								});
 
 								// add checkbox to add/remove
-								 var $ctrl = $('<label />').html(drawings.drawingName)
+								var $ctrl = $('<label />').html(drawings.drawingName)
 		                          .prepend($('<input/>').attr({ type: 'checkbox', name: includedId, value: includedId, id: 'inclDrawing'+i, checked:true}));
 								
 								var li = document.createElement("li");
 								$ctrl.appendTo(li);
-								ul.appendChild(li); 
-
+								ul.appendChild(li);
 							}
 						}
 					}
@@ -1731,17 +2036,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	</script>
     
     <script type="text/javascript">
-    var files = [], result;
+    var imageFiles = [], shapeFiles = [], result;
 
     // file handling for image upload
-    $(document)
-            .on(
-                    "change",
-                    "#fileLoader",
-                    function(event) {
-                     files=event.target.files;
-                    });
-    // submit button click
+    $(document).on( "change","#fileLoader",function(event) {
+    				imageFiles = event.target.files;
+                });
+    
+    $(document).on( "change","#shapeFileLoader",function(event) {
+    	shapeFiles = event.target.files;
+   });
+    
+    // submit button click/
     $(document).on(
             "click",
             "#fileSubmit",
@@ -1750,15 +2056,23 @@ scratch. This page gets rid of all links and provides the needed markup only.
      		}
      );
     
+    
+    $(document).on(
+            "click",
+            "#shapefileSubmit",
+            function() {
+            	shapeFileProcessing();
+     		}
+     );
     // upload process
     function processUpload(){
     	
 	  	var url = "${pageContext.request.contextPath}";
               
-        console.log('total files: '+files.length);
-        tt = files;
+        console.log('total files: '+imageFiles.length);
+        tt = imageFiles;
         
-        var filesCount = files.length;
+        var filesCount = imageFiles.length;
               
 
         var layer = popUpLayer;
@@ -1777,17 +2091,15 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		// save in properties
         if(typeof(props.images)=="undefined")
 			props.images = [];
-
-
 		
 		var completedFiles = 0;
 		
         for(var i=0; i< filesCount; i++){
         
            var oMyForm = new FormData();
-           oMyForm.append("file", files[i]);
+           oMyForm.append("file", imageFiles[i]);
            
-           console.log(files[i].name);
+           console.log(imageFiles[i].name);
            
            
            
@@ -1807,9 +2119,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
           			completedFiles++;
                   	
-                  	
                   	if(completedFiles == filesCount){
-                  		files = [];
+                  		imageFiles = [];
                   		// display the image
           				
                   		var imagePath = url+'/'+msg;
@@ -1827,11 +2138,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
            			    mydiv.appendChild(aTag);
                   	}
                   	
-                  	
                   	result = msg;
                     console.log("Success: "+result);
-        		    
-                   	                      
                       
                       // save in properties
                       props.images.push(result);
@@ -1845,10 +2153,56 @@ scratch. This page gets rid of all links and provides the needed markup only.
                  
         }
      }
+    
+    
+    
+    // upload process
+    function shapeFileProcessing(){
+    	
+
+              
+        console.log('total shape files: '+shapeFiles.length);
+        tt = shapeFiles;
+
+          var fFile = shapeFiles[0];
+           
+           console.log(fFile.name);
+           console.log(fFile);
+            
+           //shapeFiles
+
+                     /* var json = {"upload":oMyForm};
+                     var jsonData = JSON.stringify(json); */
+
+                     var formdata = new FormData();
+                     //oMyForm.append("upload", shapeFiles[0]);
+                   
+                     var dd = {};
+                     dd.upload = fFile;
+                     
+           // call server 
+           $.ajax({//dataType : 'text',
+                  url : 'http://ogre.adc4gis.com/convert',
+                  upload : dd,
+                  type : "POST",
+                  enctype: 'multipart/form-data',		// data will be sent as multi part
+                  // processData: false, 
+                  // contentType:false, 
+
+                  success : function(msg) {
+                  	// save the image name in its properties and display the image upon successful upload
+
+          			console.log("Success: "+msg);
+        		    result = msg;
+                      
+                  }
+              });
+        }
+
     </script>
   </head>
  
-  <body class="hold-transition skin-blue sidebar-mini">
+  <body class="hold-transition skin-blue sidebar-mini" onresize="windowResized()" onload="pageLoaded()">
   
   
     <div class="wrapper">
@@ -1859,20 +2213,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Logo -->
         <a href="#" class="logo">
           <!-- mini logo for sidebar mini 50x50 pixels -->
-          <%-- <span class="logo-mini" style="max-width:20%; max-height:20%;"><img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" class="img-circle" alt="User Image"></span> --%>
           <span class="logo-mini" style="max-width:20%; max-height:20%;"><img src="<spring:url value="/resources/UI/dist/img/us_navy.jpg"/>" style="width:40px; height:40px;" alt="User Image"></span>
           <!-- logo for regular state and mobile devices -->
-          <span class="logo-lg"><b>Mojavedata</b></span>
+          <span class="logo-lg"><img src="<spring:url value="/resources/UI/dist/img/mdep_135_45.jpg"/>" style="width:150px; height:45px;" alt="User Image"></span>
         </a>
         
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
           <!-- Sidebar toggle button-->
-          <a href="#" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+          <a href="#" id="sidebar-toggle-id" class="sidebar-toggle" data-toggle="offcanvas" role="button">
             <span class="sr-only">Toggle navigation</span>
           </a>
-
-          
+         <a href="#" class="logo" style="width:140px; float:left; background:inherit">
+			Page Title
+         </a>  
 
 <!--           <form class="navbar-form navbar-left" role="search">
   <div class="form-group">
@@ -2021,7 +2375,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <!-- /.search form -->
 
 
- 
+
+<!-- <input type="file" name="file" id="shapeFileLoader" multiple />
+ <input type="button" id="shapefileSubmit" value="Upload"/> -->
 
 
           <!-- Sidebar Menu -->
@@ -2031,7 +2387,6 @@ scratch. This page gets rid of all links and provides the needed markup only.
           	<li class="header">Menu</li>
             
             <li class="treeview">
-            
               <a href="#"><i class="fa fa-map"></i> <span>Base Layers</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
 	                <li><div id="baseLayersDiv"></div></li>
@@ -2050,7 +2405,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
             
             <li id="drawingsListLI" class="treeview" style="display:none">
               <a href="#" id="getDrawingsAnchorId"><i class="fa fa-bars"></i> <span>My Maps</span> <i class="fa fa-angle-left pull-right"></i></a>
-               <ul id="drawingsListUL" class="treeview-menu">	                
+				<ul id="drawingsListUL" class="treeview-menu drawingsListUL">
 	                <li>  <div id="userDrawingsListDiv"></div> </li>
 	                <li>  <div id="dispDrawingsCheckBoxDiv"> <ul id="includedDrawingsCheckBoxesUL"> </ul></div> </li>
                </ul> 
@@ -2060,7 +2415,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
             <li id="startNewDrawingLI" class="treeview" style="display:none">
               <a href="#" id="newDrawingAnchorId"><i class="fa fa-plus-square"></i> <span>Start New Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu" id="includeDrawingsUL">
+              <ul class="treeview-menu" id="includeDrawingsUL" class="scrollItem">
 	            <li>  <div id="includeDrawingsListDiv"></div> </li>
               </ul>
             </li>
@@ -2068,14 +2423,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
             
             <li id="saveDrawingLI" class="treeview" style="display:none">
               <a href="#"><i class="fa fa-save"></i> <span>Save Drawing</span> <i class="fa fa-angle-left pull-right"></i></a>
-              <ul class="treeview-menu">
-                <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name" style="width: 216px;"/>
+              <ul class="treeview-menu scrollItem" id="saveDrawingsUL">
+                <li> <input type="text" name="drawingName" id="drawingNameId" class="form-control" placeholder="Drawing Name" class="drawingNameInput"/>
                 <li>
-                	<a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save Drawing</span></a>
-                	<a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs New Drawing</span></a>
+                	<a href="#" id="saveDrawingsAnchorId"><i class="fa fa-save"></i> <span>Save</span></a>
+                	<a href="#" id="saveAsNewDrawingsAnchorId"><i class="fa fa-paste"></i> <span>SaveAs</span></a>
                 </li>
               </ul>
             </li>
+            
+            <li id="reportIssueLI" ><a href="mailto:admin@mojavedata.gov?body=Type your message&subject=Map Portal Issue" id="reportIssueAnchorId"><i class="fa fa-envelope"></i> <span>Report an issue</span></a></li>
+            
           </ul><!-- /.sidebar-menu -->
         </section>
         <!-- /.sidebar -->
@@ -2098,7 +2456,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
         <!-- Main content -->
         <section class="content">
-			<div id="map"></div>
+			<div id="map" class="mapArea"></div>
         </section><!-- /.content -->
         
       </div><!-- /.content-wrapper -->
@@ -2174,17 +2532,35 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
       <footer class="main-footer" style="height: 40px;">
         <div class="pull-right hidden-xs">
-          <a href="#"> <img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" style="width:20px; height:20px;" alt="Info"/> </a>
+          <a id="infoIconAnchor" href="#"> <img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" style="width:20px; height:20px;" alt="Info"/> </a>
         </div>
         
-       
-<!--         <strong>Copyright &copy; 2015 <a href="#">Company</a>.</strong> All rights reserved. -->
+		<div id="dialog-info" title="Portal Info" style="display:none">
+		    <!-- <span class="ui-state-default"><span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 0 0;"></span></span> -->
+		    <div style="margin-left: 23px;">
+		        <p id="info-para">
+
+		        </p></div>
+		</div>
+
+		<div id="dialog-profile" title="Profile" style="display:none">
+		    <div style="margin-left: 23px;">
+		    	User Id    <input type="text" id="userProfileId" class="form-control" disabled/>
+		    	First Name <input type="text" id="userProfileFirstName" class="form-control"/> 
+				Last Name  <input type="text" id="userProfileLastName" class="form-control"/>
+				Title 	   <input type="text" id="userProfileTitle" class="form-control"/>
+				eamil 	   <input type="text" id="userProfileEmail" class="form-control"/>
+				<!-- <input type="text" id="newuserUserId" class="form-control" placeholder="User Id"/>
+				Password   <input type="text" id="newuserPassword" class="form-control" placeholder="Password"/>
+				Re Password   <input type="text" id="newuserPassword" class="form-control" placeholder="Password"/> -->
+			</div>
+		</div>
         
         <p><a href="#">Site Map</a>&nbsp;&nbsp;&nbsp;<a href="#">Privacy &amp; Security</a>&nbsp;&nbsp;&nbsp;<a href="#">FOIA</a>&nbsp;&nbsp;&nbsp;<a href="#">No Fear Act</a>&nbsp;&nbsp;&nbsp;<a href="#">License</a>&nbsp;&nbsp;&nbsp;<a href="http://dodcio.defense.gov/DoDSection508/Std_Stmt.aspx" target="_blank">Accessibility/Section 508</a>&nbsp;&nbsp;&nbsp;<a href="http://www.usa.gov" target="_blank">USA.gov</a></p>
       </footer>
 
 
-	<!-- maps, notices, groups, users, templates ***** Admin Section ***** -->
+	<!-- maps, notices, groups, users, templates, info content ***** Admin Section ***** -->
     
 	<aside class="control-sidebar control-sidebar-dark">
         <!-- Create the tabs -->
@@ -2194,6 +2570,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <li><a href="#control-sidebar-users-tab" data-toggle="tab" id="usersTabAnchor"><i class="fa fa-user"></i></a></li>
           <li><a href="#control-sidebar-groups-tab" data-toggle="tab" id="groupsTabAnchor"><i class="fa fa-group"></i></a></li>
           <li><a href="#control-sidebar-templates-tab" data-toggle="tab"><i class="fa fa-clone"></i></a></li>
+          <!-- <li><a href="#control-sidebar-info-tab" data-toggle="tab"><i class="fa fa-clone"></i></a></li> -->
         </ul>
         
         <!-- Tab panes -->
@@ -2225,17 +2602,17 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 		  <!-- Notices tab content -->
           <div class="tab-pane" id="control-sidebar-notices-tab">
-          Notices Tab Content
-          <br/>
-          
-          <input type="text" id="noticeHeading" style="width:200px" class="form-control" placeholder="Heading"/>
-          <br />
-          <textarea rows="4" cols="25" style="width:200px" name="comment" placeholder="Notice Text" id="noticeTextArea"> </textarea>
-          <br />
-		  <button type="submit" id="sendNewNoticeButton"  class="btn btn-primary"><i>Send</i></button>
-
-          
-				
+	          Notices Tab Content
+	          <br/>
+	          <input type="text" id="noticeHeading" style="width:200px" class="form-control" placeholder="Heading"/>
+	          <br />
+	          <textarea rows="4" cols="140" style="width:200px;height:150px" name="comment" placeholder="Notice Text" id="noticeTextArea"> </textarea>
+	          <br />
+			  <button type="submit" id="sendNewNoticeButton"  class="btn btn-primary"><i>Send</i></button>
+			  
+			  <br /><br />
+			<textarea rows="4" cols="40" style="width:200px;height:150px" name="infoText" placeholder="Info Text" id="infoTextArea"> </textarea>
+			<button type="submit" id="updateInfoButtonId" class="btn btn-primary"><i>Update</i></button>
           </div><!-- /.tab-pane -->
           
           <!-- Users tab content -->
@@ -2281,6 +2658,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				<button type="submit" id="addBaseLayerButton" class="btn btn-default"><i>Add</i></button>
 
           </div><!-- /.tab-pane -->
+          
+
+<!--           <div class="tab-pane" id="control-sidebar-info-tab">
+				<textarea rows="4" cols="25" style="width:200px" name="infoText" placeholder="Info Text" id="infoTextArea"> </textarea>
+				<button type="submit" id="updateInfoButtonId" class="btn btn-default"><i>Update</i></button>
+          </div> -->
           
         </div>
       </aside><!-- /.control-sidebar -->
@@ -2398,6 +2781,13 @@ scratch. This page gets rid of all links and provides the needed markup only.
          
          
    	<script src="<spring:url value="/resources/JS/lightbox.js"/>"></script>
+   	
+<%-- <link rel="stylesheet" type="text/css" href="<spring:url value="/resources/FileImport/CSS/bootstrap.css"/>"/>
+<script type="text/javascript" src="<spring:url value="/resources/FileImport/js/leaflet.hash.js"/>"></script>
+<script type="text/javascript" src="<spring:url value="/resources/FileImport/jam/require.js"/>"></script>
+<script type="text/javascript" src="<spring:url value="/resources/FileImport/js/leaflet.spin.js"/>"></script>
+<script type="text/javascript" src="<spring:url value="/resources/FileImport/js/mapSetup.js"/>"></script>
+<script type="text/javascript" src="<spring:url value="/resources/FileImport/script.js"/>"></script> --%>
 	
 	<script>
 	    lightbox.option({
@@ -2525,7 +2915,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
  		getBaseLayers();
 		
-		
+
  		var	drawnItems = L.featureGroup().addTo(map);
  		drawnItems.on('click', function(e) { if(deleteLayersSelected == 0) {layerClicked(e.layer);} });
  		

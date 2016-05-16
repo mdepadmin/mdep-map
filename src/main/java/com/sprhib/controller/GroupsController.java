@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import com.sprhib.model.Groups;
 import com.sprhib.model.GroupsAndSharedDrawings;
+import com.sprhib.model.InfoContent;
 import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserLogin;
@@ -36,6 +37,10 @@ public class GroupsController {
 	
 	@Autowired
 	private UserLoginService loginService;
+	
+	
+	private static final String STATIC_INFO = "This map service provided by the Mojave Desert Ecosystem Program (MDEP).  More can be found about MDEP at <a href='www.mojavedata.gov'> www.mojavedata.gov </a>";
+			
 	
 	// create new group
 	@RequestMapping(value="/createNewGroup", method=RequestMethod.POST, 
@@ -157,4 +162,48 @@ public class GroupsController {
 			
 			return noticesList;
 		}
+		
+		// update info content
+		@RequestMapping(value="/updateInfoContent", method=RequestMethod.POST, 
+		produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public int updateInfoContent(@RequestBody InfoContent infoContent, HttpServletRequest request) throws JSONException, PSQLException {
+
+			int returnId = 0;
+			
+			HttpSession session = request.getSession();
+			String userId = (String)session.getAttribute("userId");
+			
+			infoContent.setDeleted(0);
+			returnId = groupsService.updateInfoContent(infoContent);
+			
+			return returnId;
+		}
+		
+		// get info content
+		@RequestMapping(value="/getInfoContent", method=RequestMethod.POST, 
+				produces=MediaType.APPLICATION_JSON_VALUE)
+		@ResponseBody
+		public InfoContent getInfoContent(HttpServletRequest request) throws PSQLException, JSONException {
+			
+			System.out.println("In Groups Controller - getInfoContent");
+			InfoContent infoContent = null;
+			
+			HttpSession session = request.getSession();
+			String userType = (String)session.getAttribute("userType");
+			
+			//if(userType!=null && userType.equals("A"))
+			infoContent =	groupsService.getInfoContent();
+			
+			if(infoContent == null){
+				infoContent =  new InfoContent();
+				infoContent.setDeleted(0);
+				infoContent.setInfo(STATIC_INFO);
+				groupsService.updateInfoContent(infoContent);
+			}
+			
+			return infoContent;
+		}
+		
+		
 }

@@ -3,13 +3,8 @@
  */
 var userGroupsAndSharedDrawings;
 var userGroupsDetails;
-var tt;
+var tt, pp;
 var siteId = "ABC";
-
-function showForm(){
-	$('#loginForm').toggle(1000);
-}
-
 
 
 // call to get the search results based on a search term
@@ -62,6 +57,7 @@ function checkCredentials(inUrl,callback_success, callback_failure){
 		success:function(user){
 			console.log(user);
 			// callback on successful login
+			pp = user;
 			if(user!="")
 				callback_success(user);
 		},
@@ -778,4 +774,78 @@ function getNotices(inUrl, callback){
 	    	console.log("Failure:getNotices  "+message);
 	    }
 	});	
+}
+
+
+function updateInfoContent(inUrl, infoContent, callback){
+	var url = inUrl+"/groupscontroller/updateInfoContent";
+
+	var json = {"info": infoContent};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: updateInfoContent "+message);
+			callback(message, infoContent);
+		},
+	    failure:function(message){
+	    	console.log("Failure: updateInfoContent "+message);
+	    }
+	});
+}
+
+function getInfoContent(inUrl, callback){
+	var url = inUrl+"/groupscontroller/getInfoContent";
+	console.log(url);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: getInfoContent "+message);
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure: getInfoContent  "+message);
+	    }
+	});	
+}
+
+
+function updateUserProfile(inUrl, updatedUser, callback){
+
+	var url = inUrl+"/logincontroller/updateUser";
+	// ,"deleted":0
+	var json = {"userId":updatedUser.userId, "firstName": updatedUser.firstName, "lastName": updatedUser.lastName, "title": updatedUser.title, "email": updatedUser.email};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+		success:function(message){
+			console.log("Success: updateUserProfile "+message);
+			callback(updatedUser);
+		},
+	    failure:function(message){
+	    	console.log("Failure: updateUserProfile "+message);
+	    }
+	});
 }

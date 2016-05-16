@@ -42,7 +42,8 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 			      .add(Projections.property("email"), "email")
 			      .add(Projections.property("firstName"), "firstName")
 			      .add(Projections.property("lastName"), "lastName")
-			      .add(Projections.property("title"), "title"))
+			      .add(Projections.property("title"), "title")
+			      .add(Projections.property("deleted"), "deleted"))
 			    .setResultTransformer(Transformers.aliasToBean(UserLogin.class));
 		
 		cr.add(Restrictions.eq("userId", userId));
@@ -112,6 +113,12 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 		query.setParameterList("idList", userIdList);
 		ArrayList<UserLogin> usersList =  (ArrayList<UserLogin>) query.list();
 		return usersList;
+	}
+
+	@Override
+	public boolean saveUser(UserLogin user) throws PSQLException {		
+		getCurrentSession().update(user);
+		return true;
 	}
 
 }

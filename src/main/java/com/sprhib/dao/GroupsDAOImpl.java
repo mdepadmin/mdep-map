@@ -3,26 +3,23 @@ package com.sprhib.dao;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 
 import org.hibernate.Criteria;
 import org.hibernate.Query;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Projections;
 import org.hibernate.criterion.Restrictions;
-import org.hibernate.transform.Transformers;
 import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import com.sprhib.model.Groups;
+import com.sprhib.model.InfoContent;
 import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
-import com.sprhib.model.UserLogin;
 
 @Repository
 public class GroupsDAOImpl implements GroupsDAO{
@@ -136,6 +133,38 @@ public class GroupsDAOImpl implements GroupsDAO{
 	public ArrayList<Notices> getNotices() throws PSQLException {
 		// TODO Auto-generated method stub
 		return (ArrayList<Notices>) getCurrentSession().createCriteria(Notices.class).list();
+	}
+
+	@Override
+	public int updateInfoContent(InfoContent infoContent) throws PSQLException,
+			JSONException {
+		
+		
+		Criteria cr = getCurrentSession().createCriteria(InfoContent.class);
+		List<InfoContent> list = cr.add(Restrictions.eq("deleted", 0)).list();
+		
+		if(list!=null){
+			for(InfoContent info : list){
+				info.setDeleted(1);
+				getCurrentSession().save(info);
+			}
+		}
+		
+		getCurrentSession().save(infoContent);
+		
+		return 1;
+	}
+
+	@Override
+	public InfoContent getInfoContent() throws PSQLException {
+		
+		Criteria cr = getCurrentSession().createCriteria(InfoContent.class);
+		List<InfoContent> list = cr.add(Restrictions.eq("deleted", 0)).list();
+		
+		if(list != null && list.size() > 0)
+			return list.get(0);
+		
+		return null;
 	}
 	
 }

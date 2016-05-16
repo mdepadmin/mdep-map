@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.sprhib.dao.GroupsDAO;
 import com.sprhib.model.Groups;
+import com.sprhib.model.InfoContent;
 import com.sprhib.model.Notices;
 import com.sprhib.model.SharedDrawing;
 import com.sprhib.model.UserDrawShapes;
@@ -79,6 +80,17 @@ public class GroupsServiceImpl implements GroupsService {
 	@Override
 	public ArrayList<Notices> getNotices() throws PSQLException {
 		return groupsDAO.getNotices();
+	}
+
+	@Override
+	public int updateInfoContent(InfoContent infoContent) throws PSQLException,
+			JSONException {
+		return groupsDAO.updateInfoContent(infoContent);
+	}
+
+	@Override
+	public InfoContent getInfoContent() throws PSQLException {
+		return groupsDAO.getInfoContent();
 	}
 	
 }
