@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.postgresql.util.PSQLException;
 
+import com.sprhib.model.SiteProperties;
 import com.sprhib.model.UserLogin;
 
 public interface UserLoginDAO {
@@ -15,4 +16,6 @@ public interface UserLoginDAO {
 	public boolean createUser(UserLogin newuser) throws PSQLException;
 	public boolean saveUser(UserLogin user) throws PSQLException;
 	public boolean deleteUsers(ArrayList<String> userIdList) throws PSQLException;
+	public SiteProperties getSiteProperties()  throws PSQLException;
+	public boolean setSiteProperties(SiteProperties properties)  throws PSQLException;
 }

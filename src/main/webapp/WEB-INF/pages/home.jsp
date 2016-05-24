@@ -45,7 +45,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<link rel="stylesheet" href="http://code.jquery.com/ui/1.11.0/themes/smoothness/jquery-ui.css"/>
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/1.2.0/superagent.js"></script>
+<!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/superagent/1.2.0/superagent.js"></script> -->
 
 
 
@@ -62,7 +62,20 @@ scratch. This page gets rid of all links and provides the needed markup only.
           page. However, you can choose any other skin. Make sure you
           apply the skin class to the body tag so the changes take effect.
     -->
+    
+    
+    
+    
     <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-blue.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-green.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-red.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-purple.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-yellow.min.css"/>">
+    <link rel="stylesheet" href="<spring:url value="/resources/UI/dist/css/skins/skin-green-light.min.css"/>">
+    
+    
+    
+    
     <!-- HTML5 Shim and Respond.js IE8 support of HTML5 elements and media queries -->
     <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
     <!--[if lt IE 9]>
@@ -137,15 +150,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
 	<link rel="stylesheet" type="text/css" href="<spring:url value="/resources/Print/leaflet.print.css"/>"/> 
 	<script type="text/javascript" src="<spring:url value="/resources/Print/leaflet.print.js"/>"></script>
 	
+	<style>
+	.ui-dialog{
+		left: 20px;
+		top: 20px;
+	}
 	
-<style>
-.ui-dialog{
-	left: 20px;
-	top: 20px;
-}
-</style>
-
-
+	.leaflet-top{
+	    z-index: 1;
+	}
+	</style>
 		
 	<script type="text/javascript">
 
@@ -180,7 +194,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		var searchSlideOpen = false;
 		var shareSlideOpen = false;
 		var adminSlideOpen = false;
+		var superAdminSlideOpen = false;
 		
+		var currentSkinColor;
+		var selectedSkinColor;
 		
 		var tempvalue;
 		var chk;
@@ -207,6 +224,16 @@ scratch. This page gets rid of all links and provides the needed markup only.
           				
 			$('.content-wrapper').css("height", mapHeight+"px");
 			$('.content-wrapper').css("min-height", mapHeight+"px");
+			
+			
+			$('#newUserFormdiv').css("height", (mapHeight-50)+"px");
+			$('#newUserFormdiv').css("overflow-y", "scroll");
+			
+			$('#control-sidebar-groups-tab').css("height", (mapHeight-50)+"px");
+			$('#control-sidebar-groups-tab').css("overflow-y", "scroll");
+			
+			$('#allDrawingsUl').css("height", (mapHeight-50)+"px");
+			$('#allDrawingsUl').css("overflow-y", "scroll");
 			
           	changeScrollSettings();
 		}
@@ -262,6 +289,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					$("#shareAnchorId").click();
 				if(adminSlideOpen)
 					$("#adminSettingsGearAnchor").click();
+				if(superAdminSlideOpen)
+					$("#superAdminSettingsGearAnchor").click();
 				
 				searchSlideOpen = !searchSlideOpen;				
 			});
@@ -271,6 +300,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					$("#searchAnchorId").click();
 				if(adminSlideOpen)
 					$("#adminSettingsGearAnchor").click();
+				if(superAdminSlideOpen)
+					$("#superAdminSettingsGearAnchor").click();
 				
 				shareSlideOpen = !shareSlideOpen;				
 			});
@@ -280,11 +311,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					$("#searchAnchorId").click();
 				if(shareSlideOpen)
 					$("#shareAnchorId").click();
+				if(superAdminSlideOpen)
+					$("#superAdminSettingsGearAnchor").click();
 				
 				adminSlideOpen = !adminSlideOpen;				
 			});
 
-			
+			$('#superAdminSettingsGearAnchor').click(function(event){
+				if(searchSlideOpen)
+					$("#searchAnchorId").click();
+				if(shareSlideOpen)
+					$("#shareAnchorId").click();
+				if(adminSlideOpen)
+					$("#adminSettingsGearAnchor").click();
+				
+				superAdminSlideOpen = !superAdminSlideOpen;				
+			});
 			
 			$('#sidebar-toggle-id').click(function(event){
 				leftNavOpen = !leftNavOpen;
@@ -333,6 +375,18 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				openProfileDialog(); 				
 			});
 			
+ 			$('#updateSitePropertiesButton').click(function(event){
+				var url = "${pageContext.request.contextPath}";
+				
+				var dropDownColor = $('#themeDropDown').val();
+				var pageTitleText =  $('#portalTitleTextBox').val();
+				
+				setSiteProperties(url, dropDownColor,  pageTitleText, setPropertiesCallBack_success);
+			});
+
+ 			function setPropertiesCallBack_success(){
+ 				alert('Success');
+ 			}
  			
  			function openProfileDialog(){
  				
@@ -541,8 +595,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
  					console.log("admin");
  					$('#adminSettingsGearAnchor').show();
  				}
-
- 				// set edit profile info here
+ 				
+ 				if(userType=="SA"){
+ 					console.log("admin");
+ 					$('#superAdminSettingsGearAnchor').show();
+ 				}
  				
  				
  				getNotices(url, userNoticesFetchSuccessCallback);
@@ -617,6 +674,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				$('#userProfileImageId').hide();
 				
 				$('#adminSettingsGearAnchor').hide();
+				$('#superAdminSettingsGearAnchor').hide();
 				
 				if(searchSlideOpen)
 					$("#searchAnchorId").click();
@@ -624,6 +682,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					$("#shareAnchorId").click();
 				if(adminSlideOpen)
 					$("#adminSettingsGearAnchor").click();
+				if(superAdminSlideOpen)
+					$("#superAdminSettingsGearAnchor").click();
 
 				loadedDrawings = [];
 				drawingsLoaded = false;
@@ -967,6 +1027,19 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		    	 toggleSlide(groupSlide); */
 			 }
 			 
+			
+			 
+			// display any shared drawing when selected
+			$(document).on('change', '#themeDropDown', function() {
+				console.log('theme option changed');
+				var dropDownColor = $("option:selected", this);
+				
+				var color = dropDownColor[0].value;
+				console.log("Option changed: "+dropDownColor[0].value);
+				setThemeColor(color);
+				
+			});
+
 			 
 			 $('#createUserButton').click(function(event){
 				 
@@ -979,11 +1052,22 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				 var password = $('#newuserPassword').val();
 				
 				 if(firstName.length > 0 && lastName.length > 0 && title.length > 0 && email.length > 0 && userId.length > 0 && password.length > 0)
-					 createUser(url, firstName, lastName, title, email, userId, password, createUserSuccessCallback)
+					 createUser(url, firstName, lastName, title, email, userId, password, createUserSuccessCallback);
 			 });
 			 
 			 function createUserSuccessCallback(message){
 				 
+				 if(message == false){
+					 alert('duplicate user id');
+				 }else{
+					 $('#newuserFirstName').val('');
+					 $('#newuserLastName').val('');
+					 $('#newuserTitle').val('');
+					 $('#newuserEmail').val('');
+					 $('#newuserUserId').val('');
+					 $('#newuserPassword').val('');
+					 alert('User created');
+				 }
 			 }
 			 
 			 
@@ -1200,9 +1284,34 @@ scratch. This page gets rid of all links and provides the needed markup only.
 					addNewButton("button","Add", ul);
 				}
 			});
-			
 		});
 	
+		
+		function setThemeColor(color){
+			
+			var body = $('body');
+			
+			$("body").removeClass (function (index, css) {
+			    return (css.match (/\bskin-\S+/g) || []).join(' ');
+			});
+			
+			if(color == 'blue'){
+				body.addClass('skin-blue');
+			}else if(color == 'green'){
+				body.addClass('skin-green');
+			}else if(color == 'purple'){
+				body.addClass('skin-purple');
+			}else if(color == 'red'){
+				body.addClass('skin-red');
+			}else if(color == 'yellow'){
+				body.addClass('skin-yellow');
+			}else if(color == 'green-light'){
+				body.addClass('skin-green-light');
+			}else{
+				body.addClass('skin-blue');
+			}
+		}
+		
 		// add the list of users to the slide
 		// user can select any number of users to include in the group
 		function getUsersListCallback(userList){
@@ -1242,6 +1351,21 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			}
 		}
  
+		function getSiteProperties(){
+			var url = "${pageContext.request.contextPath}";
+			getSitePropertiesFromService(url,getSitePropertiesCallback);
+		}
+		
+		function getSitePropertiesCallback(properties){
+			console.log('theme color setting '+properties.themeColor);
+			// change & title drop down color
+			$('#themeDropDown').val(properties.themeColor);
+			$('#portalTitleTextBox').val(properties.themeColor);
+			
+			$('#pageTitleDiv').html(properties.titleText);
+			setThemeColor(properties.themeColor);
+		}
+		
 		function getBaseLayers(){
 			var url = "${pageContext.request.contextPath}";
 			getBaseLayersFromService(url,getBaseLayersCallback);
@@ -1463,6 +1587,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		// add sharing feed details to the slide upon successful service call
 		function addSharingFeed(){
 			
+			return;
+			
 			var userGroupIds = [];
 			for(var i=0; i < userGroupsDetails.length; i++){
 				var group = userGroupsDetails[i];
@@ -1529,6 +1655,10 @@ scratch. This page gets rid of all links and provides the needed markup only.
 				img.style.margin = 'auto 10px auto auto';
 				img.style.width = '40px';
 				img.style.width = '40px';
+				
+				$('#userImgBarDropdownId').attr('data-name',user.firstName+", "+user.lastName);
+				$('#userImgBarDropdownId').initial({name: user.firstName+", "+user.lastName});
+				
 				
 				var rightDiv = document.createElement("div");
 				rightDiv.className ="pull-left";
@@ -2221,12 +2351,12 @@ scratch. This page gets rid of all links and provides the needed markup only.
         <!-- Header Navbar -->
         <nav class="navbar navbar-static-top" role="navigation">
           <!-- Sidebar toggle button-->
-          <a href="#" id="sidebar-toggle-id" class="sidebar-toggle" data-toggle="offcanvas" role="button">
-            <span class="sr-only">Toggle navigation</span>
-          </a>
-         <a href="#" class="logo" style="width:140px; float:left; background:inherit">
-			Page Title
-         </a>  
+         <a href="#" id="sidebar-toggle-id" class="sidebar-toggle" data-toggle="offcanvas" role="button">
+			<span class="sr-only">Toggle navigation</span>
+         </a>
+         <div id="pageTitleDiv" class="logo" style="width:140px; float:left; background:inherit; text-align: left">
+			PT
+         </div>
 
 <!--           <form class="navbar-form navbar-left" role="search">
   <div class="form-group">
@@ -2339,6 +2469,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
               <li>
                 <!-- <a href="#" id="adminSettingsGearAnchor" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a> -->
                 <a href="#" id="adminSettingsGearAnchor" style="display:none" data-toggle="control-sidebar"><i class="fa fa-gears"></i></a>
+                <a href="#" id="superAdminSettingsGearAnchor" style="display:none" data-toggle="control-superAdmin-sidebar"><i class="fa fa-gears"></i></a>
               </li>
             </ul>
           </div>
@@ -2389,7 +2520,8 @@ scratch. This page gets rid of all links and provides the needed markup only.
             <li class="treeview">
               <a href="#"><i class="fa fa-map"></i> <span>Base Layers</span> <i class="fa fa-angle-left pull-right"></i></a>
                <ul class="treeview-menu">
-	                <li><div id="baseLayersDiv"></div></li>
+	                <li><div id="baseLayersDiv" ></div></li>
+	                <!-- style="position: relative; z-index: 1;" -->
                </ul> 
             </li>
             
@@ -2531,9 +2663,9 @@ scratch. This page gets rid of all links and provides the needed markup only.
 
 
       <footer class="main-footer" style="height: 40px;">
-        <div class="pull-right hidden-xs">
+        <%-- <div class="pull-right hidden-xs">
           <a id="infoIconAnchor" href="#"> <img src="<spring:url value="/resources/UI/dist/img/avatar.png"/>" style="width:20px; height:20px;" alt="Info"/> </a>
-        </div>
+        </div> --%>
         
 		<div id="dialog-info" title="Portal Info" style="display:none">
 		    <!-- <span class="ui-state-default"><span class="ui-icon ui-icon-info" style="float:left; margin:0 7px 0 0;"></span></span> -->
@@ -2556,7 +2688,11 @@ scratch. This page gets rid of all links and provides the needed markup only.
 			</div>
 		</div>
         
-        <p><a href="#">Site Map</a>&nbsp;&nbsp;&nbsp;<a href="#">Privacy &amp; Security</a>&nbsp;&nbsp;&nbsp;<a href="#">FOIA</a>&nbsp;&nbsp;&nbsp;<a href="#">No Fear Act</a>&nbsp;&nbsp;&nbsp;<a href="#">License</a>&nbsp;&nbsp;&nbsp;<a href="http://dodcio.defense.gov/DoDSection508/Std_Stmt.aspx" target="_blank">Accessibility/Section 508</a>&nbsp;&nbsp;&nbsp;<a href="http://www.usa.gov" target="_blank">USA.gov</a></p>
+        <div><a href="#">Site Map</a>&nbsp;&nbsp;&nbsp;<a href="#">Privacy &amp; Security</a>&nbsp;&nbsp;&nbsp;<a href="#">FOIA</a>&nbsp;&nbsp;&nbsp;<a href="#">No Fear Act</a>&nbsp;&nbsp;&nbsp;<a href="#">License</a>&nbsp;&nbsp;&nbsp;<a href="http://dodcio.defense.gov/DoDSection508/Std_Stmt.aspx" target="_blank">Accessibility/Section 508</a>&nbsp;&nbsp;&nbsp;<a href="http://www.usa.gov" target="_blank">USA.gov</a>
+        <div class="pull-right hidden-xs">
+	        <a id="infoIconAnchor" href="#"> <img src="<spring:url value="/resources/UI/dist/img/icon_info.jpg"/>" style="width:20px; height:20px;" alt="Info"/> </a>
+        </div>
+        </div>
       </footer>
 
 
@@ -2618,22 +2754,24 @@ scratch. This page gets rid of all links and provides the needed markup only.
           <!-- Users tab content -->
           <div class="tab-pane" id="control-sidebar-users-tab">
           
-	          <form>
-	            <input type="text" id="newuserFirstName" class="form-control" placeholder="First Name"/> 
-				<input type="text" id="newuserLastName" class="form-control" placeholder="Last Name"/>
-				<input type="text" id="newuserTitle" class="form-control" placeholder="Title"/>
-				<input type="text" id="newuserEmail" class="form-control" placeholder="email"/>
-				<input type="text" id="newuserUserId" class="form-control" placeholder="User Id"/>
-				<input type="text" id="newuserPassword" class="form-control" placeholder="Password"/>
-				<button type="submit" id="createUserButton" class="btn btn-default"><i>Create</i></button>
-				
-				<br/>
-				
-				Users List
-				<ul id="existingUsersListUl" class="list-group">
-				</ul>
-				
-	          </form>
+	          <div id="newUserFormdiv">
+		          <form>
+		            <input type="text" id="newuserFirstName" class="form-control" placeholder="First Name"/> 
+					<input type="text" id="newuserLastName" class="form-control" placeholder="Last Name"/>
+					<input type="text" id="newuserTitle" class="form-control" placeholder="Title"/>
+					<input type="text" id="newuserEmail" class="form-control" placeholder="email"/>
+					<input type="text" id="newuserUserId" class="form-control" placeholder="User Id"/>
+					<input type="text" id="newuserPassword" class="form-control" placeholder="Password"/>
+					<button type="submit" id="createUserButton" class="btn btn-default"><i>Create</i></button>
+					
+					<br/>
+					
+					Users List
+					<ul id="existingUsersListUl" class="list-group">
+					</ul>
+					
+		          </form>
+	          </div>
           </div><!-- /.tab-pane -->
                    
           <!-- Groups tab content -->
@@ -2671,6 +2809,75 @@ scratch. This page gets rid of all links and provides the needed markup only.
       <!-- Add the sidebar's background. This div must be placed
            immediately after the control sidebar -->
       <div class="control-sidebar-bg"></div>
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+
+      
+      
+      <!-- Control Sidebar -->
+      <aside class="control-superAdmin-sidebar control-sidebar-dark">
+        
+          <!-- Search tab content -->
+          <div class="tab-pane active" id="control-sidebar-searchPlaces-tab">
+            <form action="#" method="get" class="sidebar-form">
+            <div class="input-group">
+            
+              Set Theme<br/>
+              <select id="themeDropDown">
+					<option value="blue"> Blue </option>
+					<option value="green"> Green </option>
+					<option value="purple"> Purple </option>
+					<option value="red"> Red </option>
+					<option value="yellow"> Yellow </option>
+					<option value="green-light"> Light Green </option>
+			  </select>
+
+			  <br/><br/>
+              Set Title<br/>
+              <input type="text"  id="portalTitleTextBox"/>
+              
+              <br/><br/>
+              <input type="button" id="updateSitePropertiesButton" value="Update"/>
+              
+              <!-- Set Logo-1
+              Set Logo-2 -->
+              
+              
+              
+            </div>
+          </form>
+          </div><!-- /.tab-pane -->
+          
+          
+      </aside><!-- /.control-sidebar -->
+      <!-- Add the sidebar's background. This div must be placed
+           immediately after the control sidebar -->
+      <div class="control-sidebar-bg"></div>
+      
+      
+      
+      
+      
+      
+      
       
       
       <!-- Control Sidebar -->
@@ -2911,7 +3118,7 @@ scratch. This page gets rid of all links and provides the needed markup only.
 		controls.addTo(map); */		
 
  		getBaseLayers();
-		
+		getSiteProperties();
 
  		var	drawnItems = L.featureGroup().addTo(map);
  		drawnItems.on('click', function(e) { if(deleteLayersSelected == 0) {layerClicked(e.layer);} });

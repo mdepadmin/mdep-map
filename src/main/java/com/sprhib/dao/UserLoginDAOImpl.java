@@ -15,6 +15,8 @@ import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import com.sprhib.model.BaseLayer;
+import com.sprhib.model.SiteProperties;
 import com.sprhib.model.UserDrawShapes;
 import com.sprhib.model.UserLogin;
 
@@ -118,6 +120,30 @@ public class UserLoginDAOImpl implements UserLoginDAO {
 	@Override
 	public boolean saveUser(UserLogin user) throws PSQLException {		
 		getCurrentSession().update(user);
+		return true;
+	}
+
+	@Override
+	public SiteProperties getSiteProperties() throws PSQLException {
+		Criteria criteria = getCurrentSession().createCriteria(SiteProperties.class);
+		ArrayList<SiteProperties> properties = (ArrayList<SiteProperties>) criteria.list();
+		if(properties != null && properties.size() > 0)
+			return properties.get(0);
+		else
+			return null;
+	}
+
+	@Override
+	public boolean setSiteProperties(SiteProperties properties)
+			throws PSQLException {
+		SiteProperties existing = this.getSiteProperties();
+		if(existing != null){
+			existing.setThemeColor(properties.getThemeColor());
+			existing.setTitleText(properties.getTitleText());
+			getCurrentSession().update(existing);	
+		}else{
+			getCurrentSession().save(properties);
+		}
 		return true;
 	}
 

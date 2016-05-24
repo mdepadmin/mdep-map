@@ -78,6 +78,11 @@ $.AdminLTE.options = {
 	     selector: ".control-SearchSideBar",
 	     slide: true
 	  },
+  controlSuperAdminSideBarOptions: {
+	     toggleBtnSelector: "[data-toggle='control-superAdmin-sidebar']",
+	     selector: ".control-superAdmin-sidebar",
+	     slide: true
+	  },
   controlShareSideBarOptions: {
 	     toggleBtnSelector: "[data-toggle='control-ShareSideBar']",
 	     selector: ".control-ShareSideBar",
@@ -289,8 +294,16 @@ function _init() {
             $(".content-wrapper, .right-side").css('min-height', controlSearchSideBar.height());
         }
         
+        
+        var controlSuperAdminSideBarOptions = $($.AdminLTE.options.controlSuperAdminSideBarOptions.selector);
+        if (typeof controlSuperAdminSideBarOptions !== "undefined") {
+          if (controlSuperAdminSideBarOptions.height() > postSetWidth)
+            $(".content-wrapper, .right-side").css('min-height', controlSuperAdminSideBarOptions.height());
+        }
+        
+        
         var controlShareSideBar = $($.AdminLTE.options.controlShareSideBarOptions.selector);
-        if (typeof controlSearchSideBar !== "undefined") {
+        if (typeof controlShareSideBar !== "undefined") {
           if (controlShareSideBar.height() > postSetWidth)
             $(".content-wrapper, .right-side").css('min-height', controlShareSideBar.height());
         }
@@ -502,6 +515,24 @@ function _init() {
           }
         });
       
+      
+      
+      var k = $.AdminLTE.options.controlSuperAdminSideBarOptions;
+      var SuperAdminSideBar = $(k.selector);
+      var SuperAdminSideBarBtn = $(k.toggleBtnSelector);
+      
+      SuperAdminSideBarBtn.on('click', function (e) {
+          e.preventDefault();
+          //If the sidebar is not open
+          if (!SuperAdminSideBar.hasClass('control-sidebar-open')
+                  && !$('body').hasClass('control-sidebar-open')) {
+            //Open the sidebar
+            _this.open(SuperAdminSideBar, k.slide);
+          } else {
+            _this.close(SuperAdminSideBar, k.slide);
+          }
+        });
+
       
       var n = $.AdminLTE.options.controlShareSideBarOptions;
       var ShareSideBar = $(n.selector);

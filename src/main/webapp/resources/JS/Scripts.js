@@ -849,3 +849,54 @@ function updateUserProfile(inUrl, updatedUser, callback){
 	    }
 	});
 }
+
+//get site properties
+function getSitePropertiesFromService(inUrl, callback){
+
+	var url = inUrl+"/logincontroller/getSiteProperties";
+	console.log(url);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success getSiteProperties "+message);
+			callback(message);
+		},
+	    failure:function(message){
+	    	console.log("Failure getSiteProperties "+message);
+	    }
+	});
+}
+
+function setSiteProperties(inUrl, dropDownColor,  pageTitleText, callback){
+
+	var url = inUrl+"/logincontroller/setSiteProperties";
+	console.log(url);
+
+	var json = {"themeColor": dropDownColor, "titleText": pageTitleText};
+	var jsonData = JSON.stringify(json);
+	
+	$.ajax({
+		url: url,
+		type:"POST",
+		data: jsonData,
+		headers: { 
+	        'Accept': 'application/json',
+	        'Content-Type': 'application/json; charset=utf-8' 
+	    },
+	    
+		success:function(message){
+			console.log("Success: setSiteProperties "+message);
+			callback(message, infoContent);
+		},
+	    failure:function(message){
+	    	console.log("Failure: setSiteProperties "+message);
+	    }
+	});
+}

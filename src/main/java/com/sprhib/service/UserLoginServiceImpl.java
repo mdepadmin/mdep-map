@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.sprhib.dao.UserLoginDAO;
+import com.sprhib.model.SiteProperties;
 import com.sprhib.model.UserLogin;
 
 @Service
@@ -35,6 +36,13 @@ public class UserLoginServiceImpl implements UserLoginService {
 
 	@Override
 	public boolean createUser(UserLogin newuser) throws PSQLException {
+		
+		List<UserLogin> existingUsers = userLoginDAO.getUserList();
+		
+		for(UserLogin user : existingUsers){
+			if(user.getUserId().equals(newuser.getUserId()))
+				return false;
+		}
 		return userLoginDAO.createUser(newuser);
 	}
 
@@ -51,6 +59,17 @@ public class UserLoginServiceImpl implements UserLoginService {
 	@Override
 	public boolean saveUser(UserLogin user) throws PSQLException {
 		return userLoginDAO.saveUser(user);
+	}
+
+	@Override
+	public SiteProperties getSiteProperties() throws PSQLException {
+		return userLoginDAO.getSiteProperties();
+	}
+
+	@Override
+	public boolean setSiteProperties(SiteProperties properties) throws PSQLException {
+		
+		return userLoginDAO.setSiteProperties(properties);
 	}
 
 }

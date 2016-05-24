@@ -6,6 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
+import org.json.JSONException;
 import org.postgresql.util.PSQLException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import com.sprhib.model.InfoContent;
+import com.sprhib.model.SiteProperties;
 import com.sprhib.model.UserLogin;
 import com.sprhib.service.UserLoginService;
 
@@ -154,6 +157,44 @@ public class LoginController {
 		returnMessage =	loginService.saveUser(regUser);
 
 		return returnMessage;			
+	}
+	
+	// get the site properties
+	@RequestMapping(value="/getSiteProperties", method=RequestMethod.POST, 
+			produces=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public SiteProperties getSiteProperties(HttpServletRequest request) throws PSQLException {
+		
+		System.out.println("In Login Controller - getSiteProperties");
+		SiteProperties properties = null;
+		
+		HttpSession session = request.getSession();
+		String userType = (String)session.getAttribute("userType");
+		
+		properties =	loginService.getSiteProperties();
+		if(properties == null){
+			properties = new SiteProperties();
+			properties.setThemeColor("red");
+			properties.setTitleText("Welcome");
+			loginService.setSiteProperties(properties);
+		}
+		return properties;
+	}
+	
+	// set the site properties
+	@RequestMapping(value="/setSiteProperties", method=RequestMethod.POST, 
+	produces=MediaType.APPLICATION_JSON_VALUE, consumes=MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody
+	public boolean setSiteProperties(@RequestBody SiteProperties properties, HttpServletRequest request) throws JSONException, PSQLException {
+
+		boolean returnValue = false;
+		
+		HttpSession session = request.getSession();
+		String userId = (String)session.getAttribute("userId");
+		
+		returnValue = loginService.setSiteProperties(properties);
+		
+		return returnValue;
 	}
 	
 }
